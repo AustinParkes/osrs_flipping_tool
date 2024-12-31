@@ -34,9 +34,11 @@ class InputFilters():
         self.focus = None
 
         # Filters applied to the focused time range
-        self.profit = None          # Currently applied to "profit per trade limit"
-
-
+        self.profit_per_item = None
+        self.profit_per_limit = None
+        self.roi_per_limit = None
+        self.insta_buy_boundary = None
+        self.insta_sell_boundary = None
   
 # Determines what data gets shown for a selected item (Second Filter)
 class OutputFilters():
@@ -52,7 +54,8 @@ class OutputFilters():
         self.show_1y = None
 
         # Data to show
-        # TODO: Add this in when we've figured out our data first ..
+        self.show_graphs = None
+        # TODO: Add this in when we've figured out our data ..
 
 # Basic Item Data
 class ItemData():
@@ -61,6 +64,30 @@ class ItemData():
         self.name = None
         self.ge_limit = None
 
+# Latest Data
+class LatestData():
+    def __init__(self):
+        self.insta_sell_price = None
+        self.insta_sell_time = None
+        self.insta_sell_time_min = None
+        self.insta_buy_price = None
+        self.insta_buy_time = None
+        self.insta_buy_time_min = None
+        
+        self.margin = None
+        self.margin_taxed = None
+        self.profit_per_limit = None
+
+        # String data
+        self.header_s = ""
+        self.insta_sell_price_s = ""
+        self.insta_sell_time_min_s = ""
+        self.insta_buy_price_s = ""
+        self.insta_buy_time_min_s = ""
+        self.margin_taxed_s = ""
+        self.profit_per_limit_s = ""
+        self.main_string = ""
+
 # 5m or 1h average data
 class AvgData():
     def __init__(self):
@@ -68,10 +95,10 @@ class AvgData():
         self.insta_buy_vol = None
         self.insta_sell_avg = None
         self.insta_sell_vol = None
+        self.price_avg = None
 
         self.margin = None
         self.margin_taxed = None
-        self.profit_per_item = None
         self.profit_per_limit = None
 
         # String Data
@@ -81,16 +108,8 @@ class AvgData():
         self.insta_sell_avg_s = ""
         self.insta_sell_vol_s = ""
         self.margin_taxed_s = ""
-        self.profit_per_item_s = ""
         self.profit_per_limit_s = ""
         self.main_string = ""    
-
-# Latest Data
-class LatestData():
-    def __init__(self):
-        self.blah = None
-
-
 
 # Data for a timeseries
 class TimeSeriesData():
@@ -101,11 +120,7 @@ class TimeSeriesData():
 """
 filter_items()
 
-Find items based on applied input filter 
-
-
- 
-
+Find items based on applied filters
 """
 def filter_items():
 
@@ -113,7 +128,8 @@ def filter_items():
     ifs = InputFilters()
     ifs.min_price = 190
     ifs.max_price = 205
-    ifs.profit = 0
+    ifs.profit_per_item = 0
+    ifs.profit_per_limit = 0
     ifs.ge_limit = 5000
 
     ofs = OutputFilters()
@@ -129,15 +145,24 @@ def filter_items():
     # TODO: Turn into function
     min_price_c = format(ifs.min_price, ',d')
     max_price_c = format(ifs.max_price, ',d')
-    profit_c = format(ifs.profit, ',d')
+    profit_c = format(ifs.profit_per_item, ',d')
     ge_limit_c = format(ifs.ge_limit, ',d')    
     filterh_s =     "Filters:\n"
     ifs_s = "  Price Range (%s, %s) | Profit (%s) | GE Limit (%s)\n\n" % (min_price_c, max_price_c, profit_c, ge_limit_c)
     
     main_string = ""
     
+    # TODO: Loop /latest data instead ..
     # Loop all items, apply filters, and print data if item passes through filters
     # - Loop 5 minute average data to apply initial filters
+    #
+    # TODO: Make a function before this loop, that applies low hanging fruit filters
+    #   and counts the number of items that make it through.
+    #   If that number is way too high, perhaps we stop?
+    #   We don't wanna loop entire data base with all the timeseries calls
+    #   we might make .. 
+    num_items = get_num_filtered_items(ifs, ofs)
+    print(num_items)
     for item_id in avg_5m_all['data']:   
         data = filter_item(item_id, ifs, ofs)
         main_string = data + main_string
@@ -152,58 +177,44 @@ def filter_items():
 """
 filter_item():
 
-Apply filters to an item and return item data.
-   
+Apply filters to an item and return item data string
 """
 def filter_item(item_id, ifs, ofs):
-
-    item = avg_5m_all['data'][item_id]
-
-    # TODO:
-    # Re-writing get_average_data to return data via its class
-    # so its more modular.
-
-    avg_5m_ib = item['avgHighPrice']
-    avg_5m_is = item['avgLowPrice']
-
-    #high_5m_vol = item['highPriceVolume']
-    #low_5m_vol = item['lowPriceVolume']
-    
-    if (avg_5m_is == None):
-        return ""
-    
-    if (avg_5m_ib == None):
-        return ""    
-    
-    margin = avg_5m_ib - avg_5m_is
-    tax_margin = int((avg_5m_ib*.99) - avg_5m_is)
-    
-    # Ensure item is in desired price range
-    if (avg_5m_is < ifs.min_price or avg_5m_is > ifs.max_price):
-        return ""
-      
-    # Ensure item fits desired profit
-    if (tax_margin < ifs.profit):
-        return ""
 
     # Find item in item_map 
     item_entry = find_item_entry(int(item_id))
     name = item_entry['name'] 
-       
+
+    # Check if item limit exists
     if 'limit' in item_entry:
         limit = item_entry['limit']
     else:
-        limit = 9999999       
+        limit = 0     
           
-    # Ensure item has atleast the desired buy limit
+    # Ensure item has the minimum desired buy limit
     if (limit < ifs.ge_limit):
         return ""
     
-    # Passed initial filters, get basic item data
+    # Passed initial filter, get basic item data
     itd = ItemData()
     itd.id = int(item_id)
     itd.name = name
     itd.ge_limit = limit    
+
+    # Get 5 minute average data
+    # - Get early to apply "low hanging fruit" price filters
+    ad_5m = get_average_data(itd, int(item_id), ofs, "5m")
+
+    # TODO: 
+    # - What do we do when an item does not have 5 minute price data ..?
+    #   This will be the case with low volume items ..
+    #   1) We need to look at the /latest data instead
+    #   2) If no data, then it has no history! So drop item.
+
+
+    # Ensure item is in desired price range
+    if (ad_5m.price_avg < ifs.min_price or ad_5m.price_avg > ifs.max_price):
+        return ""
 
     # Get 24h data for last year
     item_24h = get_json(ts_url, item_id=int(item_id), timestep="24h")
@@ -258,22 +269,11 @@ def filter_item(item_id, ifs, ofs):
     limit_s = "  Trade Limit: %s\n" % (limit_c)
     
     # Get latest data
-    if (ofs.show_latest == True):
-        data_latest = get_latest_string(latest_all, int(item_id), ofs) 
-    else:
-        data_latest = ""
+    latest_data = get_latest_data(itd, int(item_id), ofs)
 
-    # Get 5 minute average data
-    if (ofs.show_5m_avg == True):
-        data_5m_avg = get_average_data(itd, avg_5m_all, int(item_id), ofs, "5m") 
-    else:
-        data_5m_avg = ""
-  
     # Get 1 hour average data
-    if (ofs.show_1h_avg == True):
-        data_1h_avg = get_average_data(itd, avg_1h_all, int(item_id), ofs, "1h")
-    else:
-        data_1h_avg = ""    
+    avg_data_1h = get_average_data(itd, int(item_id), ofs, "1h")
+
 
     # Get data for a full day for this item
     # TODO: class returned will include our strings :)
@@ -282,9 +282,51 @@ def filter_item(item_id, ifs, ofs):
     else:
         data_24h = None
     
-    fmt_string = name_string + item_s + vol_24h_s + avg_daily_vol_s + limit_s + data_5m_avg + data_latest + data_1h_avg
+    fmt_string = name_string + item_s + vol_24h_s + avg_daily_vol_s + limit_s + ad_5m.main_string + latest_data.main_string + avg_data_1h.main_string
     
     return fmt_string + '\n'
+
+"""
+get_num_filtered_items()
+
+Get number of items that pass basic filters
+"""
+def get_num_filtered_items(ifs, ofs):
+    num_filtered = 0
+    for item_id in avg_5m_all['data']:
+        # Find item in item_map 
+        item_entry = find_item_entry(int(item_id))
+        name = item_entry['name'] 
+
+        # Check if item limit exists
+        if 'limit' in item_entry:
+            limit = item_entry['limit']
+        else:
+            limit = 0     
+            
+        # Filter item by ge buy limit
+        if (limit < ifs.ge_limit):
+            continue
+        
+        # Get basic item data, fill in all just to be safe
+        itd = ItemData()
+        itd.id = int(item_id)
+        itd.name = name
+        itd.ge_limit = limit    
+
+        # Get 5m average data just for filtering price data
+        ad_5m = get_average_data(itd, int(item_id), ofs, "5m")
+
+        if (ad_5m.price_avg == None):
+            continue
+
+        # Filter item by price
+        if (ad_5m.price_avg < ifs.min_price or ad_5m.price_avg > ifs.max_price):
+            continue
+
+        num_filtered = num_filtered + 1
+
+    return num_filtered    
 
 def get_timeseries_data(item_id, ifs, ofs, timestep, num_steps):
 
@@ -688,7 +730,9 @@ def get_all_item_data(item_list):
 """
 get_item_data()
 
-Return all flipping data for an item as a string.
+Return all flipping data for an item
+
+# TODO: This really needs updated
 """
 def get_item_data(item_id, *args, **kwargs):
 
@@ -722,7 +766,7 @@ def get_item_data(item_id, *args, **kwargs):
     if 'limit' in item_entry:
         limit = item_entry['limit']
     else:
-        limit = 9999999    
+        limit = 0 
         
     # Get daily trade volume
     item_24h = get_json(ts_url, item_id=int(item_id), timestep="24h")
@@ -751,18 +795,18 @@ def get_item_data(item_id, *args, **kwargs):
     
     # Get latest data
     if get_latest == True:
-        latest_string = get_latest_string(latest_all, item_id, ofs)
-        item_string = item_string + latest_string
+        latest_data = get_latest_data(itd, item_id, ofs)
+        item_string = item_string + latest_data.main_string
     
     # Get last 5m average data
     if get_avg5m == True:
-        avg_5m_string = get_average_data(itd, avg_5m_all, item_id, "5m", ofs)
-        item_string = item_string + avg_5m_string
+        avg_data_5m = get_average_data(itd, item_id, "5m", ofs)
+        item_string = item_string + avg_data_5m.main_string
     
     # Get last 1h average data
     if get_avg1h == True:
-        avg_1h_string = get_average_data(itd, avg_1h_all, item_id, "1h", ofs)
-        item_string = item_string + avg_1h_string
+        avg_data_1h = get_average_data(itd, item_id, "1h", ofs)
+        item_string = item_string + avg_data_1h.main_string
 
     main_string = name_string + trade_s + vol_s + limit_s + item_string
     
@@ -773,61 +817,97 @@ def get_item_data(item_id, *args, **kwargs):
     
   
 """
-get_latest_string()
+get_latest_data()
 
 Format a string for the /latest data
 """
-def get_latest_string(latest_all, item_id, ofs):
+def get_latest_data(itd, item_id, ofs):
 
+    ld = LatestData()
+
+    # Check if item does not exist in latest data
     if (str(item_id)) not in latest_all['data']:
-        fmt_string = "latest:\n"
-        fmt_string = fmt_string + "  No data\n"
-        return fmt_string
+        ld.header_s = "Latest:\n"
+        ld.main_string = "  No data\n"
+        ld.main_string = ld.header_s + ld.main_string
+        return ld
 
     latest = latest_all['data'][str(item_id)]
     
-    high = latest['high']
-    high_time = latest['highTime']
-    low = latest['low']
-    low_time = latest['lowTime']
+    # Get item's main data
+    ld.insta_buy_price = latest['high']
+    ld.insta_buy_time = latest['highTime']
+    ld.insta_sell_price = latest['low']
+    ld.insta_sell_time = latest['lowTime']
     
+    # Check if there is insta buy data
+    if (ld.insta_buy_price == None):
+        ld.header_s = "Latest:\n"
+        ld.main_string =  "  No insta buy data\n"
+        ld.main_string = ld.header_s + ld.main_string        
+        return ld
+        
+    # Check if there is insta sell data
+    if (ld.insta_sell_price == None):
+        ld.header_s = "Latest:\n"
+        ld.main_string =  "  No insta sell data\n"
+        ld.main_string = ld.header_s + ld.main_string              
+        return ld  
+
+    # Get last buy/sell time in minutes
     now = time.time()
-    high_diff_min = int((now - high_time)/60)
-    low_diff_min = int((now - low_time)/60)
+    ld.insta_buy_time_min = int((now - ld.insta_buy_time)/60)
+    ld.insta_sell_time_min = int((now - ld.insta_sell_time)/60)
     
-    margin = high - low
-    tax_margin = int((high*.99) - low)
+    # Get margins and profit
+    ld.margin = ld.insta_buy_price - ld.insta_sell_price
+    ld.margin_taxed = int((ld.insta_buy_price*.99) - ld.insta_sell_price)
+    ld.profit_per_limit = ld.margin_taxed * itd.ge_limit
+
+    # Return data but keep strings empty
+    if (ofs.show_latest == False):
+        return ld  
+
+    # Populate strings
+    ld.header_s = "Latest:\n"
+    ld.insta_sell_price_s = "  Insta Sell Price: %s" % (com(ld.insta_sell_price))
+    ld.insta_sell_time_min_s = " | Time: %s Min Ago\n" % (com(ld.insta_sell_time_min))
+    ld.insta_buy_price_s = "  Insta Buy Price: %s" % (com(ld.insta_buy_price))
+    ld.insta_buy_time_min_s = " | Time: %s Min Ago\n" % (com(ld.insta_buy_time_min))
+    ld.margin_taxed_s = "  Taxed Margin: %s\n" % (com(ld.margin_taxed))
+    ld.profit_per_limit_s = "  Profit Per Limit: %s\n" % (com(ld.profit_per_limit))
     
-    low_c = format(low, ',d')
-    high_c = format(high, ',d')
-    tax_margin_c = format(tax_margin, ',d')
-    margin_c = format(margin, ',d')
-    profit_10_s_c = format(tax_margin*10, ',d')
-    
-    latest_s =      "latest:\n"
-    low_s =         "  Low: %s | Time: %d min ago\n" % (low_c, low_diff_min)
-    high_s =        "  High: %s | Time: %d min ago\n" % (high_c, high_diff_min)
-    margin_s =      "  Taxed Margin: %s | Margin: %s\n" % (tax_margin_c, margin_c)
-    profit_10_s =   "  Profit from 10: %s\n" % (profit_10_s_c)
-    
-    fmt_string = latest_s + low_s + high_s + margin_s + profit_10_s
-    
-    return fmt_string
+    ld.main_string = ld.header_s + ld.insta_sell_price_s + ld.insta_sell_time_min_s \
++ ld.insta_buy_price_s + ld.insta_buy_time_min_s + ld.margin_taxed_s \
++  ld.profit_per_limit_s
+
+    return ld
 
 """
 get_average_data()
 
 Get data for 5m or 1h average
 """
-def get_average_data(itd, avg_all, item_id, ofs, avg_type):
+def get_average_data(itd, item_id, ofs, avg_type):
     
+    # Check for a valid time range
+    if (avg_type == "5m"):
+        avg_all = avg_5m_all
+    elif (avg_type == "1h"):
+        avg_all = avg_1h_all
+    else:
+        print("Invalid time range for average data: %s" % (avg_type))
+        quit(1)
+
     ad = AvgData()
 
+    # Format string if no data found for item
     if (str(item_id)) not in avg_all['data']:
-        fmt_string = "Last %s:\n" % (avg_type)
-        fmt_string = fmt_string + "  No data\n"
-        return fmt_string
-        
+        ad.header_s = "Last %s:\n" % (avg_type)
+        ad.main_string =  "  No data\n"
+        ad.main_string = ad.header_s + ad.main_string
+        return ad
+
     avg = avg_all['data'][str(item_id)] 
       
     ad.insta_buy_avg = avg['avgHighPrice']
@@ -837,21 +917,30 @@ def get_average_data(itd, avg_all, item_id, ofs, avg_type):
 
     # Check if there is insta buy data
     if (ad.insta_buy_vol == 0 or ad.insta_buy_avg == None):
-        fmt_string = "Last %s:\n" % (avg_type)
-        fmt_string = fmt_string + "  No insta buy data\n"
-        return fmt_string
+        ad.header_s = "Last %s:\n" % (avg_type)
+        ad.main_string =  "  No insta buy data\n"
+        ad.main_string = ad.header_s + ad.main_string        
+        return ad
         
     # Check if there is insta sell data
     if (ad.insta_sell_vol == 0 or ad.insta_sell_avg == None):
-        fmt_string = "Last %s:\n" % (avg_type)
-        fmt_string = fmt_string + "  No insta sell data\n"        
-        return fmt_string   
+        ad.header_s = "Last %s:\n" % (avg_type)
+        ad.main_string =  "  No insta sell data\n"
+        ad.main_string = ad.header_s + ad.main_string              
+        return ad  
     
+    ad.price_avg = (ad.insta_buy_avg + ad.insta_sell_avg)/2
+
+    # Get margin and profit
     ad.margin = ad.insta_buy_avg - ad.insta_sell_avg
     ad.margin_taxed = int((ad.insta_buy_avg*.99) - ad.insta_sell_avg)
     ad.profit_per_limit = ad.margin_taxed * itd.ge_limit
 
-    # Get string data    
+    # Return data but keep strings empty
+    if (ofs.show_5m_avg == False):
+        return ad
+
+    # Populate strings    
     ad.header_s = "Last %s\n" % (avg_type)
     ad.insta_sell_avg_s = "  Avg Insta Sell Price: %s" % (com(ad.insta_sell_avg))
     ad.insta_sell_vol_s = " | Insta Sell Volume: %s\n" % (com(ad.insta_sell_vol))
@@ -863,25 +952,7 @@ def get_average_data(itd, avg_all, item_id, ofs, avg_type):
     ad.main_string = ad.header_s + ad.insta_sell_avg_s + ad.insta_sell_vol_s + \
 ad.insta_buy_avg_s + ad.insta_buy_vol_s + ad.margin_taxed_s + ad.profit_per_limit_s
 
-    # TODO: Now we return "ad" and make it work
-    print(ad.main_string)
-
-    insta_buy_avg_c = format(ad.insta_buy_avg, ',d')
-    insta_buy_vol_c = format(ad.insta_buy_vol, ',d')
-    insta_sell_avg_c = format(ad.insta_sell_avg, ',d')
-    insta_sell_vol_c = format(ad.insta_sell_vol, ',d')
-    tax_margin_c = format(ad.margin_taxed, ',d')
-    margin_c = format(ad.margin, ',d')
-    profit_10_c = format(ad.margin_taxed*10, ',d')   
-    avg_s =         "Last %s:\n" % (avg_type)
-    insta_sell_avg_s =     "  Avg Low: %s | Low Volume: %s\n" % (insta_sell_avg_c, insta_sell_vol_c)
-    insta_buy_avg_s =    "  Avg High: %s | High Volume: %s\n" % (insta_buy_avg_c, insta_buy_vol_c)
-    margin_s =      "  Taxed Margin: %s | Margin: %s\n" % (tax_margin_c, margin_c)
-    profit_10_s =   "  Profit from 10: %s\n" % (profit_10_c)  
-
-    fmt_string = avg_s + insta_sell_avg_s + insta_buy_avg_s + margin_s + profit_10_s
-    
-    return fmt_string
+    return ad
     
 """
 com()
