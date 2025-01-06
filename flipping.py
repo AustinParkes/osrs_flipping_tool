@@ -17,9 +17,14 @@ five_url = api_url + '/5m'
 hour_url = api_url + '/1h'
 ts_url = api_url + '/timeseries'
 
+# 1) Let user enable which data they want to see with output filters.
+# 2) If data is enabled for a particular time frame, then enable 
+#    parsing that time frame. /latest is exception
+# 3) We cannot apply filters to data user does not want to see
+
 #TODO: separate filters via timeranges.
 # - can probably make some reusable classes (timeseries, avg)
-# Determines what items get shown (First Filter)
+# Determines what items get shown
 class InputFilters():
     def __init__(self):
         # Filters applied to 5m average
@@ -42,22 +47,173 @@ class InputFilters():
         self.insta_buy_boundary = None
         self.insta_sell_boundary = None
   
-# Determines what data gets shown for a selected item (Second Filter)
+
+
+# Determines what data gets shown for a selected item 
 class OutputFilters():
     def __init__(self):
-        # Time ranges to show data for
-        self.show_latest = None
-        self.show_5m_avg = None
-        self.show_1h_avg = None
-        self.show_6h = None
-        self.show_24h = None
-        self.show_1w = None
-        self.show_1m = None
-        self.show_1y = None
+        # Time range user options
+        self.lo = self.LatestOpts()
+        self.a5mo = self.Avg5mOpts()
+        self.a1ho = self.Avg1hOpts()
+        self.s6ho = self.Series6hOpts()
+        self.s12ho = self.Series12hOpts()
+        self.s24ho = self.Series24hOpts()
+        self.s1wo = self.Series1wOpts()
+        self.s1mo = self.Series1mOpts()
+        self.s1yo = self.Series1yOpts()
 
-        # Data to show
-        self.show_graphs = None
-        # TODO: Add this in when we've figured out our data ..
+    class LatestOpts():
+        def __init__(self):
+            self.insta_sell_price = False
+            self.insta_sell_time_min = False
+            self.insta_buy_price = False
+            self.insta_buy_time_min = False
+            self.price_avg = False
+            self.margin_taxed = False
+            self.profit_per_limit = False
+            self.roi = False     
+            self.plot = False
+
+    class Avg5mOpts():
+        def __init__(self):
+            self.insta_buy_avg = False
+            self.insta_buy_vol = False
+            self.insta_sell_avg = False
+            self.insta_sell_vol = False
+            self.price_avg = False
+            self.total_vol = False
+            self.margin_taxed = False
+            self.profit_per_limit = False
+            self.roi = False 
+            self.plot = False
+
+    class Avg1hOpts():
+        def __init__(self):
+            self.insta_buy_avg = False
+            self.insta_buy_vol = False
+            self.insta_sell_avg = False
+            self.insta_sell_vol = False
+            self.price_avg = False
+            self.total_vol = False
+            self.margin_taxed = False
+            self.profit_per_limit = False
+            self.roi = False 
+            self.plot = False
+
+    class Series6hOpts():
+        def __init__(self):
+            self.insta_buy_avg = False
+            self.insta_buy_vol = False
+            self.insta_sell_avg = False
+            self.insta_sell_vol = False
+            self.price_avg = False
+            self.total_vol = False
+            self.margin_taxed_avg = False
+            self.profit_per_limit_avg = False
+            self.price_change = False
+            self.price_change_percent = False
+            self.roi_avg = False 
+
+            self.plot = False
+
+    class Series12hOpts():
+        def __init__(self):
+            self.insta_buy_avg = False
+            self.insta_buy_vol = False
+            self.insta_sell_avg = False
+            self.insta_sell_vol = False
+            self.price_avg = False
+            self.total_vol = False
+            self.margin_taxed_avg = False
+            self.profit_per_limit_avg = False
+            self.price_change = False
+            self.price_change_percent = False
+            self.roi_avg = False 
+            self.plot = False
+
+    class Series24hOpts():
+        def __init__(self):
+            self.insta_buy_avg = False
+            self.insta_buy_vol = False
+            self.insta_sell_avg = False
+            self.insta_sell_vol = False
+            self.price_avg = False
+            self.total_vol = False
+            self.margin_taxed_avg = False
+            self.profit_per_limit_avg = False
+            self.price_change = False
+            self.price_change_percent = False
+            self.roi_avg = False 
+            self.plot = False
+
+    class Series1wOpts():
+        def __init__(self):
+            self.insta_buy_avg = False
+            self.insta_buy_vol = False
+            self.insta_sell_avg = False
+            self.insta_sell_vol = False
+            self.price_avg = False
+            self.total_vol = False
+            self.margin_taxed_avg = False
+            self.profit_per_limit_avg = False
+            self.price_change = False
+            self.price_change_percent = False
+            self.roi_avg = False 
+            self.plot = False
+
+    class Series1mOpts():
+        def __init__(self):
+            self.insta_buy_avg = False
+            self.insta_buy_vol = False
+            self.insta_sell_avg = False
+            self.insta_sell_vol = False
+            self.price_avg = False
+            self.total_vol = False
+            self.margin_taxed_avg = False
+            self.profit_per_limit_avg = False
+            self.price_change = False
+            self.price_change_percent = False
+            self.roi_avg = False 
+            self.plot = False
+
+    class Series1yOpts():
+        def __init__(self):
+            self.insta_buy_avg = False
+            self.insta_buy_vol = False
+            self.insta_sell_avg = False
+            self.insta_sell_vol = False
+            self.price_avg = False
+            self.total_vol = False
+            self.margin_taxed_avg = False
+            self.profit_per_limit_avg = False
+            self.price_change = False
+            self.price_change_percent = False
+            self.roi_avg = False           
+            self.plot = False                                                                                
+
+class Data():
+    def __init__(self, used=False, value=None, string=""):
+        self.used = used
+        self.value = value
+        self.string = string
+
+    def show_underline(self):
+        line = ""
+        string = self.string % (self.value)
+        for c in string: 
+            line = line + '-'
+        
+        print(line)
+
+    def show(self):
+        if (self.used == True):
+            print(self.string % (self.value))
+
+    def show_no_nl(self):        
+        if (self.used == True):
+            print(self.string % (self.value), end = "")
+
 
 # Basic Item Data
 class ItemData():
@@ -69,7 +225,7 @@ class ItemData():
         self.name = None
         self.ge_limit = None
 
-        # Time range data
+        # Time range data objects
         self.ld = None
         self.avg_5m_data = None
         self.avg_1h_data = None
@@ -79,7 +235,6 @@ class ItemData():
         self.series_1w_data = None
         self.series_1m_data = None
         self.series_1y_data = None
-
 
 # Latest Data
 class LatestData():
@@ -92,20 +247,10 @@ class LatestData():
         self.insta_buy_time = None
         self.insta_buy_time_min = None
         self.price_avg = None
-        
         self.margin = None
         self.margin_taxed = None
         self.profit_per_limit = None
-
-        # String data
-        self.header_s = ""
-        self.insta_sell_price_s = ""
-        self.insta_sell_time_min_s = ""
-        self.insta_buy_price_s = ""
-        self.insta_buy_time_min_s = ""
-        self.margin_taxed_s = ""
-        self.profit_per_limit_s = ""
-        self.main_string = ""
+        self.roi = None
 
 # 5m or 1h average data
 class AvgData():
@@ -116,31 +261,43 @@ class AvgData():
         self.insta_sell_avg = None
         self.insta_sell_vol = None
         self.price_avg = None
-
         self.margin = None
         self.margin_taxed = None
-        self.profit_per_limit = None
-
-        # String Data
-        self.header_s = ""
-        self.insta_buy_avg_s = ""
-        self.insta_buy_vol_s = ""
-        self.insta_sell_avg_s = ""
-        self.insta_sell_vol_s = ""
-        self.margin_taxed_s = ""
-        self.profit_per_limit_s = ""
-        self.main_string = ""    
+        self.profit_per_limit = None  
+        self.roi = None
 
 # Data for a timeseries
 class TimeSeriesData():
     def __init__(self):
         self.used = True
+        self.insta_buy_avg = None
+        self.insta_buy_vol = None
+        self.insta_sell_avg = None
+        self.insta_sell_vol = None
+        self.price_avg = None
+        self.margin_avg = None
+        self.margin_taxed_avg = None
+        self.profit_per_limit_avg = None  
+        self.roi_avg = None
+
         self.price_change = None
         self.price_change_percent = None   
 
         # Plot data
-        self.plt = None
+        self.plt = None     
+
+def print_data(item_list):
+    for item in item_list:
+        # Print basic item data
+        item.name.show()  
+        item.name.show_underline() 
+        item.id.show()
+        item.ge_limit.show()
+        print("")
+
+        # Print latest data
         
+
 """
 filter_items()
 
@@ -158,14 +315,8 @@ def filter_items():
     ifs.profit_per_limit = 0
     ifs.ge_limit = 5000
 
+    # Represents the data a user wants to show
     ofs = OutputFilters()
-    ofs.show_latest = True
-    ofs.show_5m_avg = True
-    ofs.show_1h_avg = True
-    ofs.show_6h = False
-    ofs.show_24h = True
-    ofs.show_1m = False
-    ofs.show_1y = False
 
     # Get filter string
     # TODO: Turn into function
@@ -188,7 +339,8 @@ def filter_items():
         itd = filter_item(item_id, ifs, ofs)
         if (itd.used):
             item_list.append(itd)
-            itd.series_24h_data.plt.show()
+
+    print_data(item_list)
 
     return
         
@@ -222,19 +374,18 @@ def filter_item(item_id, ifs, ofs):
         return itd
     
     # Passed initial limit filter, get basic item data
-    itd.id = int(item_id)
-    itd.name = name
-    itd.ge_limit = limit    
+    itd.id = Data(True, int(item_id), "Id: %d")
+    itd.name = Data(True, name, "Name: %s")
+    itd.ge_limit = Data(True, limit, "GE Buy Limit: %s")
 
-    # Get 5 minute average data
-    # - Get early to apply "low hanging fruit" price filters
+    # Get latest data
     latest_data = get_latest_data(itd, int(item_id), ofs)
     if latest_data.used == False:
         itd.used = False
         return itd
 
     # Ensure item is in desired price range
-    if (latest_data.price_avg < ifs.min_price or latest_data.price_avg > ifs.max_price):
+    if (latest_data.price_avg.value < ifs.min_price or latest_data.price_avg.value > ifs.max_price):
         itd.used = False
         return itd
 
@@ -290,7 +441,7 @@ def filter_item(item_id, ifs, ofs):
     itd.avg_1h_data = get_average_data(itd, int(item_id), ofs, "1h")
 
     # Get last 24h data
-    itd.series_24h_data = get_timeseries_data(int(item_id), ifs, ofs, "5m", 288)
+    itd.series_24h_data = get_timeseries_data(itd, int(item_id), ifs, ofs, "5m", 288)
 
     
     #fmt_string = name_string + item_s + vol_24h_s + avg_daily_vol_s + limit_s + latest_data.main_string + latest_data.main_string + avg_data_1h.main_string
@@ -323,25 +474,25 @@ def get_num_filtered_items(ifs, ofs):
         
         # Get basic item data, fill in all just to be safe
         itd = ItemData()
-        itd.id = int(item_id)
-        itd.name = name
-        itd.ge_limit = limit    
+        itd.id = Data(False, int(item_id), "")
+        itd.name = Data(False, name, "")
+        itd.ge_limit = Data(False, limit, "")    
 
         # Get latest data just for filtering price data
         latest_data = get_latest_data(itd, int(item_id), ofs)
 
-        if (latest_data.price_avg == None):
+        if (latest_data.price_avg.value == None):
             continue
 
         # Filter item by price
-        if (latest_data.price_avg < ifs.min_price or latest_data.price_avg > ifs.max_price):
+        if (latest_data.price_avg.value < ifs.min_price or latest_data.price_avg.value > ifs.max_price):
             continue
 
         num_filtered = num_filtered + 1
 
     return num_filtered    
 
-def get_timeseries_data(item_id, ifs, ofs, timestep, num_steps):
+def get_timeseries_data(itd, item_id, ifs, ofs, timestep, num_steps):
 
     if (num_steps < 0 or num_steps > 364):
         print("Timeseries steps must be from 0 to 364")
@@ -351,6 +502,28 @@ def get_timeseries_data(item_id, ifs, ofs, timestep, num_steps):
     if (timestep != "5m" and timestep != "1h" and timestep != "6h" and timestep != "24h"):
         print("Invalid timestep provided")
         quit(1)
+
+    # TODO: 6 & 12 can be gotten from 24.
+    # Get time range user options
+    # 6 Hours
+    if (timestep == "5m" and num_steps == 72):
+        opt = ofs.s6ho
+    # 12 Hours
+    if (timestep == "5m" and num_steps == 144):
+        opt = ofs.s12ho
+    # 24 Hours
+    if (timestep == "5m" and num_steps == 288):
+        opt = ofs.s24ho
+    # 1 Week
+    if (timestep == "1h" and num_steps == 168):
+        opt = ofs.s1wo
+    # 1 Month
+    if (timestep == "6h" and num_steps == 112):
+        opt = ofs.s1mo
+    # 1 Year
+    if (timestep == "24h" and num_steps == 365):
+        opt = ofs.s1yo
+                                                
 
     tsd = TimeSeriesData()        
     plt = pyplot
@@ -376,20 +549,20 @@ def get_timeseries_data(item_id, ifs, ofs, timestep, num_steps):
     # Get price change over entire time period
     if (curr_insta_buy_avg == None or curr_insta_sell_avg == None or\
         first_insta_buy_avg == None or first_insta_sell_avg == None):
-        ts_price_change = None
-        ts_price_change_percent = None
+        price_change = None
+        price_change_percent = None
     else:
         first_insta_price_avg = (first_insta_sell_avg + first_insta_buy_avg)/2     
         curr_insta_price_avg = (curr_insta_sell_avg + curr_insta_buy_avg)/2
-        ts_price_change = curr_insta_price_avg - first_insta_price_avg
-        ts_price_change_percent = (ts_price_change / first_insta_price_avg)*100 
+        price_change = curr_insta_price_avg - first_insta_price_avg
+        price_change_percent = int((price_change / first_insta_price_avg)*100) 
 
 
     count = 0
     buy_count = 0
     sell_count = 0
-    total_insta_sell_vol = 0
-    total_insta_buy_vol = 0
+    insta_sell_vol = 0
+    insta_buy_vol = 0
     total_insta_sell_price = 0
     total_insta_buy_price = 0
     min_insta_sell_price = 0xffffffff
@@ -404,8 +577,8 @@ def get_timeseries_data(item_id, ifs, ofs, timestep, num_steps):
         entry = data_ts[i]
 
         # Track total volumes
-        total_insta_sell_vol = total_insta_sell_vol + entry['lowPriceVolume']
-        total_insta_buy_vol = total_insta_buy_vol + entry['highPriceVolume']
+        insta_sell_vol = insta_sell_vol + entry['lowPriceVolume']
+        insta_buy_vol = insta_buy_vol + entry['highPriceVolume']
         
         # Get insta sell price data
         if (entry['avgLowPrice'] != None):
@@ -436,16 +609,27 @@ def get_timeseries_data(item_id, ifs, ofs, timestep, num_steps):
             get_maxima(max_list, data_ts, num_steps, i)
  
     # Get total trade volume
-    total_vol = total_insta_sell_vol + total_insta_buy_vol
+    total_vol = insta_sell_vol + insta_buy_vol
 
     # Get average volume for each timestep
     avg_vol = int(total_vol/num_steps)
-    avg_insta_sell_vol = int(total_insta_sell_vol/num_steps)
-    avg_insta_buy_vol = int(total_insta_buy_vol/num_steps)
+    avg_insta_sell_vol = int(insta_sell_vol/num_steps)
+    avg_insta_buy_vol = int(insta_buy_vol/num_steps)
 
     # Get average insta buy/sell prices for each timestep
-    avg_insta_sell_price = int(total_insta_sell_price/sell_count)
-    avg_insta_buy_price = int(total_insta_buy_price/buy_count)
+    insta_sell_avg = int(total_insta_sell_price/sell_count)
+    insta_buy_avg = int(total_insta_buy_price/buy_count)
+    price_avg = (insta_buy_avg + insta_sell_avg)/2
+
+    # Get average margin and taxed margin
+    margin_avg = insta_buy_avg - insta_sell_avg
+    margin_taxed_avg = int((insta_buy_avg*.99 - insta_sell_avg))
+
+    # Get average profit per buy limit
+    profit_per_limit_avg = margin_taxed_avg * itd.ge_limit.value
+
+    # Get average return on invesment
+    roi_avg = int((margin_taxed_avg / insta_sell_avg)*100)
 
     # Get our buying price based on the sell data
     low_i = get_ideal_low_margin(data_ts, num_steps, min_list, .2)
@@ -455,6 +639,7 @@ def get_timeseries_data(item_id, ifs, ofs, timestep, num_steps):
 
     item = find_item_entry(item_id)
 
+    # TODO: Make function to returning plot data
     plt.plot(insta_sell_times, insta_sell_prices, color = 'blue', label = 'Instant Sell Price')
 
     # Plot low margin
@@ -477,10 +662,17 @@ def get_timeseries_data(item_id, ifs, ofs, timestep, num_steps):
 
     plt.legend()
 
+    tsd.insta_buy_avg = Data(opt.insta_buy_avg, insta_buy_avg, "Insta Buy Price (Average): %s")
+    tsd.insta_buy_vol = Data(opt.insta_buy_vol, insta_buy_vol, "Insta Buy Volume: %s")
+    tsd.insta_sell_avg = Data(opt.insta_sell_avg, insta_sell_avg, "Insta Sell Price (Average): %s")
+    tsd.insta_sell_vol = Data(opt.insta_sell_vol, insta_sell_vol, "Insta Sell Volume: %s")
+    tsd.price_avg = Data(opt.price_avg, price_avg, "Price (Average): %s")
+    tsd.margin_taxed_avg = Data(opt.margin_taxed_avg, margin_taxed_avg, "Margin (Average Taxed): %s")
+    tsd.profit_per_limit_avg = Data(opt.profit_per_limit_avg, profit_per_limit_avg, "Profit Per Limit (Average): %s")
+    tsd.roi_avg = Data(opt.roi_avg, roi_avg, "ROI (Average): %d%")
+    tsd.price_change = Data(opt.price_change, price_change, "Price Change: %s")
+    tsd.price_change_percent = Data(opt.price_change_percent, price_change_percent, "Price Change %: %s%")
     tsd.plt = plt
-
-    tsd.price_change = ts_price_change
-    tsd.price_change_percent = ts_price_change_percent      
     
     return tsd
 
@@ -844,60 +1036,49 @@ def get_latest_data(itd, item_id, ofs):
 
     # Check if item does not exist in latest data
     if (str(item_id)) not in latest_all['data']:
-        ld.header_s = "Latest:\n"
-        ld.main_string = "  No data\n"
-        ld.main_string = ld.header_s + ld.main_string
         ld.used = False
         return ld
 
     latest = latest_all['data'][str(item_id)]
     
     # Get item's main data
-    ld.insta_buy_price = latest['high']
-    ld.insta_buy_time = latest['highTime']
-    ld.insta_sell_price = latest['low']
-    ld.insta_sell_time = latest['lowTime']
+    insta_buy_price = latest['high']
+    insta_buy_time = latest['highTime']
+    insta_sell_price = latest['low']
+    insta_sell_time = latest['lowTime']
     
     # Check if there is insta buy data
-    if (ld.insta_buy_price == None):
-        ld.header_s = "Latest:\n"
-        ld.main_string =  "  No insta buy data\n"
-        ld.main_string = ld.header_s + ld.main_string 
+    if (insta_buy_price == None):
         ld.used = False       
         return ld
         
     # Check if there is insta sell data
-    if (ld.insta_sell_price == None):
-        ld.header_s = "Latest:\n"
-        ld.main_string =  "  No insta sell data\n"
-        ld.main_string = ld.header_s + ld.main_string  
-        ld.used = False            
+    if (insta_sell_price == None):
+        ld.used = False           
         return ld  
 
-    ld.price_avg = (ld.insta_sell_price + ld.insta_buy_price) / 2
+    price_avg = (insta_sell_price + insta_buy_price) / 2
 
     # Get last buy/sell time in minutes
     now = time.time()
-    ld.insta_buy_time_min = int((now - ld.insta_buy_time)/60)
-    ld.insta_sell_time_min = int((now - ld.insta_sell_time)/60)
+    insta_buy_time_min = int((now - insta_buy_time)/60)
+    insta_sell_time_min = int((now - insta_sell_time)/60)
     
     # Get margins and profit
-    ld.margin = ld.insta_buy_price - ld.insta_sell_price
-    ld.margin_taxed = int((ld.insta_buy_price*.99) - ld.insta_sell_price)
-    ld.profit_per_limit = ld.margin_taxed * itd.ge_limit
+    margin = insta_buy_price - insta_sell_price
+    margin_taxed = int((insta_buy_price*.99) - insta_sell_price)
 
-    # Populate strings
-    ld.header_s = "Latest:\n"
-    ld.insta_sell_price_s = "  Insta Sell Price: %s" % (com(ld.insta_sell_price))
-    ld.insta_sell_time_min_s = " | Time: %s Min Ago\n" % (com(ld.insta_sell_time_min))
-    ld.insta_buy_price_s = "  Insta Buy Price: %s" % (com(ld.insta_buy_price))
-    ld.insta_buy_time_min_s = " | Time: %s Min Ago\n" % (com(ld.insta_buy_time_min))
-    ld.margin_taxed_s = "  Taxed Margin: %s\n" % (com(ld.margin_taxed))
-    ld.profit_per_limit_s = "  Profit Per Limit: %s\n" % (com(ld.profit_per_limit))
-    
-    ld.main_string = ld.header_s + ld.insta_sell_price_s + ld.insta_sell_time_min_s \
-+ ld.insta_buy_price_s + ld.insta_buy_time_min_s + ld.margin_taxed_s \
-+  ld.profit_per_limit_s
+    # TODO: itd.ge_limit is currently an int, but should be Data()
+    profit_per_limit = margin_taxed * itd.ge_limit.value
+
+    # Store latest data
+    ld.insta_sell_price = Data(ofs.lo.insta_sell_price, insta_sell_price, "Insta Sell Price: %s")
+    ld.insta_sell_time_min = Data(ofs.lo.insta_sell_time_min, insta_sell_time_min, "Insta Sell Time: %s Min Ago")    
+    ld.insta_buy_price = Data(ofs.lo.insta_buy_price, insta_buy_price, "Insta Buy Price: %s")
+    ld.insta_buy_time_min = Data(ofs.lo.insta_buy_time_min, insta_buy_time_min, "Insta Buy Time: %s Min Ago")
+    ld.price_avg = Data(ofs.lo.price_avg, price_avg, "Average Price: %s") 
+    ld.margin_taxed = Data(ofs.lo.margin_taxed, margin_taxed, "Margin (Taxed): %s")
+    ld.profit_per_limit = Data(ofs.lo.profit_per_limit, profit_per_limit, "Profit Per Limit: %s")
 
     return ld
 
@@ -911,8 +1092,10 @@ def get_average_data(itd, item_id, ofs, avg_type):
     # Check for a valid time range
     if (avg_type == "5m"):
         avg_all = avg_5m_all
+        opt = ofs.a5mo
     elif (avg_type == "1h"):
         avg_all = avg_1h_all
+        opt = ofs.a1ho
     else:
         print("Invalid time range for average data: %s" % (avg_type))
         quit(1)
@@ -926,45 +1109,35 @@ def get_average_data(itd, item_id, ofs, avg_type):
 
     avg = avg_all['data'][str(item_id)] 
       
-    ad.insta_buy_avg = avg['avgHighPrice']
-    ad.insta_buy_vol = avg['highPriceVolume']
-    ad.insta_sell_avg = avg['avgLowPrice']
-    ad.insta_sell_vol = avg['lowPriceVolume']  
+    insta_buy_avg = avg['avgHighPrice']
+    insta_buy_vol = avg['highPriceVolume']
+    insta_sell_avg = avg['avgLowPrice']
+    insta_sell_vol = avg['lowPriceVolume']  
 
     # Check if there is insta buy data
-    if (ad.insta_buy_vol == 0 or ad.insta_buy_avg == None):
-        ad.header_s = "Last %s:\n" % (avg_type)
-        ad.main_string =  "  No insta buy data\n"
-        ad.main_string = ad.header_s + ad.main_string   
-        ad.used = False     
+    if (insta_buy_vol == 0 or insta_buy_avg == None):
+        used = False     
         return ad
         
     # Check if there is insta sell data
-    if (ad.insta_sell_vol == 0 or ad.insta_sell_avg == None):
-        ad.header_s = "Last %s:\n" % (avg_type)
-        ad.main_string =  "  No insta sell data\n"
-        ad.main_string = ad.header_s + ad.main_string 
-        ad.used = False             
+    if (insta_sell_vol == 0 or insta_sell_avg == None):
+        used = False             
         return ad  
     
-    ad.price_avg = (ad.insta_buy_avg + ad.insta_sell_avg)/2
+    price_avg = (insta_buy_avg + insta_sell_avg)/2
 
     # Get margin and profit
-    ad.margin = ad.insta_buy_avg - ad.insta_sell_avg
-    ad.margin_taxed = int((ad.insta_buy_avg*.99) - ad.insta_sell_avg)
-    ad.profit_per_limit = ad.margin_taxed * itd.ge_limit
+    margin = insta_buy_avg - insta_sell_avg
+    margin_taxed = int((insta_buy_avg*.99) - insta_sell_avg)
+    profit_per_limit = margin_taxed * itd.ge_limit.value
 
-    # Populate strings    
-    ad.header_s = "Last %s\n" % (avg_type)
-    ad.insta_sell_avg_s = "  Avg Insta Sell Price: %s" % (com(ad.insta_sell_avg))
-    ad.insta_sell_vol_s = " | Insta Sell Volume: %s\n" % (com(ad.insta_sell_vol))
-    ad.insta_buy_avg_s = "  Avg Insta Buy Price: %s" % (com(ad.insta_buy_avg))
-    ad.insta_buy_vol_s = " | Insta Buy Volume: %s\n" % (com(ad.insta_buy_vol))
-    ad.margin_taxed_s = "  Taxed Margin: %s\n" % (com(ad.margin_taxed))
-    ad.profit_per_limit_s = "  Profit Per Limit: %s\n" % (com(ad.profit_per_limit))
-    
-    ad.main_string = ad.header_s + ad.insta_sell_avg_s + ad.insta_sell_vol_s + \
-ad.insta_buy_avg_s + ad.insta_buy_vol_s + ad.margin_taxed_s + ad.profit_per_limit_s
+    ad.insta_buy_avg = Data(opt.insta_buy_avg, insta_buy_avg, "Insta Buy Price: %s")
+    ad.insta_buy_vol = Data(opt.insta_buy_vol, insta_buy_vol, "Insta Buy Vol: %s")
+    ad.insta_sell_avg = Data(opt.insta_sell_avg, insta_sell_avg, "Insta Sell Price: %s")
+    ad.insta_sell_vol = Data(opt.insta_sell_vol, insta_sell_vol, "Insta Sell Vol: %s")
+    ad.price_avg = Data(opt.price_avg, price_avg, "Price: %s")
+    ad.margin_taxed = Data(opt.margin_taxed, margin_taxed, "Margin (Taxed): %s")
+    ad.profit_per_limit = Data(opt.profit_per_limit, profit_per_limit, "Profit Per Limit: %s")
 
     return ad
     
@@ -1009,19 +1182,6 @@ def find_item_id(name):
             
     print("Could not find name for item name: %s" % (name))
     quit(1) 
-    
-    
-"""
-make_name_underline
-
-Returns a line for every character in item name
-"""    
-def make_name_underline(name):
-    line = ""
-    for c in name: 
-        line = line + '-'
-    
-    return line + '\n'    
     
 
 """
