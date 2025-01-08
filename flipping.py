@@ -63,6 +63,17 @@ class OutputFilters():
         self.s1mo = self.Series1mOpts()
         self.s1yo = self.Series1yOpts()
 
+        # Do not show time range if user sets all data to false
+        self.show_lo = not(self.lo.are_all_false())
+        self.show_a5mo = not(self.a5mo.are_all_false())
+        self.show_a1ho = not(self.a1ho.are_all_false())
+        self.show_s6ho = not(self.s6ho.are_all_false())
+        self.show_s12ho = not(self.s12ho.are_all_false())
+        self.show_s24ho = not(self.s24ho.are_all_false())
+        self.show_s1w0 = not(self.s1wo.are_all_false())
+        self.show_s1mo = not(self.s1mo.are_all_false())
+        self.show_s1yo = not(self.s1yo.are_all_false())
+
     class LatestOpts():
         def __init__(self):
             self.insta_sell_price = False
@@ -74,6 +85,9 @@ class OutputFilters():
             self.profit_per_limit = False
             self.roi = False     
             self.plot = False
+
+        def are_all_false(self):
+            return all(not bool(getattr(self, attr)) for attr in vars(self))            
 
     class Avg5mOpts():
         def __init__(self):
@@ -88,6 +102,9 @@ class OutputFilters():
             self.roi = False 
             self.plot = False
 
+        def are_all_false(self):
+            return all(not bool(getattr(self, attr)) for attr in vars(self))          
+
     class Avg1hOpts():
         def __init__(self):
             self.insta_buy_avg = False
@@ -100,6 +117,9 @@ class OutputFilters():
             self.profit_per_limit = False
             self.roi = False 
             self.plot = False
+
+        def are_all_false(self):
+            return all(not bool(getattr(self, attr)) for attr in vars(self))  
 
     class Series6hOpts():
         def __init__(self):
@@ -114,8 +134,10 @@ class OutputFilters():
             self.price_change = False
             self.price_change_percent = False
             self.roi_avg = False 
-
             self.plot = False
+
+        def are_all_false(self):
+            return all(not bool(getattr(self, attr)) for attr in vars(self))  
 
     class Series12hOpts():
         def __init__(self):
@@ -132,6 +154,9 @@ class OutputFilters():
             self.roi_avg = False 
             self.plot = False
 
+        def are_all_false(self):
+            return all(not bool(getattr(self, attr)) for attr in vars(self))  
+
     class Series24hOpts():
         def __init__(self):
             self.insta_buy_avg = False
@@ -146,6 +171,9 @@ class OutputFilters():
             self.price_change_percent = False
             self.roi_avg = False 
             self.plot = False
+
+        def are_all_false(self):
+            return all(not bool(getattr(self, attr)) for attr in vars(self))  
 
     class Series1wOpts():
         def __init__(self):
@@ -162,6 +190,9 @@ class OutputFilters():
             self.roi_avg = False 
             self.plot = False
 
+        def are_all_false(self):
+            return all(not bool(getattr(self, attr)) for attr in vars(self))  
+
     class Series1mOpts():
         def __init__(self):
             self.insta_buy_avg = False
@@ -177,6 +208,9 @@ class OutputFilters():
             self.roi_avg = False 
             self.plot = False
 
+        def are_all_false(self):
+            return all(not bool(getattr(self, attr)) for attr in vars(self))  
+
     class Series1yOpts():
         def __init__(self):
             self.insta_buy_avg = False
@@ -191,6 +225,9 @@ class OutputFilters():
             self.price_change_percent = False
             self.roi_avg = False           
             self.plot = False                                                                                
+
+        def are_all_false(self):
+            return all(not bool(getattr(self, attr)) for attr in vars(self))  
 
 class Data():
     def __init__(self, used=False, value=None, string=""):
@@ -296,7 +333,7 @@ def print_data(item_list):
         print("")
 
         # Print latest data
-        
+
 
 """
 filter_items()
@@ -379,6 +416,7 @@ def filter_item(item_id, ifs, ofs):
     itd.ge_limit = Data(True, limit, "GE Buy Limit: %s")
 
     # Get latest data
+    # We MUST get this for filtering, even if latest data is not shown.
     latest_data = get_latest_data(itd, int(item_id), ofs)
     if latest_data.used == False:
         itd.used = False
@@ -438,10 +476,14 @@ def filter_item(item_id, ifs, ofs):
     """
 
     # Get 1 hour average data
-    itd.avg_1h_data = get_average_data(itd, int(item_id), ofs, "1h")
+    if (ofs.show_a1ho == True):
+        print("1 hour average")
+        itd.avg_1h_data = get_average_data(itd, int(item_id), ofs, "1h")
 
     # Get last 24h data
-    itd.series_24h_data = get_timeseries_data(itd, int(item_id), ifs, ofs, "5m", 288)
+    if (ofs.show_s24ho == True):
+        print("24 hr")
+        itd.series_24h_data = get_timeseries_data(itd, int(item_id), ifs, ofs, "5m", 288)
 
     
     #fmt_string = name_string + item_s + vol_24h_s + avg_daily_vol_s + limit_s + latest_data.main_string + latest_data.main_string + avg_data_1h.main_string
