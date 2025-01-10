@@ -444,6 +444,7 @@ def filter_items():
 
     item_list = []
 
+
     # Represents the data a user wants to show
     ofs = OutputFilters()
     if (ofs.used == False):
