@@ -22,36 +22,233 @@ ts_url = api_url + '/timeseries'
 #    parsing that time frame. /latest is exception
 # 3) We cannot apply filters to data user does not want to see
 
+# Class to let user enter range filter
+class Range():
+    def __init__(self, show=False, min=-2147483647, max=2147483647):
+        self.show = show
+        self.min = min
+        self.max = max
+
+    # Checks if value passes range filter
+    def does_pass(self, value):
+        if (self.show != True):
+            return
+        if (self.min <= value <= self.max):
+            return True
+        else:
+            return False    
+
+# Class to let user enter string contains filter
+class Contains():
+    def __init__(self, show=False, string=""):
+        self.show = show
+        self.string = string
+
+    # Checks if string is contained in item name
+    # If so, passes filter
+    def does_pass(self, name):
+        if (self.show != True):
+            return        
+        if (self.string in name):
+            return True
+        else:
+            return False  
+
+class Plot():
+    def __init__(self, show=False):
+        self.show = show
+
 #TODO: separate filters via timeranges.
 # - can probably make some reusable classes (timeseries, avg)
 # Determines what items get shown
 class InputFilters():
     def __init__(self):
-        # Filters applied to 5m average
+        # Determines if any data is output
+        self.used = False
+
+        # TODO: Keeping these for now until we move to new code
         self.min_price = None
         self.max_price = None
-
-        # Filter applied to item itself
         self.ge_limit = None
 
-        # Specific Filters
-        self.daily_avg_vol = None
+        self.bif = self.BasicItemFilters()
+        self.lf = self.LatestFilters()
+        self.a5mf = self.Avg5mFilters()
+        self.a1hf = self.Avg1hFilters()
+        self.s6hf = self.Series6hFilters()
+        self.s12hf = self.Series12hFilters()
+        self.s24hf = self.Series24hFilters()
+        self.s1wf = self.Series1wFilters()
+        self.s1mf = self.Series1mFilters()
+        self.s1yf = self.Series1yFilters()
 
-        # Time range to apply filters below to
-        self.focus = None
+        # Do not show time range if user sets all data to false
+        self.show_bif = self.are_any_shown(self.bif)
+        self.show_lf = self.are_any_shown(self.lf)
+        self.show_a5mf = self.are_any_shown(self.a5mf)
+        self.show_a1hf = self.are_any_shown(self.a1hf)
+        self.show_s6hf = self.are_any_shown(self.s6hf)
+        self.show_s12hf = self.are_any_shown(self.s12hf)
+        self.show_s24hf = self.are_any_shown(self.s24hf)
+        self.show_s1wf = self.are_any_shown(self.s1wf)
+        self.show_s1mf = self.are_any_shown(self.s1mf)
+        self.show_s1yf = self.are_any_shown(self.s1yf)
 
-        # Filters applied to the focused time range
-        self.profit_per_item = None
-        self.profit_per_limit = None
-        self.roi_per_limit = None
-        self.insta_buy_boundary = None
-        self.insta_sell_boundary = None
-  
+        # Check if user has opted to show data for atleast one time range
+        for attr in vars(self):
+            # Skip non-booleans
+            if (isinstance(getattr(self, attr), bool) != True):
+                continue
+            # If any data is to be shown, then this class is used
+            # If not, program does not run
+            if (getattr(self, attr) == True):
+                self.used = True
 
+    def are_any_shown(self, obj):
+        for attr in vars(obj):
+            inner_obj = getattr(obj, attr)    
+            if (inner_obj.show == True):
+                return True
+        return False
+
+    class BasicItemFilters():
+        def __init__(self):
+            self.item_name = Contains(show=True)
+            self.item_id = Range(show=True)
+            self.item_price = Range(show=True, min=190, max=210)
+            self.ge_limit = Range(show=True, min=5000, max=25000)
+
+    class LatestFilters():
+        def __init__(self):
+            self.insta_sell_price = Range(show=False)
+            self.insta_sell_time_min = Range(show=False)
+            self.insta_buy_price = Range(show=False)
+            self.insta_buy_time_min = Range(show=False)
+            self.price_avg = Range(show=False) # Do not modify
+            self.margin_taxed = Range(show=False)
+            self.profit_per_limit = Range(show=False)
+            self.roi = Range(show=False)    
+
+    class Avg5mFilters():
+        def __init__(self):
+            self.insta_buy_avg = Range(show=False)
+            self.insta_buy_vol = Range(show=False)
+            self.insta_sell_avg = Range(show=False)
+            self.insta_sell_vol = Range(show=False)
+            self.price_avg = Range(show=False) # Do not use
+            self.avg_vol = Range(show=False)
+            self.margin_taxed = Range(show=False)
+            self.profit_per_limit = Range(show=False)
+            self.roi_avg = Range(show=False)        
+
+    class Avg1hFilters():
+        def __init__(self):
+            self.insta_buy_avg = Range(show=False)
+            self.insta_buy_vol = Range(show=False)
+            self.insta_sell_avg = Range(show=False)
+            self.insta_sell_vol = Range(show=False)
+            self.price_avg = Range(show=False) # Do not use
+            self.avg_vol = Range(show=False)
+            self.margin_taxed = Range(show=False)
+            self.profit_per_limit = Range(show=False)
+            self.roi_avg = Range(show=False)  
+
+    class Series6hFilters():
+        def __init__(self):
+            self.insta_buy_avg = Range(show=False)
+            self.insta_buy_vol = Range(show=False)
+            self.insta_sell_avg = Range(show=False)
+            self.insta_sell_vol = Range(show=False)
+            self.price_avg = Range(show=False) # Do not use
+            self.total_vol = Range(show=False)
+            self.margin_taxed_avg = Range(show=False)
+            self.profit_per_limit_avg = Range(show=False)
+            self.price_change = Range(show=False)
+            self.price_change_percent = Range(show=False)
+            self.roi_avg = Range(show=False) 
+            self.plot = Plot(show = True)  
+
+    class Series12hFilters():
+        def __init__(self):
+            self.insta_buy_avg = Range(show=False)
+            self.insta_buy_vol = Range(show=False)
+            self.insta_sell_avg = Range(show=False)
+            self.insta_sell_vol = Range(show=False)
+            self.price_avg = Range(show=False) # Do not use
+            self.total_vol = Range(show=False)
+            self.margin_taxed_avg = Range(show=False)
+            self.profit_per_limit_avg = Range(show=False)
+            self.price_change = Range(show=False)
+            self.price_change_percent = Range(show=False)
+            self.roi_avg = Range(show=False) 
+            self.plot = Plot(show = True)
+
+    class Series24hFilters():
+        def __init__(self):
+            self.insta_buy_avg = Range(show=False)
+            self.insta_buy_vol = Range(show=False)
+            self.insta_sell_avg = Range(show=False)
+            self.insta_sell_vol = Range(show=False)
+            self.price_avg = Range(show=False) # Do not use
+            self.total_vol = Range(show=False)
+            self.margin_taxed_avg = Range(show=False)
+            self.profit_per_limit_avg = Range(show=False)
+            self.price_change = Range(show=False)
+            self.price_change_percent = Range(show=False)
+            self.roi_avg = Range(show=False) 
+            self.plot = Plot(show = True)
+
+    class Series1wFilters():
+        def __init__(self):
+            self.insta_buy_avg = Range(show=False)
+            self.insta_buy_vol = Range(show=False)
+            self.insta_sell_avg = Range(show=False)
+            self.insta_sell_vol = Range(show=False)
+            self.price_avg = Range(show=False) # Do not use
+            self.total_vol = Range(show=False)
+            self.margin_taxed_avg = Range(show=False)
+            self.profit_per_limit_avg = Range(show=False)
+            self.price_change = Range(show=False)
+            self.price_change_percent = Range(show=False)
+            self.roi_avg = Range(show=False) 
+            self.plot = Plot(show = True)
+
+    class Series1mFilters():
+        def __init__(self):
+            self.insta_buy_avg = Range(show=False)
+            self.insta_buy_vol = Range(show=False)
+            self.insta_sell_avg = Range(show=False)
+            self.insta_sell_vol = Range(show=False)
+            self.price_avg = Range(show=False) # Do not use
+            self.total_vol = Range(show=False)
+            self.margin_taxed_avg = Range(show=False)
+            self.profit_per_limit_avg = Range(show=False)
+            self.price_change = Range(show=False)
+            self.price_change_percent = Range(show=False)
+            self.roi_avg = Range(show=False) 
+            self.plot = Plot(show = True)  
+
+    class Series1yFilters():
+        def __init__(self):
+            self.insta_buy_avg = Range(show=False)
+            self.insta_buy_vol = Range(show=False)
+            self.insta_sell_avg = Range(show=False)
+            self.insta_sell_vol = Range(show=False)
+            self.price_avg = Range(show=False) # Do not use
+            self.total_vol = Range(show=False)
+            self.margin_taxed_avg = Range(show=False)
+            self.profit_per_limit_avg = Range(show=False)
+            self.price_change = Range(show=False)
+            self.price_change_percent = Range(show=False)
+            self.roi_avg = Range(show=False)           
+            self.plot = Plot(show = True)                                                                                  
 
 # Determines what data gets shown for a selected item 
 class OutputFilters():
     def __init__(self):
+        # Determines if any outout filters are true
+        self.used = False
+
         # Time range user options
         self.lo = self.LatestOpts()
         self.a5mo = self.Avg5mOpts()
@@ -70,21 +267,30 @@ class OutputFilters():
         self.show_s6ho = not(self.s6ho.are_all_false())
         self.show_s12ho = not(self.s12ho.are_all_false())
         self.show_s24ho = not(self.s24ho.are_all_false())
-        self.show_s1w0 = not(self.s1wo.are_all_false())
+        self.show_s1wo = not(self.s1wo.are_all_false())
         self.show_s1mo = not(self.s1mo.are_all_false())
         self.show_s1yo = not(self.s1yo.are_all_false())
 
+        # Check if user has opted to show data for atleast one time range
+        for attr in vars(self):
+            # Skip non-booleans
+            if (isinstance(getattr(self, attr), bool) != True):
+                continue
+            # If any data is to be shown, then this class is used
+            # If not, program does not run
+            if (getattr(self, attr) == True):
+                self.used = True
+
     class LatestOpts():
         def __init__(self):
-            self.insta_sell_price = False
-            self.insta_sell_time_min = False
-            self.insta_buy_price = False
-            self.insta_buy_time_min = False
+            self.insta_sell_price = True
+            self.insta_sell_time_min = True
+            self.insta_buy_price = True
+            self.insta_buy_time_min = True
             self.price_avg = False
-            self.margin_taxed = False
-            self.profit_per_limit = False
-            self.roi = False     
-            self.plot = False
+            self.margin_taxed = True
+            self.profit_per_limit = True
+            self.roi = False
 
         def are_all_false(self):
             return all(not bool(getattr(self, attr)) for attr in vars(self))            
@@ -96,11 +302,10 @@ class OutputFilters():
             self.insta_sell_avg = False
             self.insta_sell_vol = False
             self.price_avg = False
-            self.total_vol = False
+            self.avg_vol = False
             self.margin_taxed = False
             self.profit_per_limit = False
-            self.roi = False 
-            self.plot = False
+            self.roi_avg = False 
 
         def are_all_false(self):
             return all(not bool(getattr(self, attr)) for attr in vars(self))          
@@ -112,11 +317,10 @@ class OutputFilters():
             self.insta_sell_avg = False
             self.insta_sell_vol = False
             self.price_avg = False
-            self.total_vol = False
+            self.avg_vol = False
             self.margin_taxed = False
             self.profit_per_limit = False
-            self.roi = False 
-            self.plot = False
+            self.roi_avg = False 
 
         def are_all_false(self):
             return all(not bool(getattr(self, attr)) for attr in vars(self))  
@@ -164,7 +368,7 @@ class OutputFilters():
             self.insta_sell_avg = False
             self.insta_sell_vol = False
             self.price_avg = False
-            self.total_vol = False
+            self.total_vol = True
             self.margin_taxed_avg = False
             self.profit_per_limit_avg = False
             self.price_change = False
@@ -229,12 +433,16 @@ class OutputFilters():
         def are_all_false(self):
             return all(not bool(getattr(self, attr)) for attr in vars(self))  
 
+# Lowest level data
+# TODO: Can initializing all Data() objects with Data()
+# IF AND ONLY IF its useful. (They are initted to None currently)
 class Data():
     def __init__(self, used=False, value=None, string=""):
         self.used = used
         self.value = value
         self.string = string
 
+    # Create underline for data string
     def show_underline(self):
         line = ""
         string = self.string % (self.value)
@@ -243,10 +451,25 @@ class Data():
         
         print(line)
 
+    # Show data string as is
     def show(self):
-        if (self.used == True):
+        if (self.used != True):
+            return
+        if (isinstance(self.value, int)):
+            print(self.string % (com(self.value)))
+        else:
             print(self.string % (self.value))
 
+    # Show data string indented
+    def showi(self):
+        if (self.used != True):
+            return
+        if (isinstance(self.value, int)):
+            print("  " + self.string % (com(self.value)))
+        else:
+            print("  " + self.string % (self.value))
+
+    # Show data without newline
     def show_no_nl(self):        
         if (self.used == True):
             print(self.string % (self.value), end = "")
@@ -263,20 +486,27 @@ class ItemData():
         self.ge_limit = None
 
         # Time range data objects
-        self.ld = None
-        self.avg_5m_data = None
-        self.avg_1h_data = None
-        self.series_6h_data = None
-        self.series_12h_data = None
-        self.series_24h_data = None
-        self.series_1w_data = None
-        self.series_1m_data = None
-        self.series_1y_data = None
+        self.ld = LatestData()
+        self.avg_5m_data = AvgData()
+        self.avg_1h_data = AvgData()
+        self.series_6h_data = TimeSeriesData()
+        self.series_12h_data = TimeSeriesData()
+        self.series_24h_data = TimeSeriesData()
+        self.series_1w_data = TimeSeriesData()
+        self.series_1m_data = TimeSeriesData()
+        self.series_1y_data = TimeSeriesData()
+        
+    def show(self):
+        self.name.show()  
+        self.name.show_underline() 
+        self.id.show()
+        self.ge_limit.show()     
+        print("")
 
 # Latest Data
 class LatestData():
     def __init__(self):
-        self.used = True
+        self.used = False
         self.insta_sell_price = None
         self.insta_sell_time = None
         self.insta_sell_time_min = None
@@ -288,29 +518,45 @@ class LatestData():
         self.margin_taxed = None
         self.profit_per_limit = None
         self.roi = None
+    
+    def show(self):
+        if (self.used == True):
+            print("Latest:")
+            show_obj_data(self)
 
 # 5m or 1h average data
 class AvgData():
     def __init__(self):
-        self.used = True
+        self.used = False
+        self.type = ""
+
         self.insta_buy_avg = None
         self.insta_buy_vol = None
         self.insta_sell_avg = None
         self.insta_sell_vol = None
+        self.avg_vol = None
         self.price_avg = None
-        self.margin = None
         self.margin_taxed = None
         self.profit_per_limit = None  
-        self.roi = None
+        self.roi_avg = None
+
+    def show(self):
+        if (self.used == True):
+            print("%s Average:" % (self.type))
+            show_obj_data(self)
 
 # Data for a timeseries
 class TimeSeriesData():
     def __init__(self):
-        self.used = True
+        self.used = False
+        self.type = ""
+
+        # TODO: Where it total volume
         self.insta_buy_avg = None
         self.insta_buy_vol = None
         self.insta_sell_avg = None
         self.insta_sell_vol = None
+        self.total_vol = None
         self.price_avg = None
         self.margin_avg = None
         self.margin_taxed_avg = None
@@ -323,17 +569,55 @@ class TimeSeriesData():
         # Plot data
         self.plt = None     
 
+    def show(self):
+        if (self.used == True):
+            print("Last %s:" % (self.type))
+            show_obj_data(self)
+
+# Show data for a time range's Data() objects
+def show_obj_data(obj):
+    for attr in vars(obj):
+        #print(attr)
+        data_obj = getattr(obj, attr)
+        # Skip non-Data() objects
+        if (isinstance(data_obj, Data) != True):
+            continue
+        data_obj.showi()
+  
+    print("")
+
 def print_data(item_list):
     for item in item_list:
+
         # Print basic item data
-        item.name.show()  
-        item.name.show_underline() 
-        item.id.show()
-        item.ge_limit.show()
-        print("")
+        item.show()
 
-        # Print latest data
+        # Show latest data
+        item.ld.show()
 
+        # Show average last 5 minutes
+        item.avg_5m_data.show()
+
+        # Show average last 1 hour
+        item.avg_1h_data.show()
+
+        # Show last 6 hours
+        item.series_6h_data.show()
+
+        # Show last 12 hours
+        item.series_12h_data.show()
+
+        # Show last 24 hours
+        item.series_24h_data.show()
+
+        # Show last week
+        item.series_1w_data.show()
+
+        # Show last month
+        item.series_1m_data.show()
+
+        # Show last year
+        item.series_1y_data.show()
 
 """
 filter_items()
@@ -348,22 +632,14 @@ def filter_items():
     ifs = InputFilters()
     ifs.min_price = 190
     ifs.max_price = 205
-    ifs.profit_per_item = 0
-    ifs.profit_per_limit = 0
     ifs.ge_limit = 5000
 
     # Represents the data a user wants to show
     ofs = OutputFilters()
+    if (ofs.used == False):
+        print("User has opted to show no data. Quitting.")
+        quit(1)
 
-    # Get filter string
-    # TODO: Turn into function
-    min_price_c = format(ifs.min_price, ',d')
-    max_price_c = format(ifs.max_price, ',d')
-    profit_c = format(ifs.profit_per_item, ',d')
-    ge_limit_c = format(ifs.ge_limit, ',d')    
-    filterh_s =     "Filters:\n"
-    ifs_s = "  Price Range (%s, %s) | Profit (%s) | GE Limit (%s)\n\n" % (min_price_c, max_price_c, profit_c, ge_limit_c)
-    
     # Find /latest items that pass basic filter
     num_items = get_num_filtered_items(ifs, ofs)
     if (num_items > 200):
@@ -411,15 +687,14 @@ def filter_item(item_id, ifs, ofs):
         return itd
     
     # Passed initial limit filter, get basic item data
-    itd.id = Data(True, int(item_id), "Id: %d")
+    itd.id = Data(True, item_id, "Id: %s")
     itd.name = Data(True, name, "Name: %s")
     itd.ge_limit = Data(True, limit, "GE Buy Limit: %s")
 
-    # Get latest data
+    # Get latest data. Go to next item if no data
     # We MUST get this for filtering, even if latest data is not shown.
     latest_data = get_latest_data(itd, int(item_id), ofs)
-    if latest_data.used == False:
-        itd.used = False
+    if itd.used == False:
         return itd
 
     # Ensure item is in desired price range
@@ -475,19 +750,39 @@ def filter_item(item_id, ifs, ofs):
     limit_s = "  Trade Limit: %s\n" % (limit_c)
     """
 
+    # Get 5 minutes average data
+    if (ofs.show_a5mo == True):
+        itd.avg_5m_data = get_average_data(itd, int(item_id), ofs, "5m")
+
     # Get 1 hour average data
     if (ofs.show_a1ho == True):
-        print("1 hour average")
         itd.avg_1h_data = get_average_data(itd, int(item_id), ofs, "1h")
+
+    # TODO: 6, 12, 24h can be consolidated.
+    # Get last 6h data
+    if (ofs.show_s6ho == True):
+        itd.series_6h_data = get_timeseries_data(itd, int(item_id), ifs, ofs, "5m", 72)
+
+    # Get last 12h data
+    if (ofs.show_s12ho == True):
+        itd.series_12h_data = get_timeseries_data(itd, int(item_id), ifs, ofs, "5m", 144)
 
     # Get last 24h data
     if (ofs.show_s24ho == True):
-        print("24 hr")
         itd.series_24h_data = get_timeseries_data(itd, int(item_id), ifs, ofs, "5m", 288)
 
+    # Get last 1 week data
+    if (ofs.show_s1wo == True):
+        itd.series_1w_data = get_timeseries_data(itd, int(item_id), ifs, ofs, "1h", 168)
     
-    #fmt_string = name_string + item_s + vol_24h_s + avg_daily_vol_s + limit_s + latest_data.main_string + latest_data.main_string + avg_data_1h.main_string
-    
+    # Get last 1 month data
+    if (ofs.show_s1mo == True):
+        itd.series_1m_data = get_timeseries_data(itd, int(item_id), ifs, ofs, "6h", 112)
+
+    # Get last 1 year data
+    if (ofs.show_s1yo == True):
+        itd.series_1y_data = get_timeseries_data(itd, int(item_id), ifs, ofs, "24h", 365)
+
     return itd
 
 """
@@ -545,29 +840,47 @@ def get_timeseries_data(itd, item_id, ifs, ofs, timestep, num_steps):
         print("Invalid timestep provided")
         quit(1)
 
+    tsd = TimeSeriesData()  
+
     # TODO: 6 & 12 can be gotten from 24.
     # Get time range user options
     # 6 Hours
     if (timestep == "5m" and num_steps == 72):
         opt = ofs.s6ho
+        tsd.type = "6 Hours"
+        if (ofs.show_s6ho == True):
+            tsd.used = True
     # 12 Hours
     if (timestep == "5m" and num_steps == 144):
         opt = ofs.s12ho
+        tsd.type = "12 Hours"
+        if (ofs.show_s12ho == True):
+            tsd.used = True
     # 24 Hours
     if (timestep == "5m" and num_steps == 288):
         opt = ofs.s24ho
+        tsd.type = "24 Hours"
+        if (ofs.show_s24ho == True):
+            tsd.used = True
     # 1 Week
     if (timestep == "1h" and num_steps == 168):
         opt = ofs.s1wo
+        tsd.type = "Week"
+        if (ofs.show_s1wo == True):
+            tsd.used = True
     # 1 Month
     if (timestep == "6h" and num_steps == 112):
+        tsd.type = "Month"
         opt = ofs.s1mo
+        if (ofs.show_s1mo == True):
+            tsd.used = True
     # 1 Year
     if (timestep == "24h" and num_steps == 365):
         opt = ofs.s1yo
-                                                
-
-    tsd = TimeSeriesData()        
+        tsd.type = "Year"
+        if (ofs.show_s1yo == True):
+            tsd.used = True
+                                                      
     plt = pyplot
 
     # Get timestep data (365 datapoints, higher numbers are more recent)    
@@ -708,6 +1021,7 @@ def get_timeseries_data(itd, item_id, ifs, ofs, timestep, num_steps):
     tsd.insta_buy_vol = Data(opt.insta_buy_vol, insta_buy_vol, "Insta Buy Volume: %s")
     tsd.insta_sell_avg = Data(opt.insta_sell_avg, insta_sell_avg, "Insta Sell Price (Average): %s")
     tsd.insta_sell_vol = Data(opt.insta_sell_vol, insta_sell_vol, "Insta Sell Volume: %s")
+    tsd.total_vol = Data(opt.total_vol, total_vol, "Total Volume: %s")
     tsd.price_avg = Data(opt.price_avg, price_avg, "Price (Average): %s")
     tsd.margin_taxed_avg = Data(opt.margin_taxed_avg, margin_taxed_avg, "Margin (Average Taxed): %s")
     tsd.profit_per_limit_avg = Data(opt.profit_per_limit_avg, profit_per_limit_avg, "Profit Per Limit (Average): %s")
@@ -1078,8 +1392,12 @@ def get_latest_data(itd, item_id, ofs):
 
     # Check if item does not exist in latest data
     if (str(item_id)) not in latest_all['data']:
-        ld.used = False
+        itd.used = False
         return ld
+
+    # Check if user has opted to show latest data
+    if (ofs.show_lo == True):
+        ld.used = True
 
     latest = latest_all['data'][str(item_id)]
     
@@ -1106,12 +1424,13 @@ def get_latest_data(itd, item_id, ofs):
     insta_buy_time_min = int((now - insta_buy_time)/60)
     insta_sell_time_min = int((now - insta_sell_time)/60)
     
-    # Get margins and profit
+    # Get margins and profit and roi
     margin = insta_buy_price - insta_sell_price
     margin_taxed = int((insta_buy_price*.99) - insta_sell_price)
 
-    # TODO: itd.ge_limit is currently an int, but should be Data()
     profit_per_limit = margin_taxed * itd.ge_limit.value
+    roi = int((margin_taxed / insta_sell_price)*100)
+
 
     # Store latest data
     ld.insta_sell_price = Data(ofs.lo.insta_sell_price, insta_sell_price, "Insta Sell Price: %s")
@@ -1121,6 +1440,7 @@ def get_latest_data(itd, item_id, ofs):
     ld.price_avg = Data(ofs.lo.price_avg, price_avg, "Average Price: %s") 
     ld.margin_taxed = Data(ofs.lo.margin_taxed, margin_taxed, "Margin (Taxed): %s")
     ld.profit_per_limit = Data(ofs.lo.profit_per_limit, profit_per_limit, "Profit Per Limit: %s")
+    ld.roi = Data(ofs.lo.roi, roi, "ROI: %s%")
 
     return ld
 
@@ -1131,19 +1451,26 @@ Get data for 5m or 1h average
 """
 def get_average_data(itd, item_id, ofs, avg_type):
     
-    # Check for a valid time range
+    ad = AvgData()
+    ad.type = avg_type
+
+    # Determine time range we are using.
     if (avg_type == "5m"):
         avg_all = avg_5m_all
         opt = ofs.a5mo
+        if (ofs.show_a5mo == True):
+            ad.used = True
     elif (avg_type == "1h"):
         avg_all = avg_1h_all
         opt = ofs.a1ho
+        if (ofs.show_a1ho == True):
+            ad.used = True
     else:
         print("Invalid time range for average data: %s" % (avg_type))
         quit(1)
 
-    ad = AvgData()
-
+    # TODO: Provide a string at least letting user know that no data was found.
+    # Current behavior is to be blank
     # Format string if no data found for item
     if (str(item_id)) not in avg_all['data']:
         ad.used = False
@@ -1158,28 +1485,31 @@ def get_average_data(itd, item_id, ofs, avg_type):
 
     # Check if there is insta buy data
     if (insta_buy_vol == 0 or insta_buy_avg == None):
-        used = False     
+        ad.used = False     
         return ad
         
     # Check if there is insta sell data
     if (insta_sell_vol == 0 or insta_sell_avg == None):
-        used = False             
+        ad.used = False             
         return ad  
     
+    avg_vol = insta_sell_vol + insta_buy_vol
     price_avg = (insta_buy_avg + insta_sell_avg)/2
 
-    # Get margin and profit
-    margin = insta_buy_avg - insta_sell_avg
+    # Get margin, profit, roi
     margin_taxed = int((insta_buy_avg*.99) - insta_sell_avg)
     profit_per_limit = margin_taxed * itd.ge_limit.value
+    roi_avg = int((margin_taxed / insta_sell_avg)*100)
 
-    ad.insta_buy_avg = Data(opt.insta_buy_avg, insta_buy_avg, "Insta Buy Price: %s")
-    ad.insta_buy_vol = Data(opt.insta_buy_vol, insta_buy_vol, "Insta Buy Vol: %s")
-    ad.insta_sell_avg = Data(opt.insta_sell_avg, insta_sell_avg, "Insta Sell Price: %s")
-    ad.insta_sell_vol = Data(opt.insta_sell_vol, insta_sell_vol, "Insta Sell Vol: %s")
-    ad.price_avg = Data(opt.price_avg, price_avg, "Price: %s")
-    ad.margin_taxed = Data(opt.margin_taxed, margin_taxed, "Margin (Taxed): %s")
-    ad.profit_per_limit = Data(opt.profit_per_limit, profit_per_limit, "Profit Per Limit: %s")
+    ad.insta_buy_avg = Data(opt.insta_buy_avg, insta_buy_avg, "Average Insta Buy Price: %s")
+    ad.insta_buy_vol = Data(opt.insta_buy_vol, insta_buy_vol, "Average Insta Buy Vol: %s")
+    ad.insta_sell_avg = Data(opt.insta_sell_avg, insta_sell_avg, "Average Insta Sell Price: %s")
+    ad.insta_sell_vol = Data(opt.insta_sell_vol, insta_sell_vol, "Average Insta Sell Vol: %s")
+    ad.avg_vol = Data(opt.avg_vol, avg_vol, "Average Volume: %s")
+    ad.price_avg = Data(opt.price_avg, price_avg, "Average Price: %s")
+    ad.margin_taxed = Data(opt.margin_taxed, margin_taxed, "Average Margin (Taxed): %s")
+    ad.profit_per_limit = Data(opt.profit_per_limit, profit_per_limit, "Average Profit Per Limit: %s")
+    ad.roi_avg = Data(opt.roi_avg, roi_avg, "Average ROI: %s%")
 
     return ad
     
