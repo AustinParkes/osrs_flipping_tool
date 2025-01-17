@@ -9,6 +9,7 @@ import json
 import time
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+import argparse
 
 # Keep urls global to access with any function
 api_url = 'https://prices.runescape.wiki/api/v1/osrs'
@@ -463,7 +464,7 @@ filter_items()
 
 Find items based on applied filters
 """
-def filter_items():
+def filter_items(args):
     
     item_list = []
 
@@ -1660,14 +1661,35 @@ def main():
     avg_5m_all = get_json(five_url)
     avg_1h_all = get_json(hour_url)
 
-    #item_id = find_item_id("bandos chaps")
-    #print(item_id)
+    parser = argparse.ArgumentParser(description='OSRS Flipping Tool')
+    parser.add_argument('-s', '--save-plots',
+                        help='Save plots to PDF.',
+                        metavar=('<file_name>'),
+                        dest='save_plots')	
+
+    parser.add_argument('-g', '--gen-config',
+                        help='Generate peripheral & emulator configurations',
+                        metavar=('TOML_File'),
+                        dest='gen_periph')	
+	                      
+    parser.add_argument('-t', '--periph-types',
+                        help='Show valid peripheral names',
+                        action='store_true',                            # Hack to provide a default argument
+                        dest='list_types')   
+                 
+																	
+    args = parser.parse_args()
+
+    """
+    if args.gen_periph:
+        update_toml(args.gen_periph)   
     
-    #item_list = [item_id]
-    #item_data = get_all_item_data(item_list)
-    #print(item_data)
-    
-    filter_items()
+    elif args.list_types:
+        list_types(args.list_types)
+     
+    """
+        
+    filter_items(args)
     
     
 
