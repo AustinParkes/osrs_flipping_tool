@@ -7,7 +7,8 @@ Script for obtaining pricing data from osrs real time prices:
 import urllib.request
 import json
 import time
-from matplotlib import pyplot
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 
 # Keep urls global to access with any function
 api_url = 'https://prices.runescape.wiki/api/v1/osrs'
@@ -164,7 +165,7 @@ class OutputFilters():
 
     class Series6hFilters():
         def __init__(self):
-            self.insta_buy_avg = Range(show=False)
+            self.insta_buy_avg = Range(show=True)
             self.insta_buy_vol = Range(show=False)
             self.insta_sell_avg = Range(show=False)
             self.insta_sell_vol = Range(show=False)
@@ -175,7 +176,7 @@ class OutputFilters():
             self.price_change = Range(show=False)
             self.price_change_percent = Range(show=False)
             self.roi_avg = Range(show=False) 
-            self.plot = DisplayPlot(show = False)
+            self.plot = DisplayPlot(show = True)
              
 
     class Series12hFilters():
@@ -295,23 +296,13 @@ class Data():
         if (self.used == True):
             print(self.string % (self.value), end = "")
 
-# Plot data
-class Plot():
-    def __init__(self, used=False, plt=None):
-        self.used = used
-        self.plt = plt
-    
-    # Show plot data for time series
-    def show(self):
-        self.plt.show()
-
 # Basic Item Data
 class ItemData():
     def __init__(self):
         self.used = True
         self.num_items = None
         self.count = 1
-        self.plt = None
+        self.plot_used = False
 
         # Basic item data
         self.id = None
@@ -400,10 +391,7 @@ class TimeSeriesData():
 
         self.price_change = None
         self.price_change_percent = None   
-
-        # Plot data
-        self.plt = None     
-
+     
     def show(self):
         if (self.used == True):
             print("Last %s:" % (self.type))
@@ -417,9 +405,6 @@ def show_obj_data(obj):
         # Print data for Data() objects
         if (isinstance(data_obj, Data) == True):
             data_obj.showi()
-        # Show data for Plot() objects    
-        if (isinstance(data_obj, Plot) == True):
-            data_obj.show()
     print("")
 
 def show_data(item_list):
@@ -455,6 +440,23 @@ def show_data(item_list):
 
         # Show last year
         item.series_1y_data.show()
+
+    # Save plots to pdf
+    if (item.plot_used == True):
+        p = PdfPages("auto.pdf")
+
+        # get_fignums Return list of existing  
+        # figure numbers 
+        fig_nums = plt.get_fignums()   
+        figs = [plt.figure(n) for n in fig_nums] 
+        
+        # iterating over the numbers in list 
+        for fig in figs:  
+            
+            # and saving the files 
+            fig.savefig(p, format='pdf')
+
+        p.close()
 
 """
 filter_items()
@@ -1491,36 +1493,40 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
     # Get our selling price based on the buy data
     high_i = get_ideal_high_margin(data_ts, num_entries, num_steps, max_list, .2) 
 
-    item = find_item_entry(item_id)
+    # Only plot if used has opted to 
+    if (opt.plot.show == True):
+        itd.plot_used = True
 
-    # Begin plotting data
-    plt = pyplot
+        item = find_item_entry(item_id)
 
-    # Plot insta sell data
-    plt.plot(insta_sell_times, insta_sell_prices, color = 'blue', label = 'Instant Sell Price')
+        # Begin plotting data
+        fig, axes = plt.subplots()
 
-    # Plot low margin
-    if (low_i != 0):
-        plt.axhline(y = data_ts[low_i]['avgLowPrice'], color = 'blue', linestyle = '-')
+        # Plot insta sell data
+        axes.plot(insta_sell_times, insta_sell_prices, color = 'blue', label = 'Instant Sell Price')
 
-    # Plot insta buy data
-    plt.plot(insta_buy_times, insta_buy_prices, color='red', label = 'Instant Buy Price')
+        # Plot low margin
+        if (low_i != 0):
+            axes.axhline(y = data_ts[low_i]['avgLowPrice'], color = 'blue', linestyle = '-')
 
-    # Plot high margin
-    if (high_i != 0):
-        plt.axhline(y = data_ts[high_i]['avgHighPrice'], color = 'blue', linestyle = '-')
+        # Plot insta buy data
+        axes.plot(insta_buy_times, insta_buy_prices, color='red', label = 'Instant Buy Price')
 
-    # Label time
-    plt.xlabel('Time (Unix Timestamp)')
+        # Plot high margin
+        if (high_i != 0):
+            axes.axhline(y = data_ts[high_i]['avgHighPrice'], color = 'red', linestyle = '-')
 
-    # Label price
-    plt.ylabel('Price')
+        # Label time
+        axes.set_xlabel('Time (Unix Timestamp)')
 
-    # Give title as name of item
-    plt.title(item['name'])
+        # Label price
+        axes.set_ylabel('Price')
 
-    # Show legend for plot labels
-    plt.legend()
+        # Give title as name of item
+        axes.set_title(item['name'])
+
+        # Show legend for plot labels
+        axes.legend()
 
     tsd.insta_buy_avg = Data(opt.insta_buy_avg.show, insta_buy_avg, "Insta Buy Price (Average): %s")
     tsd.insta_buy_vol = Data(opt.insta_buy_vol.show, insta_buy_vol, "Insta Buy Volume: %s")
@@ -1533,7 +1539,6 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
     tsd.roi_avg = Data(opt.roi_avg.show, roi_avg, "ROI (Average): %d%")
     tsd.price_change = Data(opt.price_change.show, price_change, "Price Change: %s")
     tsd.price_change_percent = Data(opt.price_change_percent.show, price_change_percent, "Price Change %: %s%")
-    tsd.plt = Plot(opt.plot.show, plt)
 
     return tsd
 
