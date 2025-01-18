@@ -10,6 +10,7 @@ import time
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import argparse
+import pickle
 
 # Keep urls global to access with any function
 api_url = 'https://prices.runescape.wiki/api/v1/osrs'
@@ -82,6 +83,8 @@ class OutputFilters():
         # Determines if any data is output
         self.used = False
 
+        self.item_list = []
+
         self.bif = self.BasicItemFilters()
         self.lf = self.LatestFilters()
         self.a5mf = self.Avg5mFilters()
@@ -126,23 +129,23 @@ class OutputFilters():
         def __init__(self):
             self.item_name = Contains(show=True, string = "")
             self.item_id = Range(show=True)
-            self.item_price = Range(show=True, min=190, max=210)
-            self.ge_limit = Range(show=True, min=5000, max=25000)
+            self.item_price = Range(show=True)
+            self.ge_limit = Range(show=True)
 
     class LatestFilters():
         def __init__(self):
-            self.insta_sell_price = Range(show=False)
+            self.insta_sell_price = Range(show=True)
             self.insta_sell_time_min = Range(show=False)
-            self.insta_buy_price = Range(show=False)
-            self.insta_buy_time_min = Range(show=True)
+            self.insta_buy_price = Range(show=True)
+            self.insta_buy_time_min = Range(show=False)
             self.price_avg = NoFilter(show=False) # We use item_price as our price filter
             self.margin_taxed = Range(show=False)
-            self.profit_per_limit = Range(show=False)
-            self.roi = Range(show=False)    
+            self.profit_per_limit = Range(show=True)
+            self.roi = Range(show=False)
 
     class Avg5mFilters():
         def __init__(self):
-            self.insta_buy_avg = Range(show=True)
+            self.insta_buy_avg = Range(show=False)
             self.insta_buy_vol = Range(show=False)
             self.insta_sell_avg = Range(show=False)
             self.insta_sell_vol = Range(show=False)
@@ -154,30 +157,30 @@ class OutputFilters():
 
     class Avg1hFilters():
         def __init__(self):
-            self.insta_buy_avg = Range(show=False)
+            self.insta_buy_avg = Range(show=True)
             self.insta_buy_vol = Range(show=False)
-            self.insta_sell_avg = Range(show=False)
+            self.insta_sell_avg = Range(show=True)
             self.insta_sell_vol = Range(show=False)
             self.price_avg = NoFilter(show=False) # We use item_price as our price filter
             self.avg_vol = Range(show=False)
             self.margin_taxed = Range(show=False)
-            self.profit_per_limit = Range(show=False)
+            self.profit_per_limit = Range(show=True)
             self.roi_avg = Range(show=False)  
 
     class Series6hFilters():
         def __init__(self):
             self.insta_buy_avg = Range(show=True)
             self.insta_buy_vol = Range(show=False)
-            self.insta_sell_avg = Range(show=False)
+            self.insta_sell_avg = Range(show=True)
             self.insta_sell_vol = Range(show=False)
             self.price_avg = NoFilter(show=False) # We use item_price as our price filter
             self.total_vol = Range(show=False)
             self.margin_taxed_avg = Range(show=False)
-            self.profit_per_limit_avg = Range(show=False)
+            self.profit_per_limit_avg = Range(show=True, min=100000)
             self.price_change = Range(show=False)
             self.price_change_percent = Range(show=False)
             self.roi_avg = Range(show=False) 
-            self.plot = DisplayPlot(show = True)
+            self.plot = DisplayPlot(show = False)
              
 
     class Series12hFilters():
@@ -266,44 +269,59 @@ class Data():
         self.string = string
 
     # Create underline for data string
-    def show_underline(self):
+    def show_underline(self, file):
         line = ""
         string = self.string % (self.value)
         for c in string: 
             line = line + '-'
         
         print(line)
+        if (file):
+            file.write(line + "\n")
 
     # Show data string as is
-    def show(self):
+    def show(self, file):
         if (self.used != True):
             return
         if (isinstance(self.value, int)):
             print(self.string % (com(self.value)))
+            if (file):
+                file.write(self.string % (com(self.value)) + "\n")
         else:
             print(self.string % (self.value))
+            if (file):
+                file.write(self.string % (self.value) + "\n")
 
     # Show data string indented
-    def showi(self):
+    def showi(self, file):
         if (self.used != True):
             return
         if (isinstance(self.value, int)):
             print("  " + self.string % (com(self.value)))
+            if (file):
+                file.write("  " + self.string % (com(self.value)) + "\n")
         else:
             print("  " + self.string % (self.value))
+            if (file):
+                file.write("  " + self.string % (self.value) + "\n")
 
     # Show data without newline
     def show_no_nl(self):        
         if (self.used == True):
             print(self.string % (self.value), end = "")
 
-# Basic Item Data
+# Stores additional program configurations
+class ConfigData():
+    def __init__(self):
+        self.plot_filename = None
+        self.plots_used = None
+
+        self.data_filename = None
+
+# Data for a single item
 class ItemData():
     def __init__(self):
         self.used = True
-        self.num_items = None
-        self.count = 1
-        self.plot_used = False
 
         # Basic item data
         self.id = None
@@ -322,12 +340,12 @@ class ItemData():
         self.series_1m_data = TimeSeriesData()
         self.series_1y_data = TimeSeriesData()
         
-    def show(self):
-        self.name.show()  
-        self.name.show_underline() 
-        self.id.show()
-        self.ge_limit.show()     
-        self.item_price.show()
+    def show(self, file):
+        self.name.show(file)  
+        self.name.show_underline(file) 
+        self.id.show(file)
+        self.ge_limit.show(file)     
+        self.item_price.show(file)
         print("")
 
 # Latest Data
@@ -346,10 +364,12 @@ class LatestData():
         self.profit_per_limit = None
         self.roi = None
     
-    def show(self):
+    def show(self, file):
         if (self.used == True):
             print("Latest:")
-            show_obj_data(self)
+            if (file):
+                file.write("Latest:\n")
+            show_obj_data(self, file)
 
 # 5m or 1h average data
 class AvgData():
@@ -367,10 +387,12 @@ class AvgData():
         self.profit_per_limit = None  
         self.roi_avg = None
 
-    def show(self):
+    def show(self, file):
         if (self.used == True):
             print("%s Average:" % (self.type))
-            show_obj_data(self)
+            if (file):
+                file.write("%s Average:" % (self.type) + "\n")
+            show_obj_data(self, file)
 
 # Data for a timeseries
 class TimeSeriesData():
@@ -393,58 +415,73 @@ class TimeSeriesData():
         self.price_change = None
         self.price_change_percent = None   
      
-    def show(self):
+    def show(self, file):
         if (self.used == True):
             print("Last %s:" % (self.type))
-            show_obj_data(self)
+            if (file):
+                file.write("Last %s:" % (self.type) + "\n")
+            show_obj_data(self, file)
 
 # Show data for a time range's Data() objects
-def show_obj_data(obj):
+def show_obj_data(obj, file):
     for attr in vars(obj):
         #print(attr)
         data_obj = getattr(obj, attr)
         # Print data for Data() objects
         if (isinstance(data_obj, Data) == True):
-            data_obj.showi()
-    print("")
+            data_obj.showi(file)
 
-def show_data(item_list):
-    for item in item_list:
+    print("")
+    if (file):
+        file.write("\n")
+
+def show_data(config, itd_list):
+
+    if (config.data_filename):
+        data_file = open(config.data_filename, "a")
+    else:
+        data_file = None
+
+    for item in itd_list:
 
         # Print basic item data
         # Note, item data is shown differently from other data. (It's hardcoded)
-        item.show()
+        item.show(data_file)
 
         # Show latest data
-        item.ld.show()
+        item.ld.show(data_file)
 
         # Show average last 5 minutes
-        item.avg_5m_data.show()
+        item.avg_5m_data.show(data_file)
 
         # Show average last 1 hour
-        item.avg_1h_data.show()
+        item.avg_1h_data.show(data_file)
 
         # Show last 6 hours
-        item.series_6h_data.show()
+        item.series_6h_data.show(data_file)
 
         # Show last 12 hours
-        item.series_12h_data.show()
+        item.series_12h_data.show(data_file)
 
         # Show last 24 hours
-        item.series_24h_data.show()
+        item.series_24h_data.show(data_file)
 
         # Show last week
-        item.series_1w_data.show()
+        item.series_1w_data.show(data_file)
 
         # Show last month
-        item.series_1m_data.show()
+        item.series_1m_data.show(data_file)
 
         # Show last year
-        item.series_1y_data.show()
+        item.series_1y_data.show(data_file)
+
+    # Close file if used.
+    if (config.data_filename):
+        data_file.close()    
 
     # Save plots to pdf
-    if (item.plot_used == True):
-        p = PdfPages("auto.pdf")
+    if (config.plots_used == True):
+        p = PdfPages(config.plot_filename)
 
         # get_fignums Return list of existing  
         # figure numbers 
@@ -459,6 +496,39 @@ def show_data(item_list):
 
         p.close()
 
+# Check if user has opted to show plot for any of the 
+# time series
+def are_plots_used(ofs):
+    
+    if (ofs.s6hf.plot.show == True):
+        return True
+
+    if (ofs.s12hf.plot.show == True):
+        return True
+
+    if (ofs.s24hf.plot.show == True):
+        return True
+
+    if (ofs.s1wf.plot.show == True):
+        return True
+
+    if (ofs.s1mf.plot.show == True):
+        return True
+
+    if (ofs.s1yf.plot.show == True):
+        return True                
+
+    return False    
+
+def convert_items_to_ids(item_list):
+    id_list = []
+
+    for item in item_list:
+        id = find_item_id(item)
+        id_list.append(id)
+
+    return id_list
+
 """
 filter_items()
 
@@ -466,17 +536,56 @@ Find items based on applied filters
 """
 def filter_items(args):
     
-    item_list = []
+    itd_list = []
+    id_list = []
 
+    config = ConfigData()
 
-    # Represents the data a user wants to show
-    ofs = OutputFilters()
-    if (ofs.used == False):
-        print("User has opted to show no data. Quitting.")
+    # Do not let user load and save filter at same time
+    if (args.load_filter and args.save_filter):
+        print("Attempting to save and load filter simultaneously. Quitting.")
+
+    # Check if user is loading existing filter as object
+    if (args.load_filter):
+        with open(args.load_filter, 'rb') as f:
+            ofs = pickle.load(f)  
+    else:        
+        ofs = OutputFilters()
+        if (ofs.used == False):
+            print("User has opted to show no data. Quitting.")
+            quit(1)
+
+    # Check if user is saving program's filter
+    if (args.save_filter):
+        with open(args.save_filter, 'wb') as f:
+            pickle.dump(ofs, f)
+            return  
+
+    # Ensure --save-plots and filters are both used at same
+    # time, or not at all.
+    plots_used = are_plots_used(ofs)
+    if (args.save_plots and plots_used == False):
+        print("--save-plots option given, but no filters are set to show plots.")
         quit(1)
+    elif (plots_used == True and args.save_plots == None):
+        print("Filter(s) set to show plots, but --save-plots option not given.")
+        quit(1)
+    elif (plots_used == True and args.save_plots):
+        config.plot_filename = args.save_plots
+        config.plots_used = plots_used    
+
+    # Check if user is using items from a list
+    if (args.load_items):
+        with open(args.load_items, 'r') as file:
+            item_list = [line.strip() for line in file]
+            id_list = convert_items_to_ids(item_list)
+
+    # Check if user is saving data to a file
+    if (args.save_data):
+        config.data_filename = args.save_data
 
     # Find /latest items that pass basic filter
-    id_list = apply_basic_filter(ofs)
+    id_list = apply_basic_filter(ofs, id_list)
     num_items = len(id_list)
     if (num_items > 200):
         print("Not exceeding 200 items during testing")
@@ -486,10 +595,10 @@ def filter_items(args):
     for item_id in id_list:
         itd = filter_item(item_id, ofs)
         if (itd.used):
-            item_list.append(itd)
+            itd_list.append(itd)
 
     # Show all data user has opted to show
-    show_data(item_list)
+    show_data(config, itd_list)
 
     return
         
@@ -636,18 +745,27 @@ apply_basic_filter()
 
 Apply basic item filters and return list of items that pass through
 """
-def apply_basic_filter(ofs):
+def apply_basic_filter(ofs, user_id_list):
 
     # Basic item filter
     bif = ofs.bif
 
-    id_list = []
-    for item_id in latest_all['data']:
+    filtered_id_list = []
+
+    # If list isn't empty, user has supplied their own list of items
+    if user_id_list == []:
+        data = latest_all['data']
+    else:
+        data = user_id_list    
+
+    for item_id in data:
         # Find item in item_map 
         item_entry = find_item_entry(int(item_id))
         if item_entry == None:
             continue
         name = item_entry['name'] 
+
+        #print(item_id)
 
         # Check if item limit exists
         if 'limit' in item_entry:
@@ -671,9 +789,9 @@ def apply_basic_filter(ofs):
         if (itd.used == False):
             continue
 
-        id_list.append(item_id)
+        filtered_id_list.append(item_id)
 
-    return id_list   
+    return filtered_id_list   
 
 def get_ideal_low_margin(data_ts, num_entries, num_steps, min_list, percentile):
 
@@ -1496,8 +1614,6 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
 
     # Only plot if used has opted to 
     if (opt.plot.show == True):
-        itd.plot_used = True
-
         item = find_item_entry(item_id)
 
         # Begin plotting data
@@ -1662,33 +1778,45 @@ def main():
     avg_1h_all = get_json(hour_url)
 
     parser = argparse.ArgumentParser(description='OSRS Flipping Tool')
-    parser.add_argument('-s', '--save-plots',
+    parser.add_argument('-p', '--save-plots',
                         help='Save plots to PDF.',
-                        metavar=('<file_name>'),
+                        metavar=('<file_name>.pdf'),
                         dest='save_plots')	
 
-    parser.add_argument('-g', '--gen-config',
-                        help='Generate peripheral & emulator configurations',
-                        metavar=('TOML_File'),
-                        dest='gen_periph')	
-	                      
-    parser.add_argument('-t', '--periph-types',
+    parser.add_argument('-l', '--load-filter',
+                        help='Load existing filter file (.pkl)',
+                        metavar=('<file_name>.pkl'),
+                        dest='load_filter')	
+
+    parser.add_argument('-f', '--save-filter',
+                        help='Save programs current filter to file (.pkl)',
+                        metavar=('<file_name>.pkl'),
+                        dest='save_filter')
+
+    parser.add_argument('-I', '--load-items',
+                        help='Load item list from a file. Each item should be on its own line.',
+                        metavar=('<file_name>'),
+                        dest='load_items')
+
+    parser.add_argument('-s', '--sort',
+                        help='Sort items based on a particular data point',
+                        metavar=('Path to data point'),
+                        dest='sort')                        
+
+    parser.add_argument('-d', '--save_data',
+                        help='Save outputted item data to a file',
+                        metavar=('<file_name>'),
+                        dest='save_data')
+
+    """
+    parser.add_argument('-f', '--save-filter',
                         help='Show valid peripheral names',
                         action='store_true',                            # Hack to provide a default argument
                         dest='list_types')   
-                 
+    """             
 																	
     args = parser.parse_args()
 
-    """
-    if args.gen_periph:
-        update_toml(args.gen_periph)   
-    
-    elif args.list_types:
-        list_types(args.list_types)
-     
-    """
-        
     filter_items(args)
     
     
