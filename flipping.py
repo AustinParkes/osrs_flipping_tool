@@ -550,6 +550,8 @@ filter_items()
 
 Find items based on applied filters
 """
+# TODO: Might want to turn some of the argument
+# blobs into functions for neatness.
 def filter_items(args):
     
     itd_list = []
@@ -1106,114 +1108,7 @@ def get_current_ts_data(data_ts, key, num_entries, num_steps):
             data = data_ts[num_entries-i][key]
             break
   
-    return data        
-    
-"""
-get_all_item_data()
-
-Returns flipping data for all items in item list
-
-Other Ideas:
-- Return highest and lowest trade over last hour
-- Return last 24hr, week, and month averages
-
-"""
-def get_all_item_data(item_list):
-    main_string = ""
-    for item_id in item_list:
-        data = get_item_data(item_id, latest = True, avg_5m = True, \
-                             avg_1h = True)
-        main_string = main_string + data
-        
-    return main_string
-
-"""
-get_item_data()
-
-Return all flipping data for an item
-
-# TODO: This really needs updated
-"""
-def get_item_data(item_id, *args, **kwargs):
-
-    # TODO: Get rid of this when get_time_series_data is adapted
-    ofs = OutputFilters(True, True, True, True, None)
-
-    if (item_id < 0):
-        print("item_id must be 0 or greater")
-        quit(1)
-    
-    get_latest = kwargs.get('latest', None)
-    get_avg5m = kwargs.get('avg_5m', None)
-    get_avg1h = kwargs.get('avg_1h', None)
-    
-    item_entry = find_item_entry(item_id)
-    name = item_entry['name']
-    underline = make_name_underline(name)
-    
-    id_str = " (%s)" % (item_id)
-    name_string = name + id_str + '\n' + underline
-    item_string = ""
-    
-    if (get_latest == False and get_avg5m == False and get_avg1h == False):
-        main_string = name_string
-        main_string = main_string + "  Not retrieving data\n"
-        return main_string
-
-    # Get Item data
-    item_entry = find_item_entry(item_id)     
-    if 'limit' in item_entry:
-        limit = item_entry['limit']
-    else:
-        limit = 0 
-        
-    # Get daily trade volume
-    item_24h = get_json(ts_url, item_id=int(item_id), timestep="24h")
-    high_vol = item_24h['data'][0]['highPriceVolume']
-    low_vol = item_24h['data'][0]['lowPriceVolume']
-    total_vol = high_vol + low_vol      
-    total_vol_c = format(total_vol, ',d')
-
-    # Get trade limit
-    item_entry = find_item_entry(int(item_id))   
-    
-    if 'limit' in item_entry:
-        limit = item_entry['limit']
-        limit_c = format(limit, ',d')
-    else:
-        limit_c = "Not Listed"      
-    
-    itd = ItemData()
-    itd.id = item_id
-    itd.name = name
-    itd.ge_limit = limit
-
-    trade_s = "Trade Details:\n"
-    vol_s = "  Trade Volume (24h): %s\n" % (total_vol_c)
-    limit_s = "  Trade Limit: %s\n" % (limit_c)
-    
-    # Get latest data
-    if get_latest == True:
-        latest_data = get_latest_data(itd, item_id, ofs)
-        item_string = item_string + latest_data.main_string
-    
-    # Get last 5m average data
-    if get_avg5m == True:
-        avg_data_5m = get_average_data(itd, item_id, "5m", ofs)
-        item_string = item_string + avg_data_5m.main_string
-    
-    # Get last 1h average data
-    if get_avg1h == True:
-        avg_data_1h = get_average_data(itd, item_id, "1h", ofs)
-        item_string = item_string + avg_data_1h.main_string
-
-    main_string = name_string + trade_s + vol_s + limit_s + item_string
-    
-    # Get data for a full day for this item
-    data_24h = get_timeseries_data(item_id, ofs, "5m", 288)
-
-    return main_string + '\n'
-    
+    return data          
   
 """
 get_latest_data()
@@ -1857,7 +1752,7 @@ def main():
                         metavar=('<file_name>.pdf'),
                         dest='save_plots')	
 
-    parser.add_argument('-l', '--load-filter',
+    parser.add_argument('-F', '--load-filter',
                         help='Load existing filter file (.pkl)',
                         metavar=('<file_name>.pkl'),
                         dest='load_filter')	
@@ -1869,11 +1764,11 @@ def main():
 
     parser.add_argument('-I', '--load-items',
                         help='Load item list from a file. Each item should be on its own line.',
-                        metavar=('<file_name>'),
+                        metavar=('<file_name>.txt'),
                         dest='load_items')
 
     parser.add_argument('-x', '--sort-options',
-                        help='Show sort options',
+                        help='Show data options to sort items by',
                         action='store_true',
                         dest='sort_options')    
 
@@ -1885,16 +1780,7 @@ def main():
     parser.add_argument('-d', '--save_data',
                         help='Save outputted item data to a file',
                         metavar=('<file_name>'),
-                        dest='save_data')
-
-
-
-    """
-    parser.add_argument('-f', '--save-filter',
-                        help='Show valid peripheral names',
-                        action='store_true',                            # Hack to provide a default argument
-                        dest='list_types')   
-    """             
+                        dest='save_data')        
 																	
     args = parser.parse_args()
 
