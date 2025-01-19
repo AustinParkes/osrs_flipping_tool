@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import argparse
 import pickle
+from operator import attrgetter
 
 # Keep urls global to access with any function
 api_url = 'https://prices.runescape.wiki/api/v1/osrs'
@@ -318,6 +319,13 @@ class ConfigData():
 
         self.data_filename = None
 
+        self.is_sorting = False
+        self.data_path = None
+        self.time_obj = None
+        self.data_obj = None
+        self.data_val = None
+
+
 # Data for a single item
 class ItemData():
     def __init__(self):
@@ -330,15 +338,15 @@ class ItemData():
         self.ge_limit = None
 
         # Time range data objects
-        self.ld = LatestData()
-        self.avg_5m_data = AvgData()
-        self.avg_1h_data = AvgData()
-        self.series_6h_data = TimeSeriesData()
-        self.series_12h_data = TimeSeriesData()
-        self.series_24h_data = TimeSeriesData()
-        self.series_1w_data = TimeSeriesData()
-        self.series_1m_data = TimeSeriesData()
-        self.series_1y_data = TimeSeriesData()
+        self.ld = LatestData("Latest Data")
+        self.a5md = AvgData("Average Last 5 Minutes Data")
+        self.a1hd = AvgData("Average Last 1 Hour Data")
+        self.s6hd = TimeSeriesData("Series Last 6 Hours Data")
+        self.s12hd = TimeSeriesData("Series Last 12 Hours Data")
+        self.s24hd = TimeSeriesData("Series Last 24 Hours Data")
+        self.s1wd = TimeSeriesData("Series Last 1 Week Data")
+        self.s1md = TimeSeriesData("Series Last 1 Month Data")
+        self.s1yd = TimeSeriesData("Series Last 1 Year Data")
         
     def show(self, file):
         self.name.show(file)  
@@ -350,19 +358,20 @@ class ItemData():
 
 # Latest Data
 class LatestData():
-    def __init__(self):
+    def __init__(self, desc):
         self.used = False
-        self.insta_sell_price = None
-        self.insta_sell_time = None
-        self.insta_sell_time_min = None
-        self.insta_buy_price = None
-        self.insta_buy_time = None
-        self.insta_buy_time_min = None
-        self.price_avg = None
-        self.margin = None
-        self.margin_taxed = None
-        self.profit_per_limit = None
-        self.roi = None
+        self.desc = desc
+        self.insta_buy_price = Data()
+        self.insta_buy_time = Data()
+        self.insta_buy_time_min = Data()        
+        self.insta_sell_price = Data()
+        self.insta_sell_time = Data()
+        self.insta_sell_time_min = Data()
+        self.price_avg = Data()
+        self.margin = Data()
+        self.margin_taxed = Data()
+        self.profit_per_limit = Data()
+        self.roi = Data()
     
     def show(self, file):
         if (self.used == True):
@@ -373,19 +382,20 @@ class LatestData():
 
 # 5m or 1h average data
 class AvgData():
-    def __init__(self):
+    def __init__(self, desc):
         self.used = False
         self.type = ""
+        self.desc = desc
 
-        self.insta_buy_avg = None
-        self.insta_buy_vol = None
-        self.insta_sell_avg = None
-        self.insta_sell_vol = None
-        self.avg_vol = None
-        self.price_avg = None
-        self.margin_taxed = None
-        self.profit_per_limit = None  
-        self.roi_avg = None
+        self.insta_buy_avg = Data()
+        self.insta_buy_vol = Data()
+        self.insta_sell_avg = Data()
+        self.insta_sell_vol = Data()
+        self.avg_vol = Data()
+        self.price_avg = Data()
+        self.margin_taxed = Data()
+        self.profit_per_limit = Data()  
+        self.roi_avg = Data()
 
     def show(self, file):
         if (self.used == True):
@@ -396,24 +406,25 @@ class AvgData():
 
 # Data for a timeseries
 class TimeSeriesData():
-    def __init__(self):
+    def __init__(self, desc):
         self.used = False
         self.type = ""
+        self.desc = desc
 
         # TODO: Where it total volume
-        self.insta_buy_avg = None
-        self.insta_buy_vol = None
-        self.insta_sell_avg = None
-        self.insta_sell_vol = None
-        self.total_vol = None
-        self.price_avg = None
-        self.margin_avg = None
-        self.margin_taxed_avg = None
-        self.profit_per_limit_avg = None  
-        self.roi_avg = None
+        self.insta_buy_avg = Data()
+        self.insta_buy_vol = Data()
+        self.insta_sell_avg = Data()
+        self.insta_sell_vol = Data()
+        self.total_vol = Data()
+        self.price_avg = Data()
+        self.margin_avg = Data()
+        self.margin_taxed_avg = Data()
+        self.profit_per_limit_avg = Data()  
+        self.roi_avg = Data()
 
-        self.price_change = None
-        self.price_change_percent = None   
+        self.price_change = Data()
+        self.price_change_percent = Data()   
      
     def show(self, file):
         if (self.used == True):
@@ -437,10 +448,15 @@ def show_obj_data(obj, file):
 
 def show_data(config, itd_list):
 
+    # Open file if user is saving data to the file
     if (config.data_filename):
         data_file = open(config.data_filename, "a")
     else:
         data_file = None
+
+    # Sort item list based on a value if user has opted to.
+    if (config.is_sorting == True):
+        itd_list = sorted(itd_list, key=attrgetter(config.data_path))
 
     for item in itd_list:
 
@@ -452,28 +468,28 @@ def show_data(config, itd_list):
         item.ld.show(data_file)
 
         # Show average last 5 minutes
-        item.avg_5m_data.show(data_file)
+        item.a5md.show(data_file)
 
         # Show average last 1 hour
-        item.avg_1h_data.show(data_file)
+        item.a1hd.show(data_file)
 
         # Show last 6 hours
-        item.series_6h_data.show(data_file)
+        item.s6hd.show(data_file)
 
         # Show last 12 hours
-        item.series_12h_data.show(data_file)
+        item.s12hd.show(data_file)
 
         # Show last 24 hours
-        item.series_24h_data.show(data_file)
+        item.s24hd.show(data_file)
 
         # Show last week
-        item.series_1w_data.show(data_file)
+        item.s1wd.show(data_file)
 
         # Show last month
-        item.series_1m_data.show(data_file)
+        item.s1md.show(data_file)
 
         # Show last year
-        item.series_1y_data.show(data_file)
+        item.s1yd.show(data_file)
 
     # Close file if used.
     if (config.data_filename):
@@ -541,6 +557,27 @@ def filter_items(args):
 
     config = ConfigData()
 
+    # Show sort options
+    if (args.sort_options):
+        sort_data = ItemData()
+        for obj_name in vars(sort_data):
+            obj_data = getattr(sort_data, obj_name)
+            if (isinstance(obj_data, LatestData) != True and \
+                isinstance(obj_data, AvgData) != True and \
+                isinstance(obj_data, TimeSeriesData) != True):
+                continue
+            
+            print(obj_data.desc)
+            for data_name in vars(obj_data):
+                data = getattr(obj_data, data_name)
+                if (isinstance(data, Data) != True):
+                    continue
+
+                print("  " + obj_name + '.' + data_name)
+
+            print("")       
+        return
+
     # Do not let user load and save filter at same time
     if (args.load_filter and args.save_filter):
         print("Attempting to save and load filter simultaneously. Quitting.")
@@ -554,6 +591,43 @@ def filter_items(args):
         if (ofs.used == False):
             print("User has opted to show no data. Quitting.")
             quit(1)
+
+    # Check if user wants to sort item data and check if sort option
+    # exists and is used by filter
+    if (args.sort):
+        sort_option = args.sort
+        opts = sort_option.split('.')
+        time_name_d = opts[0]
+        time_name_f = time_name_d[:-1] + 'f'
+        sort_data = opts[1]
+        exists = False
+        for filter_name in vars(ofs):
+            # Skip until we get a match
+            if (time_name_f != filter_name):
+                continue
+            time_obj_f = getattr(ofs, filter_name)
+            for data_name in vars(time_obj_f):
+                # Skip until we get a match
+                if (data_name != sort_data):
+                    continue
+                exists = True
+                # Check if data is used by filter
+                data_f = getattr(time_obj_f, data_name)
+                if (data_f.show != True):
+                    print("Sort option %s passed, but user has not opted to show this data" % (sort_option))
+                    return
+
+                # Save heiarchal objects for sorting later
+                config.is_sorting = True
+                data_path = sort_option + '.value'
+                config.data_path = data_path
+                #config.time_obj = time_obj
+                #config.data_obj = data
+                #config.data_val = data.value
+
+            if (exists == False):
+                print("Invalid sort option: %s. See --sort-options" % (sort_option))
+                return
 
     # Check if user is saving program's filter
     if (args.save_filter):
@@ -574,7 +648,7 @@ def filter_items(args):
         config.plot_filename = args.save_plots
         config.plots_used = plots_used    
 
-    # Check if user is using items from a list
+    # Check if user is using items from a file list
     if (args.load_items):
         with open(args.load_items, 'r') as file:
             item_list = [line.strip() for line in file]
@@ -691,50 +765,50 @@ def filter_item(item_id, ofs):
 
     # Get 5 minutes average data
     if (ofs.show_a5mf == True):
-        itd.avg_5m_data = get_average_data(itd, int(item_id), ofs, "5m")
+        itd.a5md = get_average_data(itd, int(item_id), ofs, "5m")
         if (itd == False):
             return itd
 
     # Get 1 hour average data
     if (ofs.show_a1hf == True):
-        itd.avg_1h_data = get_average_data(itd, int(item_id), ofs, "1h")
+        itd.a1hd = get_average_data(itd, int(item_id), ofs, "1h")
         if (itd == False):
             return itd
 
     # TODO: 6, 12, 24h can be consolidated.
     # Get last 6h data
     if (ofs.show_s6hf == True):
-        itd.series_6h_data = get_timeseries_data(itd, int(item_id), ofs, "5m", 72)
+        itd.s6hd = get_timeseries_data(itd, int(item_id), ofs, "5m", 72)
         if (itd == False):
             return itd
 
     # Get last 12h data
     if (ofs.show_s12hf == True):
-        itd.series_12h_data = get_timeseries_data(itd, int(item_id), ofs, "5m", 144)
+        itd.s12hd = get_timeseries_data(itd, int(item_id), ofs, "5m", 144)
         if (itd == False):
             return itd
 
     # Get last 24h data
     if (ofs.show_s24hf == True):
-        itd.series_24h_data = get_timeseries_data(itd, int(item_id), ofs, "5m", 288)
+        itd.s24hd = get_timeseries_data(itd, int(item_id), ofs, "5m", 288)
         if (itd == False):
             return itd
 
     # Get last 1 week data
     if (ofs.show_s1wf == True):
-        itd.series_1w_data = get_timeseries_data(itd, int(item_id), ofs, "1h", 168)
+        itd.s1wd = get_timeseries_data(itd, int(item_id), ofs, "1h", 168)
         if (itd == False):
             return itd
 
     # Get last 1 month data
     if (ofs.show_s1mf == True):
-        itd.series_1m_data = get_timeseries_data(itd, int(item_id), ofs, "6h", 112)
+        itd.s1md = get_timeseries_data(itd, int(item_id), ofs, "6h", 112)
         if (itd == False):
             return itd
 
     # Get last 1 year data
     if (ofs.show_s1yf == True):
-        itd.series_1y_data = get_timeseries_data(itd, int(item_id), ofs, "24h", 364)
+        itd.s1yd = get_timeseries_data(itd, int(item_id), ofs, "24h", 364)
         if (itd == False):
             return itd
 
@@ -1148,7 +1222,7 @@ Format a string for the /latest data
 """
 def get_latest_data(itd, item_id, ofs):
 
-    ld = LatestData()
+    ld = LatestData("")
 
     # Latest filter
     lf = ofs.lf
@@ -1264,7 +1338,7 @@ Get data for 5m or 1h average
 """
 def get_average_data(itd, item_id, ofs, avg_type):
     
-    ad = AvgData()
+    ad = AvgData("")
     ad.type = avg_type
 
     # Determine time range we are using.
@@ -1395,7 +1469,7 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
         print("Invalid timestep provided")
         quit(1)
 
-    tsd = TimeSeriesData()  
+    tsd = TimeSeriesData("")  
 
     # TODO: 6 & 12 can be gotten from 24.
     # Get time range user options
@@ -1798,15 +1872,22 @@ def main():
                         metavar=('<file_name>'),
                         dest='load_items')
 
+    parser.add_argument('-x', '--sort-options',
+                        help='Show sort options',
+                        action='store_true',
+                        dest='sort_options')    
+
     parser.add_argument('-s', '--sort',
-                        help='Sort items based on a particular data point',
-                        metavar=('Path to data point'),
+                        help='Sort items based on a sort option. See --sort-options for a list of options',
+                        metavar=('<sort option>'),
                         dest='sort')                        
 
     parser.add_argument('-d', '--save_data',
                         help='Save outputted item data to a file',
                         metavar=('<file_name>'),
                         dest='save_data')
+
+
 
     """
     parser.add_argument('-f', '--save-filter',
@@ -1823,7 +1904,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
-    
-    
     
