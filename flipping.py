@@ -12,6 +12,10 @@ from matplotlib.backends.backend_pdf import PdfPages
 import argparse
 import pickle
 from operator import attrgetter
+import smtplib, ssl
+from email.message import EmailMessage
+import os
+import numpy as np
 
 # Keep urls global to access with any function
 api_url = 'https://prices.runescape.wiki/api/v1/osrs'
@@ -20,6 +24,8 @@ map_url = api_url + '/mapping'
 five_url = api_url + '/5m'
 hour_url = api_url + '/1h'
 ts_url = api_url + '/timeseries'
+
+email_msg = ""
 
 # 1) Let user enable which data they want to see with output filters.
 # 2) If data is enabled for a particular time frame, then enable 
@@ -177,11 +183,11 @@ class OutputFilters():
             self.price_avg = NoFilter(show=False) # We use item_price as our price filter
             self.total_vol = Range(show=False)
             self.margin_taxed_avg = Range(show=False)
-            self.profit_per_limit_avg = Range(show=True, min=100000)
+            self.profit_per_limit_avg = Range(show=True, min=10000)
             self.price_change = Range(show=False)
             self.price_change_percent = Range(show=False)
             self.roi_avg = Range(show=False) 
-            self.plot = DisplayPlot(show = False)
+            self.plot = DisplayPlot(show = True)
              
 
     class Series12hFilters():
@@ -270,7 +276,8 @@ class Data():
         self.string = string
 
     # Create underline for data string
-    def show_underline(self, file):
+    def show_underline(self, file, use_email):
+        global email_msg
         line = ""
         string = self.string % (self.value)
         for c in string: 
@@ -279,32 +286,46 @@ class Data():
         print(line)
         if (file):
             file.write(line + "\n")
+        if (use_email):
+            email_msg = email_msg + line + "\n"    
 
     # Show data string as is
-    def show(self, file):
+    def show(self, file, use_email):
+        global email_msg
         if (self.used != True):
             return
         if (isinstance(self.value, int)):
             print(self.string % (com(self.value)))
             if (file):
                 file.write(self.string % (com(self.value)) + "\n")
+            if (use_email):
+                email_msg = email_msg + self.string % (com(self.value)) + "\n"
+
         else:
             print(self.string % (self.value))
             if (file):
                 file.write(self.string % (self.value) + "\n")
+            if (use_email):
+                email_msg = email_msg + self.string % (self.value) + "\n"
+
 
     # Show data string indented
-    def showi(self, file):
+    def showi(self, file, use_email):
+        global email_msg
         if (self.used != True):
             return
         if (isinstance(self.value, int)):
             print("  " + self.string % (com(self.value)))
             if (file):
                 file.write("  " + self.string % (com(self.value)) + "\n")
+            if (use_email):
+                email_msg = email_msg + "  " + self.string % (com(self.value)) + "\n"
         else:
             print("  " + self.string % (self.value))
             if (file):
                 file.write("  " + self.string % (self.value) + "\n")
+            if (use_email):
+                email_msg + email_msg + "  " + self.string % (self.value) + "\n"
 
     # Show data without newline
     def show_no_nl(self):        
@@ -315,7 +336,7 @@ class Data():
 class ConfigData():
     def __init__(self):
         self.plot_filename = None
-        self.plots_used = None
+        self.save_plots = None
 
         self.data_filename = None
 
@@ -324,6 +345,9 @@ class ConfigData():
         self.time_obj = None
         self.data_obj = None
         self.data_val = None
+
+        self.email_creds = None
+        self.send_plots = None
 
 
 # Data for a single item
@@ -348,13 +372,18 @@ class ItemData():
         self.s1md = TimeSeriesData("Series Last 1 Month Data")
         self.s1yd = TimeSeriesData("Series Last 1 Year Data")
         
-    def show(self, file):
-        self.name.show(file)  
-        self.name.show_underline(file) 
-        self.id.show(file)
-        self.ge_limit.show(file)     
-        self.item_price.show(file)
+    def show(self, file, use_email):
+        global email_msg
+        self.name.show(file, use_email)  
+        self.name.show_underline(file, use_email) 
+        self.id.show(file, use_email)
+        self.ge_limit.show(file, use_email)     
+        self.item_price.show(file, use_email)
         print("")
+        if (file):
+            file.write("\n")
+        if (use_email):
+            email_msg = email_msg + "\n"    
 
 # Latest Data
 class LatestData():
@@ -373,12 +402,15 @@ class LatestData():
         self.profit_per_limit = Data()
         self.roi = Data()
     
-    def show(self, file):
+    def show(self, file, use_email):
+        global email_msg
         if (self.used == True):
             print("Latest:")
             if (file):
                 file.write("Latest:\n")
-            show_obj_data(self, file)
+            if (use_email):
+                email_msg = email_msg + "Latest:\n"
+            show_obj_data(self, file, use_email)
 
 # 5m or 1h average data
 class AvgData():
@@ -397,12 +429,15 @@ class AvgData():
         self.profit_per_limit = Data()  
         self.roi_avg = Data()
 
-    def show(self, file):
+    def show(self, file, use_email):
+        global email_msg
         if (self.used == True):
             print("%s Average:" % (self.type))
             if (file):
                 file.write("%s Average:" % (self.type) + "\n")
-            show_obj_data(self, file)
+            if (use_email):
+                email_msg = email_msg + "%s Average:" % (self.type) + "\n"
+            show_obj_data(self, file, use_email)
 
 # Data for a timeseries
 class TimeSeriesData():
@@ -411,40 +446,70 @@ class TimeSeriesData():
         self.type = ""
         self.desc = desc
 
-        # TODO: Where it total volume
+        # TODO:
+        # User Input
+        # insta_buy_tunnel_percentile
+        # insta_sell_tunnel_percentile
+
+        # Basic Data
         self.insta_buy_avg = Data()
         self.insta_buy_vol = Data()
         self.insta_sell_avg = Data()
         self.insta_sell_vol = Data()
         self.total_vol = Data()
         self.price_avg = Data()
-        self.margin_avg = Data()
         self.margin_taxed_avg = Data()
         self.profit_per_limit_avg = Data()  
-        self.roi_avg = Data()
 
+        # Changes and percents
+        self.roi_avg = Data()
+        #self.insta_buy_change = Data()
+        #self.insta_buy_change_percent = Data()
+        #self.insta_buy_cov # Cofficient of Variance
+        #self.insta_sell_change = Data()
+        #self.insta_sell_change_percent = Data()
+        #self.insta_buy_cov # Coefficient of Variance
         self.price_change = Data()
-        self.price_change_percent = Data()   
-     
-    def show(self, file):
+        self.price_change_percent = Data()
+        
+        # TODO: I need better names for these :)
+        # Tunnel Data
+        # insta_buy_tunnel_price
+        # insta_sell_tunnel_price
+        # tunnel_margin_taxed
+        # tunnel_profit_per_limit
+
+
+
+
+
+
+    
+    def show(self, file, use_email):
+        global email_msg
         if (self.used == True):
             print("Last %s:" % (self.type))
             if (file):
                 file.write("Last %s:" % (self.type) + "\n")
-            show_obj_data(self, file)
+            if (use_email):
+                email_msg = email_msg + "Last %s:" % (self.type) + "\n"    
+            show_obj_data(self, file, use_email)
 
 # Show data for a time range's Data() objects
-def show_obj_data(obj, file):
+def show_obj_data(obj, file, use_email):
+    global email_msg
     for attr in vars(obj):
         #print(attr)
         data_obj = getattr(obj, attr)
         # Print data for Data() objects
         if (isinstance(data_obj, Data) == True):
-            data_obj.showi(file)
+            data_obj.showi(file, use_email)
 
     print("")
     if (file):
         file.write("\n")
+    if (use_email):
+        email_msg = email_msg + "\n"    
 
 def show_data(config, itd_list):
 
@@ -454,6 +519,12 @@ def show_data(config, itd_list):
     else:
         data_file = None
 
+    # Check if user sending use_email, by checking for saved credentials
+    if (config.email_creds):
+        use_email = True
+    else:
+        use_email = False
+
     # Sort item list based on a value if user has opted to.
     if (config.is_sorting == True):
         itd_list = sorted(itd_list, key=attrgetter(config.data_path))
@@ -462,55 +533,104 @@ def show_data(config, itd_list):
 
         # Print basic item data
         # Note, item data is shown differently from other data. (It's hardcoded)
-        item.show(data_file)
+        # TODO: Email message creation is handled horribly - Clean up eventually.
+        item.show(data_file, use_email)
 
         # Show latest data
-        item.ld.show(data_file)
+        item.ld.show(data_file, use_email)
 
         # Show average last 5 minutes
-        item.a5md.show(data_file)
+        item.a5md.show(data_file, use_email)
 
         # Show average last 1 hour
-        item.a1hd.show(data_file)
+        item.a1hd.show(data_file, use_email)
 
         # Show last 6 hours
-        item.s6hd.show(data_file)
+        item.s6hd.show(data_file, use_email)
 
         # Show last 12 hours
-        item.s12hd.show(data_file)
+        item.s12hd.show(data_file, use_email)
 
         # Show last 24 hours
-        item.s24hd.show(data_file)
+        item.s24hd.show(data_file, use_email)
 
         # Show last week
-        item.s1wd.show(data_file)
+        item.s1wd.show(data_file, use_email)
 
         # Show last month
-        item.s1md.show(data_file)
+        item.s1md.show(data_file, use_email)
 
         # Show last year
-        item.s1yd.show(data_file)
+        item.s1yd.show(data_file, use_email)
 
     # Close file if used.
     if (config.data_filename):
         data_file.close()    
 
     # Save plots to pdf
-    if (config.plots_used == True):
-        p = PdfPages(config.plot_filename)
+    if (config.save_plots == True):
+        save_plots_pdf(config.plot_filename)
 
-        # get_fignums Return list of existing  
-        # figure numbers 
-        fig_nums = plt.get_fignums()   
-        figs = [plt.figure(n) for n in fig_nums] 
+    # Send email if user has opted to
+    if (use_email == True):
+        creds = config.email_creds
+        sender = creds[0]
+        recip = creds[0]
+        passw = creds[1]
+
+        # Port for SSL
+        port = 465
+
+        # Create a secure SSL context
+        context = ssl.create_default_context()
+
+        # Get subject and body of email
+        msg = EmailMessage()
+        msg['Subject'] = "OSRS Flipping Tool"
+        msg.set_content(email_msg)
+
+        # Attach pdf with plot data
+        if (config.send_plots == True):
+            pdf_data = get_plot_pdf_data(config)
+            msg.add_attachment(pdf_data, maintype='application', subtype='pdf', filename='graph_data.pdf')
+
+        # Login to gmail server and send email
+        with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
+            server.login(sender, passw)
+            server.sendmail(sender, recip, msg.as_string())
+
+def get_plot_pdf_data(config):
+
+    # Use existing pdf if user saved one. Otherwise, must create
+    # a new pdf to send over email
+    if (config.save_plots == True):
+        with open(config.plot_filename, 'rb') as fp:
+            pdf_data = fp.read()
+    else:
+        save_plots_pdf("temp.pdf")
+        with open("temp.pdf", 'rb') as fp:
+            pdf_data = fp.read()
+
+        # Remove file once we have the data    
+        os.remove("temp.pdf")
+
+    return pdf_data
+
+def save_plots_pdf(filename):
+    p = PdfPages(filename)
+
+    # get_fignums Return list of existing  
+    # figure numbers 
+    fig_nums = plt.get_fignums()   
+    figs = [plt.figure(n) for n in fig_nums] 
+    
+    # iterating over the numbers in list 
+    for fig in figs:  
         
-        # iterating over the numbers in list 
-        for fig in figs:  
-            
-            # and saving the files 
-            fig.savefig(p, format='pdf')
+        # and saving the files 
+        fig.savefig(p, format='pdf')
 
-        p.close()
+    p.close()
 
 # Check if user has opted to show plot for any of the 
 # time series
@@ -545,6 +665,60 @@ def convert_items_to_ids(item_list):
 
     return id_list
 
+def show_sort_options():
+    sort_data = ItemData()
+    for obj_name in vars(sort_data):
+        obj_data = getattr(sort_data, obj_name)
+        if (isinstance(obj_data, LatestData) != True and \
+            isinstance(obj_data, AvgData) != True and \
+            isinstance(obj_data, TimeSeriesData) != True):
+            continue
+        
+        print(obj_data.desc)
+        for data_name in vars(obj_data):
+            data = getattr(obj_data, data_name)
+            if (isinstance(data, Data) != True):
+                continue
+
+            print("  " + obj_name + '.' + data_name)
+
+        print("")     
+
+def check_sort_options(ofs, config, sort_args):
+    sort_option = sort_args
+    opts = sort_option.split('.')
+    time_name_d = opts[0]
+    time_name_f = time_name_d[:-1] + 'f'
+    sort_data = opts[1]
+    exists = False
+    for filter_name in vars(ofs):
+        # Skip until we get a match
+        if (time_name_f != filter_name):
+            continue
+        time_obj_f = getattr(ofs, filter_name)
+        for data_name in vars(time_obj_f):
+            # Skip until we get a match
+            if (data_name != sort_data):
+                continue
+            exists = True
+            # Check if data is used by filter
+            data_f = getattr(time_obj_f, data_name)
+            if (data_f.show != True):
+                print("Sort option %s passed, but user has not opted to show this data" % (sort_option))
+                return False
+
+            # Save heiarchal objects for sorting later
+            config.is_sorting = True
+            data_path = sort_option + '.value'
+            config.data_path = data_path
+
+        if (exists == False):
+            print("Invalid sort option: %s. See --sort-options" % (sort_option))
+            return False
+    
+    # User gave a valid sort option
+    return True
+
 """
 filter_items()
 
@@ -561,23 +735,7 @@ def filter_items(args):
 
     # Show sort options
     if (args.sort_options):
-        sort_data = ItemData()
-        for obj_name in vars(sort_data):
-            obj_data = getattr(sort_data, obj_name)
-            if (isinstance(obj_data, LatestData) != True and \
-                isinstance(obj_data, AvgData) != True and \
-                isinstance(obj_data, TimeSeriesData) != True):
-                continue
-            
-            print(obj_data.desc)
-            for data_name in vars(obj_data):
-                data = getattr(obj_data, data_name)
-                if (isinstance(data, Data) != True):
-                    continue
-
-                print("  " + obj_name + '.' + data_name)
-
-            print("")       
+        show_sort_options()      
         return
 
     # Do not let user load and save filter at same time
@@ -594,42 +752,11 @@ def filter_items(args):
             print("User has opted to show no data. Quitting.")
             quit(1)
 
-    # Check if user wants to sort item data and check if sort option
-    # exists and is used by filter
+    # Check if user gave valid sort option.
     if (args.sort):
-        sort_option = args.sort
-        opts = sort_option.split('.')
-        time_name_d = opts[0]
-        time_name_f = time_name_d[:-1] + 'f'
-        sort_data = opts[1]
-        exists = False
-        for filter_name in vars(ofs):
-            # Skip until we get a match
-            if (time_name_f != filter_name):
-                continue
-            time_obj_f = getattr(ofs, filter_name)
-            for data_name in vars(time_obj_f):
-                # Skip until we get a match
-                if (data_name != sort_data):
-                    continue
-                exists = True
-                # Check if data is used by filter
-                data_f = getattr(time_obj_f, data_name)
-                if (data_f.show != True):
-                    print("Sort option %s passed, but user has not opted to show this data" % (sort_option))
-                    return
-
-                # Save heiarchal objects for sorting later
-                config.is_sorting = True
-                data_path = sort_option + '.value'
-                config.data_path = data_path
-                #config.time_obj = time_obj
-                #config.data_obj = data
-                #config.data_val = data.value
-
-            if (exists == False):
-                print("Invalid sort option: %s. See --sort-options" % (sort_option))
-                return
+        can_sort = check_sort_options(ofs, config, args.sort)
+        if (can_sort == False):
+            quit(1)
 
     # Check if user is saving program's filter
     if (args.save_filter):
@@ -637,18 +764,30 @@ def filter_items(args):
             pickle.dump(ofs, f)
             return  
 
-    # Ensure --save-plots and filters are both used at same
-    # time, or not at all.
-    plots_used = are_plots_used(ofs)
-    if (args.save_plots and plots_used == False):
-        print("--save-plots option given, but no filters are set to show plots.")
+    # Ensure plot filters are used with --send-email or --save-plots
+    # Otherwise, do not use at all.
+    show_plots = are_plots_used(ofs)
+    if ((args.save_plots or args.send_email) and show_plots == False):
+        print("--save-plots and/or --save-email option given, but no filters are set to show plots.")
         quit(1)
-    elif (plots_used == True and args.save_plots == None):
-        print("Filter(s) set to show plots, but --save-plots option not given.")
+    elif (show_plots == True and (args.save_plots == None and args.send_email == None)):
+        print("Filter(s) set to show plots, but neither --save-plots or --save-email option not given.")
         quit(1)
-    elif (plots_used == True and args.save_plots):
+
+    # User wants to save plots to pdf
+    if (show_plots == True and args.save_plots):
         config.plot_filename = args.save_plots
-        config.plots_used = plots_used    
+        config.save_plots = True
+
+    # User wants to send plots over email as pdf
+    if (show_plots == True and args.send_email):
+        config.send_plots = True
+
+    # Check if user sending data to gmail
+    if (args.send_email):
+        with open(args.send_email, 'r') as file:
+            email_creds = [line.strip() for line in file]
+            config.email_creds = email_creds
 
     # Check if user is using items from a file list
     if (args.load_items):
@@ -1364,6 +1503,23 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
         print("Invalid timestep provided")
         quit(1)
 
+    buy_count = 0
+    sell_count = 0
+    insta_sell_vol = 0
+    insta_buy_vol = 0
+    total_insta_sell_price = 0
+    total_insta_buy_price = 0
+    max_insta_sell_price = 0
+    min_insta_sell_price = 0xffffffff
+    max_insta_buy_price = 0
+    min_insta_buy_price = 0xffffffff
+    min_list = []
+    max_list = []
+    insta_sell_prices = []
+    insta_buy_prices = []
+    insta_sell_times = []
+    insta_buy_times = []
+
     tsd = TimeSeriesData("")  
 
     # TODO: 6 & 12 can be gotten from 24.
@@ -1419,26 +1575,36 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
     first_insta_buy_time = get_earliest_ts_data(data_ts, "timestamp", num_entries, num_steps)
     first_insta_buy_avg = get_earliest_ts_data(data_ts, "avgHighPrice", num_entries, num_steps)
     first_insta_sell_avg = get_earliest_ts_data(data_ts, "avgLowPrice", num_entries, num_steps)
-    first_insta_buy_vol = get_earliest_ts_data(data_ts, "highPriceVolume", num_entries, num_steps)
-    first_insta_sell_vol = get_earliest_ts_data(data_ts, "lowPriceVolume", num_entries, num_steps)
     
     # Get most recent data
     curr_insta_buy_time = get_current_ts_data(data_ts, "timestamp", num_entries, num_steps)
     curr_insta_buy_avg = get_current_ts_data(data_ts, "avgHighPrice", num_entries, num_steps)
     curr_insta_sell_avg = get_current_ts_data(data_ts, "avgLowPrice", num_entries, num_steps)
-    curr_insta_buy_vol = get_current_ts_data(data_ts, "highPriceVolume", num_entries, num_steps)
-    curr_insta_sell_vol = get_current_ts_data(data_ts, "lowPriceVolume", num_entries, num_steps)
 
-    # Get price change over entire time period
+    # If there is no first or last data then don't use tsd
     if (curr_insta_buy_avg == None or curr_insta_sell_avg == None or\
         first_insta_buy_avg == None or first_insta_sell_avg == None):
         price_change = None
         price_change_percent = None
-    else:
-        first_insta_price_avg = (first_insta_sell_avg + first_insta_buy_avg)/2     
-        curr_insta_price_avg = (curr_insta_sell_avg + curr_insta_buy_avg)/2
-        price_change = curr_insta_price_avg - first_insta_price_avg
-        price_change_percent = int((price_change / first_insta_price_avg)*100) 
+        tsd.used = False
+        return tsd
+    
+    # TODO: Would like to change the percents to floats for more precision.
+
+    # Get insta buy change data
+    insta_buy_change = curr_insta_buy_avg - first_insta_buy_avg
+    insta_buy_change_percent = int((insta_buy_change/first_insta_buy_avg)*100)
+
+    # Get insta sell change data
+    insta_sell_change = curr_insta_sell_avg - first_insta_sell_avg
+    insta_sell_change_percent = int((insta_sell_change/first_insta_sell_avg)*100)
+
+    # Get average price change data
+    # TODO: Rename this to include avg, since it is an average
+    first_insta_price_avg = (first_insta_sell_avg + first_insta_buy_avg)/2     
+    curr_insta_price_avg = (curr_insta_sell_avg + curr_insta_buy_avg)/2
+    price_change = curr_insta_price_avg - first_insta_price_avg
+    price_change_percent = int((price_change / first_insta_price_avg)*100) 
 
     # Check if price change passes filter
     f = opt.price_change.filter(price_change)
@@ -1452,26 +1618,8 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
         itd.used = False
         return tsd
 
-    count = 0
-    buy_count = 0
-    sell_count = 0
-    insta_sell_vol = 0
-    insta_buy_vol = 0
-    total_insta_sell_price = 0
-    total_insta_buy_price = 0
-    min_insta_sell_price = 0xffffffff
-    max_insta_buy_price = 0
-    min_list = []
-    max_list = []
-    insta_sell_prices = []
-    insta_buy_prices = []
-    insta_sell_times = []
-    insta_buy_times = []
-
-    # TODO: Facing an infinite loop here. This would be a good time
-    # to neaten up this code.
-
-    # Loop entries from most current to earliest
+    # Loop entries from most recent to earliest
+    # TODO: Why do I loop this direction???? It plots correctly still .. 
     for i in range(num_entries, num_entries-num_steps, -1):
         entry = data_ts[i]
 
@@ -1486,12 +1634,16 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
             insta_sell_times.append(entry['timestamp'])
             total_insta_sell_price = total_insta_sell_price + insta_sell_price
             sell_count = sell_count + 1
+            # Get highest sell price
+            if (max_insta_sell_price < insta_sell_price):
+                max_insta_sell_price = insta_sell_price
+                max_isp_ts = entry['timestamp']
+            # Get lowest sell price
             if (min_insta_sell_price > insta_sell_price):
                 min_insta_sell_price = insta_sell_price
                 min_isp_ts = entry['timestamp']
-                min_isp_vol = entry['lowPriceVolume']
             # Get all local minima into a list
-            get_minima(min_list, data_ts, num_entries, num_steps, i)
+            #get_minima(min_list, data_ts, num_entries, num_steps, i)
 
         # Get insta buy price data
         if (entry['avgHighPrice'] != None):
@@ -1500,12 +1652,16 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
             insta_buy_times.append(entry['timestamp'])
             total_insta_buy_price = total_insta_buy_price + insta_buy_price
             buy_count = buy_count + 1
+            # Get highest buy price
             if (max_insta_buy_price < insta_buy_price):
                 max_insta_buy_price = insta_buy_price
                 max_ibp_ts = entry['timestamp']
-                max_ibp_vol= entry['highPriceVolume']
+            # Get lowest buy price
+            if (min_insta_buy_price > insta_buy_price):
+                min_insta_buy_price = insta_buy_price
+                min_ibp_ts = entry['timestamp']
             # Get all local maxima into a list
-            get_maxima(max_list, data_ts, num_entries, num_steps, i)
+            #get_maxima(max_list, data_ts, num_entries, num_steps, i)
  
     # Get total trade volume
     total_vol = insta_sell_vol + insta_buy_vol
@@ -1515,10 +1671,14 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
         return tsd
 
     # Get average volume for each timestep
-    # TODO: Make the vol a filter item
+    # TODO: Make the avg vol a filter item?
     avg_vol = int(total_vol/num_steps)
     avg_insta_sell_vol = int(insta_sell_vol/num_steps)
     avg_insta_buy_vol = int(insta_buy_vol/num_steps)
+
+    if (sell_count == 0):
+        itd.used = False
+        return tsd
 
     # Check if insta sell avg passes filter
     insta_sell_avg = int(total_insta_sell_price/sell_count)
@@ -1530,6 +1690,10 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
     # Check if insta sell vol passes filter
     f = opt.insta_sell_vol.filter(insta_sell_vol)
     if (f == False):
+        itd.used = False
+        return tsd
+
+    if (buy_count == 0):
         itd.used = False
         return tsd
 
@@ -1576,10 +1740,22 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
         return tsd
 
     # Get our buying price based on the sell data
-    low_i = get_ideal_low_margin(data_ts, num_entries, num_steps, min_list, .2)
+    #low_i = get_ideal_low_margin(data_ts, num_entries, num_steps, min_list, .2)
 
     # Get our selling price based on the buy data
-    high_i = get_ideal_high_margin(data_ts, num_entries, num_steps, max_list, .2) 
+    #high_i = get_ideal_high_margin(data_ts, num_entries, num_steps, max_list, .2) 
+
+    # Get buy and sell percentile lines based on buy and sell percentile
+    buy_percentile_line = np.percentile(insta_buy_prices, 60)
+    sell_percentile_line = np.percentile(insta_sell_prices, 40)
+
+    # Get insta buy coefficient of variance 
+    insta_buy_std = np.std(insta_buy_prices)
+    insta_buy_cov = insta_buy_std/insta_buy_avg
+
+    # Get insta sell coefficient of variance
+    insta_sell_std = np.std(insta_sell_prices)
+    insta_sell_cov = insta_sell_std/insta_sell_avg
 
     # Only plot if used has opted to 
     if (opt.plot.show == True):
@@ -1592,15 +1768,13 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
         axes.plot(insta_sell_times, insta_sell_prices, color = 'blue', label = 'Instant Sell Price')
 
         # Plot low margin
-        if (low_i != 0):
-            axes.axhline(y = data_ts[low_i]['avgLowPrice'], color = 'blue', linestyle = '-')
+        axes.axhline(y = sell_percentile_line, color = 'blue', linestyle = '-')
 
         # Plot insta buy data
         axes.plot(insta_buy_times, insta_buy_prices, color='red', label = 'Instant Buy Price')
 
         # Plot high margin
-        if (high_i != 0):
-            axes.axhline(y = data_ts[high_i]['avgHighPrice'], color = 'red', linestyle = '-')
+        axes.axhline(y = buy_percentile_line, color = 'red', linestyle = '-')
 
         # Label time
         axes.set_xlabel('Time (Unix Timestamp)')
@@ -1741,6 +1915,7 @@ def main():
 
     # Get all data now, so we do not have to loop later.
     global item_map, latest_all, avg_5m_all, avg_1h_all
+
     item_map = get_json(map_url)
     latest_all = get_json(latest_url)
     avg_5m_all = get_json(five_url)
@@ -1757,10 +1932,21 @@ def main():
                         metavar=('<file_name>.pkl'),
                         dest='load_filter')	
 
+    # TODO: Add argument to show a .pkl file's contents (filters or arguments)
     parser.add_argument('-f', '--save-filter',
                         help='Save programs current filter to file (.pkl)',
                         metavar=('<file_name>.pkl'),
                         dest='save_filter')
+    
+    parser.add_argument('-a', '--save-program',
+                        help='Save programs arguments for easy repeated use.\nArguments will not be saved if program is unsuccessful.',
+                        metavar=('<file_name>.pkl'),
+                        dest='save_args')    
+
+    parser.add_argument('-A', '--load-program',
+                        help='Load program arguments from a previous run.',
+                        metavar=('<file_name>.pkl'),
+                        dest='load_args')    
 
     parser.add_argument('-I', '--load-items',
                         help='Load item list from a file. Each item should be on its own line.',
@@ -1780,12 +1966,18 @@ def main():
     parser.add_argument('-d', '--save_data',
                         help='Save outputted item data to a file',
                         metavar=('<file_name>'),
-                        dest='save_data')        
-																	
+                        dest='save_data')      
+
+    parser.add_argument('-e', '--send-email',
+                        help='Send data to gmail',
+                        metavar=('File containing username and app password on separate lines'),
+                        dest='send_email')                         
+
+
+
     args = parser.parse_args()
 
     filter_items(args)
-    
     
 
 if __name__ == "__main__":
