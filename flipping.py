@@ -228,7 +228,7 @@ class OutputFilters():
             self.total_vol = Range(show=True)                  # Normal
             self.margin_taxed_avg = Range(show=False)           # Normal
             self.profit_per_limit_avg = Range(show=False)       # Normal
-            self.plot = DisplayPlot(show = False)               # Plot
+            self.plot = DisplayPlot(show = True)               # Plot
             
             # Changes and Percentages
             self.roi_avg = Range(show=False)                   # Percent
@@ -432,7 +432,6 @@ class Data():
         if (use_email):
             email_msg = email_msg + self.string % (self.value) + "\n"
 
-
     # Show data string indented
     def showi(self, file, use_email):
         global email_msg
@@ -444,7 +443,7 @@ class Data():
         if (file):
             file.write("  " + self.string % (self.value) + "\n")
         if (use_email):
-            email_msg + email_msg + "  " + self.string % (self.value) + "\n"
+            email_msg = email_msg + "  " + self.string % (self.value) + "\n"
 
     # Show data without newline
     def show_no_nl(self):        
@@ -568,10 +567,12 @@ class TimeSeriesData():
         # TODO: Eventually want to automate finding the ideal percentiles here
         # - Where their profit margin meets user's filter requirement
         # - There are sufficient offers beyond the boundary to buy/sell
-        #     - (This one is harder to make decision on, however we could
-        #        also make this a ratio with buy limit and find the appropriate
-        #        ratio over time)
-        # 
+        #     - Could base on buy/sell opportunity and just let user tune
+        #       because intelligently automating this is challenging since
+        #       items vary in their price fluctations a ton even if we can
+        #       measure cov, price changes, etc.
+        #       In other words .. what is sufficient? That is difficult to find
+        #       so unless a new idea comes along to solve that, let user decide.
         #
         self.insta_buy_tunnel_percentile = 60
         self.insta_sell_tunnel_percentile = 40
@@ -610,6 +611,50 @@ class TimeSeriesData():
         self.tunnel_profit_per_limit = Data()
         self.tunnel_roi = Data()
     
+        # Plot data
+        self.show_plot = False
+        self.plot_title = None
+        self.insta_buy_times = None
+        self.insta_buy_prices = None
+        #self.insta_buy_tunnel_price = None
+        self.insta_sell_times = None
+        self.insta_sell_prices = None
+        #self.insta_sell_tunnel_price = None
+
+    # Plot data (Does not show the plot)
+    def plot(self):
+
+        # Do not plot data if not showing plot
+        if (self.show_plot == False):
+            return
+
+        fig, axes = plt.subplots()
+
+        # Plot insta sell data
+        axes.plot(self.insta_sell_times, self.insta_sell_prices, color = 'blue', label = 'Instant Sell Price')
+
+        # Plot insta sell tunnel line
+        axes.axhline(y = self.insta_sell_tunnel_price.value, color = 'blue', linestyle = '-')
+
+        # Plot insta buy data
+        axes.plot(self.insta_buy_times, self.insta_buy_prices, color='red', label = 'Instant Buy Price')
+
+        # Plot insta buy tunnel line
+        axes.axhline(y = self.insta_buy_tunnel_price.value, color = 'red', linestyle = '-')
+
+        # Label time
+        # TODO: Eventually show time normally ..
+        axes.set_xlabel('Time (Unix Timestamp)')
+
+        # Label price
+        axes.set_ylabel('Price')
+
+        # Give title as name of item
+        axes.set_title(self.plot_title)
+
+        # Show legend for plot labels
+        axes.legend()
+
     def show(self, file, use_email):
         global email_msg
         if (self.used == True):
@@ -672,21 +717,27 @@ def show_data(config, itd_list):
 
         # Show last 6 hours
         item.s6hd.show(data_file, use_email)
+        item.s6hd.plot()
 
         # Show last 12 hours
         item.s12hd.show(data_file, use_email)
+        item.s12hd.plot()
 
         # Show last 24 hours
         item.s24hd.show(data_file, use_email)
+        item.s24hd.plot()
 
         # Show last week
         item.s1wd.show(data_file, use_email)
+        item.s1wd.plot()
 
         # Show last month
         item.s1md.show(data_file, use_email)
+        item.s1md.plot()
 
         # Show last year
         item.s1yd.show(data_file, use_email)
+        item.s1yd.plot()
 
     # Close file if used.
     if (config.data_filename):
@@ -697,6 +748,8 @@ def show_data(config, itd_list):
         save_plots_pdf(config.plot_filename)
 
     # Send email if user has opted to
+    # TODO: Email message is not being tailored correctly .. not showing in email right.
+    # Was showing everything except last 12 hour data.
     if (use_email == True):
         creds = config.email_creds
         sender = creds[0]
@@ -837,9 +890,9 @@ def check_sort_options(ofs, config, sort_args):
             data_path = sort_option + '.value'
             config.data_path = data_path
 
-        if (exists == False):
-            print("Invalid sort option: %s. See --sort-options" % (sort_option))
-            return False
+    if (exists == False):
+        print("Invalid sort option: %s. See --sort-options" % (sort_option))
+        return False
     
     # User gave a valid sort option
     return True
@@ -881,7 +934,6 @@ def filter_items(args):
             quit(1)
 
     # Check if user gave valid sort option.
-    # TODO: I gave sort option that should have failed but did not .. fix it.
     if (args.sort):
         can_sort = check_sort_options(ofs, config, args.sort)
         if (can_sort == False):
@@ -1967,8 +2019,27 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
     # Only plot if used has opted to 
     # TODO: Plot to show dots at each data point within the lines
     if (opt.plot.show == True):
+        tsd.show_plot = True
         item = find_item_entry(item_id)
 
+        # Get plot data
+        tsd.plot_title = item['name'] + " " + '(' + tsd.type + ')'
+
+        # Get insta buy data
+        tsd.insta_buy_times = insta_buy_times
+        tsd.insta_buy_prices = insta_buy_prices
+
+        # Get insta buy tunnel line
+        tsd.insta_buy_tunnel_price = insta_buy_tunnel_price
+
+        # Get insta sell data
+        tsd.insta_sell_times = insta_sell_times
+        tsd.insta_sell_prices = insta_sell_prices
+
+        # Get insta sell tunnel line
+        tsd.insta_sell_tunnel_price = insta_sell_tunnel_price
+
+        """
         # Begin plotting data
         fig, axes = plt.subplots()
 
@@ -1996,7 +2067,7 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
 
         # Show legend for plot labels
         axes.legend()
-
+        """
     tsd.insta_buy_avg = Data(opt.insta_buy_avg.show, insta_buy_avg, "Insta Buy Price (Average): %s")
     tsd.insta_buy_vol = Data(opt.insta_buy_vol.show, insta_buy_vol, "Insta Buy Volume: %s")
     tsd.insta_sell_avg = Data(opt.insta_sell_avg.show, insta_sell_avg, "Insta Sell Price (Average): %s")
