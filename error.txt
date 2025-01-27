@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "./flipping.py", line 2320, in <module>
+    main()
+  File "./flipping.py", line 2316, in main
+    filter_items(args)
+  File "./flipping.py", line 998, in filter_items
+    show_data(config, itd_list)
+  File "./flipping.py", line 698, in show_data
+    itd_list = sorted(itd_list, key=attrgetter(config.data_path))
+TypeError: '<' not supported between instances of 'NoneType' and 'int'

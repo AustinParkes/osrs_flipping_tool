@@ -83,8 +83,6 @@ class DisplayPlot():
     def __init__(self, show=False):
         self.show = show
 
-#TODO: separate filters via timeranges.
-# - can probably make some reusable classes (timeseries, avg)
 # Determines what items get shown
 class OutputFilters():
     def __init__(self):
@@ -144,19 +142,19 @@ class OutputFilters():
         def __init__(self):
             self.item_name = Contains(show=True, string = "")
             self.item_id = Range(show=True)
-            self.item_price = Range(show=True)
+            self.item_price = Range(show=True, min=200000, max=2000000)
             self.ge_limit = Range(show=True)
 
     class LatestFilters():
         def __init__(self):
-            self.insta_sell_price = Range(show=False)           # Normal
+            self.insta_sell_price = Range(show=True)           # Normal
             self.insta_sell_time_min = Range(show=False)        # Minutes
-            self.insta_buy_price = Range(show=False)            # Normal
+            self.insta_buy_price = Range(show=True)            # Normal
             self.insta_buy_time_min = Range(show=False)         # Minutes
             self.price_avg = NoFilter(show=False)               # We use item_price as our price filter
             self.margin_taxed = Range(show=False)               # Normal
-            self.profit_per_limit = Range(show=False)           # Normal
-            self.roi = Range(show=False)                        # Percent
+            self.profit_per_limit = Range(show=True)           # Normal
+            self.roi = Range(show=True)                        # Percent
 
     class Avg5mFilters():
         def __init__(self):
@@ -172,15 +170,15 @@ class OutputFilters():
 
     class Avg1hFilters():
         def __init__(self):
-            self.insta_buy_avg = Range(show=False)              # Normal
+            self.insta_buy_avg = Range(show=True)              # Normal
             self.insta_buy_vol = Range(show=False)              # Normal
-            self.insta_sell_avg = Range(show=False)             # Normal
+            self.insta_sell_avg = Range(show=True)             # Normal
             self.insta_sell_vol = Range(show=False)             # Normal
             self.price_avg = NoFilter(show=False)               # We use item_price as our price filter
             self.avg_vol = Range(show=False)                    # Normal
             self.margin_taxed = Range(show=False)               # Normal
-            self.profit_per_limit = Range(show=False)           # Normal
-            self.roi_avg = Range(show=False)                    # Percent
+            self.profit_per_limit = Range(show=True)           # Normal
+            self.roi_avg = Range(show=True)                    # Percent
 
     class Series6hFilters():
         def __init__(self):
@@ -225,7 +223,7 @@ class OutputFilters():
             self.insta_sell_avg = Range(show=False)             # Normal
             self.insta_sell_vol = Range(show=True)             # Normal
             self.price_avg = NoFilter(show=False)               # We use item_price as our price filter
-            self.total_vol = Range(show=True)                  # Normal
+            self.total_vol = Range(show=True, min=200)                  # Normal
             self.margin_taxed_avg = Range(show=False)           # Normal
             self.profit_per_limit_avg = Range(show=False)       # Normal
             self.plot = DisplayPlot(show = True)               # Plot
@@ -251,7 +249,7 @@ class OutputFilters():
             self.sell_vol_below_tunnel = Range(show=True)      # Normal
             self.tunnel_sell_opportunity = Range(show=True)    # Percent
             self.tunnel_margin_taxed = Range(show=False)        # Normal
-            self.tunnel_profit_per_limit =  Range(show=True, min=100000)   # Normal
+            self.tunnel_profit_per_limit =  Range(show=True, min=150000)   # Normal
             self.tunnel_roi =  Range(show=True)                # Percent
 
     class Series24hFilters():
@@ -425,12 +423,23 @@ class Data():
         global email_msg
         if (self.used != True):
             return
-        # TODO: Need way of adding commas to integers.
-        print(self.string % (self.value))
+        
+        # Turn float or int into string with commas
+        if ('%.2f' in self.string):
+            string = self.string.replace('%.2f', '%s')
+            val = com(self.value, 'f')
+        elif ('%d' in self.string):
+            string = self.string.replace('%d', '%s')
+            val = com(self.value, 'd')
+        else:
+            string = self.string
+            val = self.value    
+
+        print(string % (val))
         if (file):
-            file.write(self.string % (self.value) + "\n")
+            file.write(string % (val) + "\n")
         if (use_email):
-            email_msg = email_msg + self.string % (self.value) + "\n"
+            email_msg = email_msg + string % (val) + "\n"
 
     # Show data string indented
     def showi(self, file, use_email):
@@ -438,17 +447,22 @@ class Data():
         if (self.used != True):
             return
 
-        # TODO: Need way of adding commas to integers
-        print("  " + self.string % (self.value))
-        if (file):
-            file.write("  " + self.string % (self.value) + "\n")
-        if (use_email):
-            email_msg = email_msg + "  " + self.string % (self.value) + "\n"
+        # Turn float or int into string with commas
+        if ('%.2f' in self.string):
+            string = self.string.replace('%.2f', '%s')
+            val = com(self.value, 'f')
+        elif ('%d' in self.string):
+            string = self.string.replace('%d', '%s')
+            val = com(self.value, 'd')
+        else:
+            string = self.string
+            val = self.value    
 
-    # Show data without newline
-    def show_no_nl(self):        
-        if (self.used == True):
-            print(self.string % (self.value), end = "")
+        print("  " + string % (val))
+        if (file):
+            file.write("  " + string % (val) + "\n")
+        if (use_email):
+            email_msg = email_msg + "  " + string % (val) + "\n"
 
 # Stores additional program configurations
 class ConfigData():
@@ -926,7 +940,7 @@ def filter_items(args):
             #ofs = pickle.load(f) 
             r = f.read()
         ofs = jsonpickle.decode(r)
-        ofs.jsonpickle_init()
+        ofs.init()
     else:        
         ofs = OutputFilters()
         if (ofs.used == False):
@@ -986,8 +1000,8 @@ def filter_items(args):
     # Find /latest items that pass basic filter
     id_list = apply_basic_filter(ofs, id_list)
     num_items = len(id_list)
-    if (num_items > 200):
-        print("Not exceeding 200 items during testing")
+    if (num_items > 500):
+        print("%d Items passed basic filter.\nNot exceeding 200 items during testing" % (num_items))
         quit()
 
     # Return items that pass filter and return their data
@@ -1041,7 +1055,7 @@ def filter_item(item_id, ofs):
     # Passed initial limit filter, get basic item data
     itd.id = Data(True, item_id, "Id: %s")
     itd.name = Data(True, name, "Name: %s")
-    itd.ge_limit = Data(True, limit, "GE Buy Limit: %s")
+    itd.ge_limit = Data(True, limit, "GE Buy Limit: %d")
 
     # Get latest data. Go to next item if no data
     # We MUST get this for filtering, even if latest data is not shown.
@@ -1049,7 +1063,7 @@ def filter_item(item_id, ofs):
     if itd.used == False:
         return itd
 
-    itd.item_price = Data(True, int(latest_data.price_avg.value), "Price: %s")
+    itd.item_price = Data(True, int(latest_data.price_avg.value), "Price: %d")
 
     itd.ld = latest_data
 
@@ -1538,13 +1552,13 @@ def get_latest_data(itd, item_id, ofs):
         return ld
 
     # Store latest data
-    ld.insta_sell_price = Data(lf.insta_sell_price.show, insta_sell_price, "Insta Sell Price: %s")
-    ld.insta_sell_time_min = Data(lf.insta_sell_time_min.show, insta_sell_time_min, "Insta Sell Time: %s Min Ago")    
-    ld.insta_buy_price = Data(lf.insta_buy_price.show, insta_buy_price, "Insta Buy Price: %s")
-    ld.insta_buy_time_min = Data(lf.insta_buy_time_min.show, insta_buy_time_min, "Insta Buy Time: %s Min Ago")
-    ld.price_avg = Data(lf.price_avg.show, price_avg, "Average Price: %s") 
-    ld.margin_taxed = Data(lf.margin_taxed.show, margin_taxed, "Margin (Taxed): %s")
-    ld.profit_per_limit = Data(lf.profit_per_limit.show, profit_per_limit, "Profit Per Limit: %s")
+    ld.insta_sell_price = Data(lf.insta_sell_price.show, insta_sell_price, "Insta Sell Price: %d")
+    ld.insta_sell_time_min = Data(lf.insta_sell_time_min.show, insta_sell_time_min, "Insta Sell Time: %d Min Ago")    
+    ld.insta_buy_price = Data(lf.insta_buy_price.show, insta_buy_price, "Insta Buy Price: %d")
+    ld.insta_buy_time_min = Data(lf.insta_buy_time_min.show, insta_buy_time_min, "Insta Buy Time: %d Min Ago")
+    ld.price_avg = Data(lf.price_avg.show, price_avg, "Average Price: %d") 
+    ld.margin_taxed = Data(lf.margin_taxed.show, margin_taxed, "Margin (Taxed): %d")
+    ld.profit_per_limit = Data(lf.profit_per_limit.show, profit_per_limit, "Profit Per Limit: %d")
     ld.roi = Data(lf.roi.show, roi, "ROI: %.2f%%")
 
     return ld
@@ -1664,15 +1678,15 @@ def get_average_data(itd, item_id, ofs, avg_type):
         itd.used = False
         return ad
 
-    ad.insta_buy_avg = Data(opt.insta_buy_avg.show, insta_buy_avg, "Average Insta Buy Price: %s")
-    ad.insta_buy_vol = Data(opt.insta_buy_vol.show, insta_buy_vol, "Average Insta Buy Vol: %s")
-    ad.insta_sell_avg = Data(opt.insta_sell_avg.show, insta_sell_avg, "Average Insta Sell Price: %s")
-    ad.insta_sell_vol = Data(opt.insta_sell_vol.show, insta_sell_vol, "Average Insta Sell Vol: %s")
-    ad.avg_vol = Data(opt.avg_vol.show, avg_vol, "Average Volume: %s")
-    ad.price_avg = Data(opt.price_avg.show, price_avg, "Average Price: %s")
-    ad.margin_taxed = Data(opt.margin_taxed.show, margin_taxed, "Average Margin (Taxed): %s")
-    ad.profit_per_limit = Data(opt.profit_per_limit.show, profit_per_limit, "Average Profit Per Limit: %s")
-    ad.roi_avg = Data(opt.roi_avg.show, roi_avg, "Average ROI: %.2f%")
+    ad.insta_buy_avg = Data(opt.insta_buy_avg.show, insta_buy_avg, "Average Insta Buy Price: %d")
+    ad.insta_buy_vol = Data(opt.insta_buy_vol.show, insta_buy_vol, "Average Insta Buy Vol: %d")
+    ad.insta_sell_avg = Data(opt.insta_sell_avg.show, insta_sell_avg, "Average Insta Sell Price: %d")
+    ad.insta_sell_vol = Data(opt.insta_sell_vol.show, insta_sell_vol, "Average Insta Sell Vol: %d")
+    ad.avg_vol = Data(opt.avg_vol.show, avg_vol, "Average Volume: %d")
+    ad.price_avg = Data(opt.price_avg.show, price_avg, "Average Price: %d")
+    ad.margin_taxed = Data(opt.margin_taxed.show, margin_taxed, "Average Margin (Taxed): %d")
+    ad.profit_per_limit = Data(opt.profit_per_limit.show, profit_per_limit, "Average Profit Per Limit: %d")
+    ad.roi_avg = Data(opt.roi_avg.show, roi_avg, "Average ROI: %.2f%%")
 
     return ad
     
@@ -2068,35 +2082,35 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
         # Show legend for plot labels
         axes.legend()
         """
-    tsd.insta_buy_avg = Data(opt.insta_buy_avg.show, insta_buy_avg, "Insta Buy Price (Average): %s")
-    tsd.insta_buy_vol = Data(opt.insta_buy_vol.show, insta_buy_vol, "Insta Buy Volume: %s")
-    tsd.insta_sell_avg = Data(opt.insta_sell_avg.show, insta_sell_avg, "Insta Sell Price (Average): %s")
-    tsd.insta_sell_vol = Data(opt.insta_sell_vol.show, insta_sell_vol, "Insta Sell Volume: %s")
-    tsd.total_vol = Data(opt.total_vol.show, total_vol, "Total Volume: %s")
-    tsd.price_avg = Data(opt.price_avg.show, price_avg, "Price (Average): %s")
-    tsd.margin_taxed_avg = Data(opt.margin_taxed_avg.show, margin_taxed_avg, "Margin (Average Taxed): %s")
-    tsd.profit_per_limit_avg = Data(opt.profit_per_limit_avg.show, profit_per_limit_avg, "Profit Per Limit (Average): %s")
+    tsd.insta_buy_avg = Data(opt.insta_buy_avg.show, insta_buy_avg, "Insta Buy Price (Average): %d")
+    tsd.insta_buy_vol = Data(opt.insta_buy_vol.show, insta_buy_vol, "Insta Buy Volume: %d")
+    tsd.insta_sell_avg = Data(opt.insta_sell_avg.show, insta_sell_avg, "Insta Sell Price (Average): %d")
+    tsd.insta_sell_vol = Data(opt.insta_sell_vol.show, insta_sell_vol, "Insta Sell Volume: %d")
+    tsd.total_vol = Data(opt.total_vol.show, total_vol, "Total Volume: %d")
+    tsd.price_avg = Data(opt.price_avg.show, price_avg, "Price (Average): %d")
+    tsd.margin_taxed_avg = Data(opt.margin_taxed_avg.show, margin_taxed_avg, "Margin (Average Taxed): %d")
+    tsd.profit_per_limit_avg = Data(opt.profit_per_limit_avg.show, profit_per_limit_avg, "Profit Per Limit (Average): %d")
 
     tsd.roi_avg = Data(opt.roi_avg.show, roi_avg, "ROI (Average): %.2f%%")
-    tsd.insta_buy_change = Data(opt.insta_buy_change.show, insta_buy_change, "Insta Buy Change: %s")
+    tsd.insta_buy_change = Data(opt.insta_buy_change.show, insta_buy_change, "Insta Buy Change: %d")
     tsd.insta_buy_change_percent = Data(opt.insta_buy_change_percent.show, insta_buy_change_percent, "Insta Buy Change Percent: %.2f%%")
     tsd.buy_over_sell_vol_ratio = Data(opt.buy_over_sell_vol_ratio.show, buy_over_sell_vol_ratio, "Buy/Sell Vol Ratio: %.2f")
     tsd.insta_buy_cov = Data(opt.insta_buy_cov.show, insta_buy_cov, "Insta Buy CoV: %.2f%%")
-    tsd.insta_sell_change = Data(opt.insta_sell_change.show, insta_sell_change, "Insta Sell Change: %s")
+    tsd.insta_sell_change = Data(opt.insta_sell_change.show, insta_sell_change, "Insta Sell Change: %d")
     tsd.insta_sell_change_percent = Data(opt.insta_sell_change_percent.show, insta_sell_change_percent, "Insta Sell Change Percent: %.2f%%")
     tsd.sell_over_buy_vol_ratio = Data(opt.sell_over_buy_vol_ratio.show, sell_over_buy_vol_ratio, "Sell/Buy Vol Ratio: %.2f")
     tsd.insta_sell_cov = Data(opt.insta_sell_cov.show, insta_sell_cov, "Insta Sell CoV: %.2f%%")
-    tsd.price_change = Data(opt.price_change.show, price_change, "Price Change: %s")
+    tsd.price_change = Data(opt.price_change.show, price_change, "Price Change: %d")
     tsd.price_change_percent = Data(opt.price_change_percent.show, price_change_percent, "Price Change Percent: %.2f%%")
 
-    tsd.insta_buy_tunnel_price = Data(opt.insta_buy_tunnel_price.show, insta_buy_tunnel_price, "Insta Buy Tunnel Price: %s")
-    tsd.buy_vol_above_tunnel = Data(opt.buy_vol_above_tunnel.show, buy_vol_above_tunnel, "Buy Volume Above Tunnel: %s")
+    tsd.insta_buy_tunnel_price = Data(opt.insta_buy_tunnel_price.show, insta_buy_tunnel_price, "Insta Buy Tunnel Price: %d")
+    tsd.buy_vol_above_tunnel = Data(opt.buy_vol_above_tunnel.show, buy_vol_above_tunnel, "Buy Volume Above Tunnel: %d")
     tsd.tunnel_buy_opportunity = Data(opt.tunnel_buy_opportunity.show, tunnel_buy_opportunity, "Tunnel Buy Opportunity: %.2f%%")
-    tsd.insta_sell_tunnel_price = Data(opt.insta_sell_tunnel_price.show, insta_sell_tunnel_price, "Insta Sell Tunnel Price: %s")
-    tsd.sell_vol_below_tunnel = Data(opt.sell_vol_below_tunnel.show, sell_vol_below_tunnel, "Sell Volume Below Tunnel: %s")
+    tsd.insta_sell_tunnel_price = Data(opt.insta_sell_tunnel_price.show, insta_sell_tunnel_price, "Insta Sell Tunnel Price: %d")
+    tsd.sell_vol_below_tunnel = Data(opt.sell_vol_below_tunnel.show, sell_vol_below_tunnel, "Sell Volume Below Tunnel: %d")
     tsd.tunnel_sell_opportunity = Data(opt.tunnel_sell_opportunity.show, tunnel_sell_opportunity, "Tunnel Sell Opportunity: %.2f%%")
-    tsd.tunnel_margin_taxed = Data(opt.tunnel_margin_taxed.show, tunnel_margin_taxed, "Tunnel Margin Taxed: %s")
-    tsd.tunnel_profit_per_limit = Data(opt.tunnel_profit_per_limit.show, tunnel_profit_per_limit, "Tunnel Profit Per Limit: %s")
+    tsd.tunnel_margin_taxed = Data(opt.tunnel_margin_taxed.show, tunnel_margin_taxed, "Tunnel Margin Taxed: %d")
+    tsd.tunnel_profit_per_limit = Data(opt.tunnel_profit_per_limit.show, tunnel_profit_per_limit, "Tunnel Profit Per Limit: %d")
     tsd.tunnel_roi = Data(opt.tunnel_roi.show, tunnel_roi, "Tunnel ROI: %.2f%%")
 
     return tsd
@@ -2146,10 +2160,13 @@ def get_sell_vol_below_tunnel(insta_sell_prices, insta_sell_vols, insta_sell_tun
 """
 com()
 
-Return comma separated string given an integer
+Return comma separated string given an intger or float
 """
-def com(integer):
-    return format(integer, ',d')
+def com(value, type):
+    if (type == 'd'):
+        return format(value, ',d')
+    if (type == 'f'):
+        return format(value, ',.2f')    
 
 """
 find_item_entry()
