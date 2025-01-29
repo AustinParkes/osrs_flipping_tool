@@ -1720,42 +1720,58 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
 
     tsd = TimeSeriesData("")  
 
+    # Get current time in seconds
+    curr_time = int(time.time())
+
+    # Time variables in seconds
+    hour = 60*60
+    day = hour*24
+    week = day*7
+    month = week*4
+    year=month*12
+
     # TODO: 6 & 12 can be gotten from 24.
     # Get time range user options
     # 6 Hours
     if (timestep == "5m" and num_steps == 72):
         opt = ofs.s6hf
         tsd.type = "6 Hours"
+        time_range_start = curr_time - (hour*6)
         if (ofs.show_s6hf == True):
             tsd.used = True
     # 12 Hours
     if (timestep == "5m" and num_steps == 144):
         opt = ofs.s12hf
         tsd.type = "12 Hours"
+        time_range_start = curr_time - (hour*12)
         if (ofs.show_s12hf == True):
             tsd.used = True
     # 24 Hours
     if (timestep == "5m" and num_steps == 288):
         opt = ofs.s24hf
         tsd.type = "24 Hours"
+        time_range_start = curr_time - day
         if (ofs.show_s24hf == True):
             tsd.used = True
     # 1 Week
     if (timestep == "1h" and num_steps == 168):
         opt = ofs.s1wf
         tsd.type = "Week"
+        time_range_start = curr_time - week
         if (ofs.show_s1wf == True):
             tsd.used = True
     # 1 Month
     if (timestep == "6h" and num_steps == 112):
         tsd.type = "Month"
         opt = ofs.s1mf
+        time_range_start = curr_time - month
         if (ofs.show_s1mf == True):
             tsd.used = True
     # 1 Year
     if (timestep == "24h" and num_steps == 364):
         opt = ofs.s1yf
         tsd.type = "Year"
+        time_range_start = curr_time - year
         if (ofs.show_s1yf == True):
             tsd.used = True
 
@@ -1819,6 +1835,17 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
     # TODO: Why do I loop this direction???? It plots correctly still .. 
     for i in range(num_entries, num_entries-num_steps, -1):
         entry = data_ts[i]
+
+        # Check if timestamp entry is outside of our desired time range
+        # and wrap up if it is.
+        # TODO: Need to handle for when data is not used!
+        #       e.g. insta sell data is there but insta buy data isn't ...
+        if (entry['timestamp'] < time_range_start):
+            # No data in our time range
+            if (i == num_entries):
+                tsd.used = False
+                return tsd
+            break
 
         # Get insta sell price data
         if (entry['avgLowPrice'] != None):
