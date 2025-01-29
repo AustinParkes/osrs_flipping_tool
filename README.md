@@ -3,5 +3,5 @@ Allows users to find items based on an item filter.
 
 ## Installation
 
-### Install jsonpickle
+#### Install jsonpickle
 pip install jsonpickle
