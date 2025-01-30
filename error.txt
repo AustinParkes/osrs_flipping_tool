@@ -1,10 +1,2 @@
-Traceback (most recent call last):
-  File "./flipping.py", line 2320, in <module>
-    main()
-  File "./flipping.py", line 2316, in main
-    filter_items(args)
-  File "./flipping.py", line 998, in filter_items
-    show_data(config, itd_list)
-  File "./flipping.py", line 698, in show_data
-    itd_list = sorted(itd_list, key=attrgetter(config.data_path))
-TypeError: '<' not supported between instances of 'NoneType' and 'int'
+./flipping.py:645: RuntimeWarning: More than 20 figures have been opened. Figures created through the pyplot interface (`matplotlib.pyplot.figure`) are retained until explicitly closed and may consume too much memory. (To control this warning, see the rcParam `figure.max_open_warning`).
+

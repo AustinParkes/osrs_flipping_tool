@@ -298,7 +298,7 @@ class OutputFilters():
             self.total_vol = Range(show=False)                  # Normal
             self.margin_taxed_avg = Range(show=False)           # Normal
             self.profit_per_limit_avg = Range(show=False)       # Normal
-            self.plot = DisplayPlot(show = True)               # Plot
+            self.plot = DisplayPlot(show = False)               # Plot
             
             # Changes and Percentages
             self.roi_avg = Range(show=False)                    # Percent
@@ -310,8 +310,8 @@ class OutputFilters():
             self.insta_sell_change_percent = Range(show=False)  # Percent
             self.sell_over_buy_vol_ratio = Range(show=False)    # Ratio
             self.insta_sell_cov = Range(show=False)             # Percent
-            self.price_change = Range(show=True)               # Normal
-            self.price_change_percent = Range(show=True)       # Percent
+            self.price_change = Range(show=False)               # Normal
+            self.price_change_percent = Range(show=False)       # Percent
 
             # Tunnel Data
             self.insta_buy_tunnel_price = Range(show=False)     # Normal
@@ -520,7 +520,10 @@ class ItemData():
 # Latest Data
 class LatestData():
     def __init__(self, desc):
-        self.used = False
+        # Does user want to show this data
+        self.shown = False
+
+        # Is this data used regardless of whether user wants to show it
         self.desc = desc
         self.insta_buy_price = Data()
         self.insta_buy_time = Data()
@@ -536,18 +539,33 @@ class LatestData():
     
     def show(self, file, use_email):
         global email_msg
+        if (self.shown != True):
+            return
+
+        # Print header
+        print("Latest:")
+        if (file):
+            file.write("Latest:\n")
+        if (use_email):
+            email_msg = email_msg + "Latest:\n"
+
+        # Show data if there is any to show
         if (self.used == True):
-            print("Latest:")
-            if (file):
-                file.write("Latest:\n")
-            if (use_email):
-                email_msg = email_msg + "Latest:\n"
             show_obj_data(self, file, use_email)
+        else:
+            print("  No data\n")
+            if (file):
+                file.write("  No data\n\n")
+            if (use_email):
+                email_msg = email_msg + "  No data\n\n"
 
 # 5m or 1h average data
 class AvgData():
     def __init__(self, desc):
-        self.used = False
+        # Does user want to show this data
+        self.shown = False
+
+        # Is this data used regardless of whether user wants to show it
         self.type = ""
         self.desc = desc
 
@@ -563,17 +581,35 @@ class AvgData():
 
     def show(self, file, use_email):
         global email_msg
+        if (self.shown != True):
+            return
+
+        # Print header
+        header = "%s Average:" % (self.type)
+        print(header)
+        if (file):
+            file.write(header + "\n")
+        if (use_email):
+            email_msg = email_msg + header + "\n"
+
+        # Show data if there is any to show
         if (self.used == True):
-            print("%s Average:" % (self.type))
-            if (file):
-                file.write("%s Average:" % (self.type) + "\n")
-            if (use_email):
-                email_msg = email_msg + "%s Average:" % (self.type) + "\n"
             show_obj_data(self, file, use_email)
+        else:
+            print("  No data\n")
+            if (file):
+                file.write("  No data\n\n")
+            if (use_email):
+                email_msg = email_msg + "  No data\n\n"
+
 
 # Data for a timeseries
 class TimeSeriesData():
     def __init__(self, desc):
+        # Does user want to show this data
+        self.shown = False
+
+        # Is this data used regardless of whether user wants to show it
         self.used = False
         self.type = ""
         self.desc = desc
@@ -671,13 +707,27 @@ class TimeSeriesData():
 
     def show(self, file, use_email):
         global email_msg
+        if (self.shown != True):
+            return
+
+        # Print header
+        header = "Last %s:" % (self.type)
+        print(header)
+        if (file):
+            file.write(header + "\n")
+        if (use_email):
+            email_msg = email_msg + header + "\n" 
+
+        # Print data if there is any
         if (self.used == True):
-            print("Last %s:" % (self.type))
-            if (file):
-                file.write("Last %s:" % (self.type) + "\n")
-            if (use_email):
-                email_msg = email_msg + "Last %s:" % (self.type) + "\n"    
             show_obj_data(self, file, use_email)
+        else:
+            print("  No data\n")
+            if (file):
+                file.write("  No data\n\n")
+            if (use_email):
+                email_msg = email_msg + "  No data\n\n"
+            
 
 # Show data for a time range's Data() objects
 def show_obj_data(obj, file, use_email):
@@ -762,8 +812,6 @@ def show_data(config, itd_list):
         save_plots_pdf(config.plot_filename)
 
     # Send email if user has opted to
-    # TODO: Email message is not being tailored correctly .. not showing in email right.
-    # Was showing everything except last 12 hour data.
     if (use_email == True):
         creds = config.email_creds
         sender = creds[0]
@@ -790,6 +838,9 @@ def show_data(config, itd_list):
         with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
             server.login(sender, passw)
             server.sendmail(sender, recip, msg.as_string())
+
+    # Print some final statistics
+    print("Items Shown: %d" % (len(itd_list)))
 
 def get_plot_pdf_data(config):
 
@@ -1457,6 +1508,9 @@ def get_latest_data(itd, item_id, ofs):
     # Latest filter
     lf = ofs.lf
 
+    # Mark whether user desires to show this data or not
+    ld.shown = ofs.show_lf
+
     # Check if item does not exist in latest data
     if (str(item_id)) not in latest_all['data']:
         itd.used = False
@@ -1575,11 +1629,13 @@ def get_average_data(itd, item_id, ofs, avg_type):
     if (avg_type == "5m"):
         avg_all = avg_5m_all
         opt = ofs.a5mf
+        ad.shown = ofs.show_a5mf
         if (ofs.show_a5mf == True):
             ad.used = True
     elif (avg_type == "1h"):
         avg_all = avg_1h_all
         opt = ofs.a1hf
+        ad.shown = ofs.a1hf
         if (ofs.show_a1hf == True):
             ad.used = True
     else:
@@ -1709,8 +1765,6 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
     min_insta_sell_price = 0xffffffff
     max_insta_buy_price = 0
     min_insta_buy_price = 0xffffffff
-    min_list = []
-    max_list = []
     insta_sell_prices = []
     insta_buy_prices = []
     insta_buy_vols = []
@@ -1736,6 +1790,7 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
     if (timestep == "5m" and num_steps == 72):
         opt = ofs.s6hf
         tsd.type = "6 Hours"
+        tsd.shown = ofs.show_s6hf
         time_range_start = curr_time - (hour*6)
         if (ofs.show_s6hf == True):
             tsd.used = True
@@ -1743,6 +1798,7 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
     if (timestep == "5m" and num_steps == 144):
         opt = ofs.s12hf
         tsd.type = "12 Hours"
+        tsd.shown = ofs.show_s12hf
         time_range_start = curr_time - (hour*12)
         if (ofs.show_s12hf == True):
             tsd.used = True
@@ -1750,6 +1806,7 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
     if (timestep == "5m" and num_steps == 288):
         opt = ofs.s24hf
         tsd.type = "24 Hours"
+        tsd.shown = ofs.show_s24hf
         time_range_start = curr_time - day
         if (ofs.show_s24hf == True):
             tsd.used = True
@@ -1757,13 +1814,15 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
     if (timestep == "1h" and num_steps == 168):
         opt = ofs.s1wf
         tsd.type = "Week"
+        tsd.shown = ofs.show_s1wf
         time_range_start = curr_time - week
         if (ofs.show_s1wf == True):
             tsd.used = True
     # 1 Month
     if (timestep == "6h" and num_steps == 112):
-        tsd.type = "Month"
         opt = ofs.s1mf
+        tsd.type = "Month"
+        tsd.shown = ofs.show_s1mf
         time_range_start = curr_time - month
         if (ofs.show_s1mf == True):
             tsd.used = True
@@ -1771,6 +1830,7 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
     if (timestep == "24h" and num_steps == 364):
         opt = ofs.s1yf
         tsd.type = "Year"
+        tsd.shown = ofs.show_s1yf
         time_range_start = curr_time - year
         if (ofs.show_s1yf == True):
             tsd.used = True
@@ -1838,8 +1898,6 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
 
         # Check if timestamp entry is outside of our desired time range
         # and wrap up if it is.
-        # TODO: Need to handle for when data is not used!
-        #       e.g. insta sell data is there but insta buy data isn't ...
         if (entry['timestamp'] < time_range_start):
             # No data in our time range
             if (i == num_entries):
@@ -1887,6 +1945,14 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
             # Get all local maxima into a list
             #get_maxima(max_list, data_ts, num_entries, num_steps, i)
  
+    # Leave if there are no trades for either buy or sell data
+    # TODO: Leaving prematurely is an issue because some of the filters
+    # don't get a chance to filter out the item.
+    # I think we just need checks for any division stuff.
+    if (insta_sell_vol == 0 or insta_buy_vol == 0):
+        tsd.used = False
+        return
+
     # Get total trade volume
     total_vol = insta_sell_vol + insta_buy_vol
     f = opt.total_vol.filter(total_vol)
@@ -2032,8 +2098,8 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
         itd.used = False
         return tsd
 
-    # Get tunnel return on investment
-    tunnel_roi = (tunnel_profit_per_limit / insta_sell_tunnel_price)*100
+    # Get tunnel return on investment per item
+    tunnel_roi = (tunnel_margin_taxed / insta_sell_tunnel_price)*100
     f = opt.tunnel_roi.filter(tunnel_roi)
     if (f == False):
         itd.used = False
@@ -2288,21 +2354,10 @@ def main():
                         metavar=('<file_name>.pkl'),
                         dest='load_filter')	
 
-    # TODO: Add argument to show a .pkl file's contents (filters or arguments)
     parser.add_argument('-f', '--save-filter',
                         help='Save programs current filter to file (.pkl)',
                         metavar=('<file_name>.pkl'),
                         dest='save_filter')
-    
-    parser.add_argument('-a', '--save-program',
-                        help='Save programs arguments for easy repeated use.\nArguments will not be saved if program is unsuccessful.',
-                        metavar=('<file_name>.pkl'),
-                        dest='save_args')    
-
-    parser.add_argument('-A', '--load-program',
-                        help='Load program arguments from a previous run.',
-                        metavar=('<file_name>.pkl'),
-                        dest='load_args')    
 
     parser.add_argument('-I', '--load-items',
                         help='Load item list from a file. Each item should be on its own line.',
