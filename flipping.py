@@ -10,7 +10,6 @@ import time
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import argparse
-import pickle
 from operator import attrgetter
 import smtplib, ssl
 from email.message import EmailMessage
@@ -83,8 +82,6 @@ class OutputFilters():
     def __init__(self):
         # Determines if any data is output
         self.used = False
-
-        self.item_list = []
 
         self.bif = self.BasicItemFilters()
         self.lf = self.LatestFilters()
@@ -981,9 +978,9 @@ def filter_items(args):
     # Check if user is loading existing filter as object
     if (args.load_filter):
         with open(args.load_filter, 'r') as f:
-            #ofs = pickle.load(f) 
             r = f.read()
         ofs = jsonpickle.decode(r)
+        # Must run ofs init code since we did not instantiate object normally
         ofs.init()
     else:        
         ofs = OutputFilters()
@@ -1001,7 +998,6 @@ def filter_items(args):
     if (args.save_filter):
         s = jsonpickle.encode(ofs, indent=3)
         with open(args.save_filter, 'w') as f:
-        #    pickle.dump(ofs, f)
             s = jsonpickle.encode(ofs, indent=3)
             f.write(s)
             return  
