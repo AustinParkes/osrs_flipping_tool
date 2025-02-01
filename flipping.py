@@ -28,11 +28,6 @@ ts_url = api_url + '/timeseries'
 
 email_msg = ""
 
-# 1) Let user enable which data they want to see with output filters.
-# 2) If data is enabled for a particular time frame, then enable 
-#    parsing that time frame. /latest is exception
-# 3) We cannot apply filters to data user does not want to see
-
 # Class to let user enter range filter
 class Range():
     def __init__(self, show=False, min=-2147483647, max=2147483647):
@@ -208,10 +203,10 @@ class OutputFilters():
             # Tunnel Data
             self.insta_buy_tunnel_price = Range(show=False)     # Normal
             self.buy_vol_above_tunnel = Range(show=False)       # Normal
-            self.tunnel_buy_opportunity = Range(show=False)     # Percent
+            self.buy_vol_above_tunnel_percent = Range(show=False)    # Percent
             self.insta_sell_tunnel_price = Range(show=False)    # Normal
             self.sell_vol_below_tunnel = Range(show=False)      # Normal
-            self.tunnel_sell_opportunity = Range(show=False)    # Percent
+            self.sell_vol_below_tunnel_percent = Range(show=False)     # Percent
             self.tunnel_margin_taxed = Range(show=False)        # Normal
             self.tunnel_profit_per_limit =  Range(show=False)   # Normal
             self.tunnel_roi =  Range(show=False)                # Percent
@@ -244,10 +239,10 @@ class OutputFilters():
             # Tunnel Data
             self.insta_buy_tunnel_price = Range(show=True)     # Normal
             self.buy_vol_above_tunnel = Range(show=True)       # Normal
-            self.tunnel_buy_opportunity = Range(show=True)     # Percent
+            self.buy_vol_above_tunnel_percent = Range(show=True)    # Percent
             self.insta_sell_tunnel_price = Range(show=True)    # Normal
             self.sell_vol_below_tunnel = Range(show=True)      # Normal
-            self.tunnel_sell_opportunity = Range(show=True)    # Percent
+            self.sell_vol_below_tunnel_percent = Range(show=True)     # Percent
             self.tunnel_margin_taxed = Range(show=False)        # Normal
             self.tunnel_profit_per_limit =  Range(show=True, min=150000)   # Normal
             self.tunnel_roi =  Range(show=True)                # Percent
@@ -280,10 +275,10 @@ class OutputFilters():
             # Tunnel Data
             self.insta_buy_tunnel_price = Range(show=False)     # Normal
             self.buy_vol_above_tunnel = Range(show=False)       # Normal
-            self.tunnel_buy_opportunity = Range(show=False)     # Percent
+            self.buy_vol_above_tunnel_percent = Range(show=False)    # Percent
             self.insta_sell_tunnel_price = Range(show=False)    # Normal
             self.sell_vol_below_tunnel = Range(show=False)      # Normal
-            self.tunnel_sell_opportunity = Range(show=False)    # Percent
+            self.sell_vol_below_tunnel_percent = Range(show=False)     # Percent
             self.tunnel_margin_taxed = Range(show=False)        # Normal
             self.tunnel_profit_per_limit =  Range(show=False)   # Normal
             self.tunnel_roi =  Range(show=False)                # Percent
@@ -316,10 +311,10 @@ class OutputFilters():
             # Tunnel Data
             self.insta_buy_tunnel_price = Range(show=False)     # Normal
             self.buy_vol_above_tunnel = Range(show=False)       # Normal
-            self.tunnel_buy_opportunity = Range(show=False)     # Percent
+            self.buy_vol_above_tunnel_percent = Range(show=False)    # Percent
             self.insta_sell_tunnel_price = Range(show=False)    # Normal
             self.sell_vol_below_tunnel = Range(show=False)      # Normal
-            self.tunnel_sell_opportunity = Range(show=False)    # Percent
+            self.sell_vol_below_tunnel_percent = Range(show=False)     # Percent
             self.tunnel_margin_taxed = Range(show=False)        # Normal
             self.tunnel_profit_per_limit =  Range(show=False)   # Normal
             self.tunnel_roi =  Range(show=False)                # Percent
@@ -352,10 +347,10 @@ class OutputFilters():
             # Tunnel Data
             self.insta_buy_tunnel_price = Range(show=False)     # Normal
             self.buy_vol_above_tunnel = Range(show=False)       # Normal
-            self.tunnel_buy_opportunity = Range(show=False)     # Percent
+            self.buy_vol_above_tunnel_percent = Range(show=False)    # Percent
             self.insta_sell_tunnel_price = Range(show=False)    # Normal
             self.sell_vol_below_tunnel = Range(show=False)      # Normal
-            self.tunnel_sell_opportunity = Range(show=False)    # Percent
+            self.sell_vol_below_tunnel_percent = Range(show=False)     # Percent
             self.tunnel_margin_taxed = Range(show=False)        # Normal
             self.tunnel_profit_per_limit =  Range(show=False)   # Normal
             self.tunnel_roi =  Range(show=False)                # Percent
@@ -388,10 +383,10 @@ class OutputFilters():
             # Tunnel Data
             self.insta_buy_tunnel_price = Range(show=False)     # Normal
             self.buy_vol_above_tunnel = Range(show=False)       # Normal
-            self.tunnel_buy_opportunity = Range(show=False)     # Percent
+            self.buy_vol_above_tunnel_percent = Range(show=False)    # Percent
             self.insta_sell_tunnel_price = Range(show=False)    # Normal
             self.sell_vol_below_tunnel = Range(show=False)      # Normal
-            self.tunnel_sell_opportunity = Range(show=False)    # Percent
+            self.sell_vol_below_tunnel_percent = Range(show=False)     # Percent
             self.tunnel_margin_taxed = Range(show=False)        # Normal
             self.tunnel_profit_per_limit =  Range(show=False)   # Normal
             self.tunnel_roi =  Range(show=False)                # Percent
@@ -653,10 +648,10 @@ class TimeSeriesData():
         # Tunnel Data
         self.insta_buy_tunnel_price = Data()
         self.buy_vol_above_tunnel = Data()
-        self.tunnel_buy_opportunity = Data()
+        self.buy_vol_above_tunnel_percent = Data()
         self.insta_sell_tunnel_price = Data()
         self.sell_vol_below_tunnel = Data()
-        self.tunnel_sell_opportunity = Data()
+        self.sell_vol_below_tunnel_percent = Data()
         self.tunnel_margin_taxed = Data()
         self.tunnel_profit_per_limit = Data()
         self.tunnel_roi = Data()
@@ -666,10 +661,8 @@ class TimeSeriesData():
         self.plot_title = None
         self.insta_buy_times = None
         self.insta_buy_prices = None
-        #self.insta_buy_tunnel_price = None
         self.insta_sell_times = None
         self.insta_sell_prices = None
-        #self.insta_sell_tunnel_price = None
 
     # Plot data (Does not show the plot)
     def plot(self):
@@ -1038,11 +1031,21 @@ def filter_items(args):
             email_creds = [line.strip() for line in file]
             config.email_creds = email_creds
 
+    # Ensure user is not loading items from list and passing a single item
+    if (args.load_items and args.search_item):
+        print("Passed --load-items and --item. May only pass one of these options.")
+        quit(1)
+
     # Check if user is using items from a file list
     if (args.load_items):
         with open(args.load_items, 'r') as file:
             item_list = [line.strip() for line in file]
             id_list = convert_items_to_ids(item_list)
+
+    # Check if user is passing just a single item
+    if (args.search_item):
+        item_id = find_item_id(args.search_item)
+        id_list.append(item_id)
 
     # Check if user is saving data to a file
     if (args.save_data):
@@ -1118,39 +1121,6 @@ def filter_item(item_id, ofs):
 
     itd.ld = latest_data
 
-    # TODO: move this to timeseries function instead
-    # Get 24h data for last year
-    """
-    item_24h = get_json(ts_url, item_id=int(item_id), timestep="24h")
-    
-    # Get daily trade volume
-    high_24h_vol = item_24h['data'][0]['highPriceVolume']
-    low_24h_vol = item_24h['data'][0]['lowPriceVolume']
-    total_24h_vol = high_24h_vol + low_24h_vol      
-    total_24h_vol_c = format(total_24h_vol, ',d')
-    
-    # Get average daily trade volume for last year
-    high_yr_vol = 0
-    low_yr_vol = 0
-    h_count = 0
-    l_count = 0
-    for item in item_24h['data']:
-        h_vol = item['highPriceVolume']
-        if (h_vol != None):
-            h_count = h_count + 1
-            high_yr_vol = high_yr_vol + h_vol
-    
-        l_vol = item['lowPriceVolume']
-        if (l_vol != None):
-            l_count = l_count + 1        
-            low_yr_vol = low_yr_vol + l_vol
-  
-    high_yr_vol = int(high_yr_vol / h_count)
-    low_yr_vol = int(low_yr_vol / l_count)
-    avg_daily_vol = high_yr_vol + low_yr_vol
-    avg_daily_vol_c = format(avg_daily_vol, ',d')
-    """    
-
     # Get 5 minutes average data
     if (ofs.show_a5mf == True):
         itd.a5md = get_average_data(itd, int(item_id), ofs, "5m")
@@ -1163,40 +1133,46 @@ def filter_item(item_id, ofs):
         if (itd.used == False):
             return itd
 
-    # TODO: 6, 12, 24h can be consolidated.
+    # Get timeseries for 5 minute timesteps for better efficiency, if any are used.
+    # TODO: If any other timeseries ever uses the same step, we can do the same thing
+    #        before they are called.
+    if (ofs.show_s6hf == True or ofs.show_s12hf == True or ofs.show_s24hf == True):
+        data_ts = get_json(ts_url, item_id=int(item_id), timestep="5m")
+        data_ts = data_ts['data']
+
     # Get last 6h data
     if (ofs.show_s6hf == True):
-        itd.s6hd = get_timeseries_data(itd, int(item_id), ofs, "5m", 72)
+        itd.s6hd = get_timeseries_data(itd, int(item_id), ofs, "5m", 72, data_ts)
         if (itd.used == False):
             return itd
 
     # Get last 12h data
     if (ofs.show_s12hf == True):
-        itd.s12hd = get_timeseries_data(itd, int(item_id), ofs, "5m", 144)
+        itd.s12hd = get_timeseries_data(itd, int(item_id), ofs, "5m", 144, data_ts)
         if (itd.used == False):
             return itd
 
     # Get last 24h data
     if (ofs.show_s24hf == True):
-        itd.s24hd = get_timeseries_data(itd, int(item_id), ofs, "5m", 288)
+        itd.s24hd = get_timeseries_data(itd, int(item_id), ofs, "5m", 288, data_ts)
         if (itd.used == False):
             return itd
 
     # Get last 1 week data
     if (ofs.show_s1wf == True):
-        itd.s1wd = get_timeseries_data(itd, int(item_id), ofs, "1h", 168)
+        itd.s1wd = get_timeseries_data(itd, int(item_id), ofs, "1h", 168, None)
         if (itd.used == False):
             return itd
 
     # Get last 1 month data
     if (ofs.show_s1mf == True):
-        itd.s1md = get_timeseries_data(itd, int(item_id), ofs, "6h", 112)
+        itd.s1md = get_timeseries_data(itd, int(item_id), ofs, "6h", 112, None)
         if (itd.used == False):
             return itd
 
     # Get last 1 year data
     if (ofs.show_s1yf == True):
-        itd.s1yd = get_timeseries_data(itd, int(item_id), ofs, "24h", 364)
+        itd.s1yd = get_timeseries_data(itd, int(item_id), ofs, "24h", 364, None)
         if (itd.used == False):
             return itd
 
@@ -1254,108 +1230,7 @@ def apply_basic_filter(ofs, user_id_list):
         filtered_id_list.append(item_id)
 
     return filtered_id_list   
-
-def get_ideal_low_margin(data_ts, num_entries, num_steps, min_list, percentile):
-
-    if (len(min_list) == 0):
-        return 0
-
-    # Find the min closest to a given percentile and preferably above
-    # (e.g. percentile of .2 means 20% of the time, there is an opportunity
-    #  to buy)
-    num_items = 0
-    num_lower = 0
-    lowest_perc = 1
-    highest_perc_below = 0
-    closest_i = None
-    closest_i_below = None
-    for i in min_list:
-        for x in range(num_entries, num_entries-num_steps, -1):
-            item = data_ts[x]
-            if (item['avgLowPrice'] == None):
-                continue
-            num_items = num_items + 1
-            if (item['avgLowPrice'] < data_ts[i]['avgLowPrice']):
-                num_lower = num_lower + 1
-
-        # Compute local min closest to percentile above and below.
-        perc = num_lower/num_items
-        num_lower = 0
-        num_items = 0
-        if (perc >= percentile and closest_i == None):
-            lowest_perc = perc
-            closest_i = i
-        elif (perc >= percentile and closest_i != None):
-            if (perc < lowest_perc):
-                lowest_perc = perc
-                closest_i = i
-
-        if (perc < percentile and closest_i_below == None):
-            highest_perc_below = perc
-            closest_i_below = i
-        elif (perc < percentile and closest_i_below != None):
-            if (perc > highest_perc_below):
-                highest_perc_below = perc
-                closest_i_below = i
-    
-    # TODO:
-    # May eventually want to return more than the index .. we will see :)
-    if closest_i != None:
-        return closest_i
-    else:
-        return closest_i_below  
-    
-
-def get_ideal_high_margin(data_ts, num_entries, num_steps, max_list, percentile):
-    
-    if (len(max_list) == 0):
-        return 0
-
-    # Find the mmax closest to a given percentile and preferably below
-    # (e.g. percentile of .2 means 20% of the time, there is an opportunity
-    #  to sell)
-    num_items = 0
-    num_higher = 0
-    highest_perc = 0
-    lowest_perc_above = 1
-    closest_i = None
-    closest_i_above = None
-    for i in max_list:
-        for x in range(num_entries, num_entries-num_steps, -1):
-            item = data_ts[x]
-            if (item['avgHighPrice'] == None):
-                continue
-            num_items = num_items + 1
-            if (item['avgHighPrice'] > data_ts[i]['avgHighPrice']):
-                num_higher = num_higher + 1
-
-        # Compute local max closest to percentile above and below.
-        perc = num_higher/num_items
-        num_higher = 0
-        num_items = 0
-
-        if (perc >= percentile and closest_i == None):
-            highest_perc = perc
-            closest_i = i
-        elif (perc >= percentile and closest_i != None):
-            if (perc < highest_perc):
-                highest_perc = perc
-                closest_i = i
-
-        if (perc < percentile and closest_i_above == None):
-            lowest_perc_above = perc
-            closest_i_above = i
-        elif (perc < percentile and closest_i_above != None):
-            if (perc > lowest_perc_above):
-                lowest_perc_above = perc
-                closest_i_above = i
-
-    # TODO:
-    # May eventually want to return more than the index .. we will see :)
-    if closest_i != None:
-        return closest_i
-    else:
-        return closest_i_above     
+       
 
 def get_minima(min_list, data_ts, num_entries, num_steps, i):
 
@@ -1744,7 +1619,7 @@ def get_average_data(itd, item_id, ofs, avg_type):
 
     return ad
     
-def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
+def get_timeseries_data(itd, item_id, ofs, timestep, num_steps, data_ts):
 
     if (num_steps < 0 or num_steps > 364):
         print("Timeseries steps must be from 0 to 364")
@@ -1777,12 +1652,11 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
     # Get current time in seconds
     curr_time = int(time.time())
 
-    # Time variables in seconds
+    # Time steps in seconds
+    min5 = 60*5
     hour = 60*60
+    hour6 = hour*6
     day = hour*24
-    week = day*7
-    month = week*4
-    year=month*12
 
     # TODO: 6 & 12 can be gotten from 24.
     # Get time range user options
@@ -1791,7 +1665,9 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
         opt = ofs.s6hf
         tsd.type = "6 Hours"
         tsd.shown = ofs.show_s6hf
-        time_range_start = curr_time - (hour*6)
+        # Get calculated start, with some timesteps of padding incase 
+        # server has not updated
+        time_range_start = curr_time - min5*(num_steps+1)
         if (ofs.show_s6hf == True):
             tsd.used = True
     # 12 Hours
@@ -1799,7 +1675,7 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
         opt = ofs.s12hf
         tsd.type = "12 Hours"
         tsd.shown = ofs.show_s12hf
-        time_range_start = curr_time - (hour*12)
+        time_range_start = curr_time - min5*(num_steps+1)
         if (ofs.show_s12hf == True):
             tsd.used = True
     # 24 Hours
@@ -1807,7 +1683,7 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
         opt = ofs.s24hf
         tsd.type = "24 Hours"
         tsd.shown = ofs.show_s24hf
-        time_range_start = curr_time - day
+        time_range_start = curr_time - min5*(num_steps+1)
         if (ofs.show_s24hf == True):
             tsd.used = True
     # 1 Week
@@ -1815,7 +1691,7 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
         opt = ofs.s1wf
         tsd.type = "Week"
         tsd.shown = ofs.show_s1wf
-        time_range_start = curr_time - week
+        time_range_start = curr_time - hour*(num_steps+1)
         if (ofs.show_s1wf == True):
             tsd.used = True
     # 1 Month
@@ -1823,7 +1699,7 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
         opt = ofs.s1mf
         tsd.type = "Month"
         tsd.shown = ofs.show_s1mf
-        time_range_start = curr_time - month
+        time_range_start = curr_time - hour6*(num_steps+1)
         if (ofs.show_s1mf == True):
             tsd.used = True
     # 1 Year
@@ -1831,78 +1707,40 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
         opt = ofs.s1yf
         tsd.type = "Year"
         tsd.shown = ofs.show_s1yf
-        time_range_start = curr_time - year
+        time_range_start = curr_time - day*(num_steps+1)
         if (ofs.show_s1yf == True):
             tsd.used = True
 
-    # Get timestep data (365 datapoints, higher numbers are more recent)    
-    data_ts = get_json(ts_url, item_id=item_id, timestep=timestep)
-    data_ts = data_ts['data']
+    # Get timestep data if none provided
+    if (data_ts == None):
+        data_ts = get_json(ts_url, item_id=item_id, timestep=timestep)
+        data_ts = data_ts['data']
 
-    # Get the number of time series entries. If there are less entries
-    # than the number of steps, then adjust it.
-    num_entries = len(data_ts) - 1
-    if (num_entries < num_steps):
-        num_steps = num_entries
-
-    # Get earliest data
-    first_insta_buy_time = get_earliest_ts_data(data_ts, "timestamp", num_entries, num_steps)
-    first_insta_buy_avg = get_earliest_ts_data(data_ts, "avgHighPrice", num_entries, num_steps)
-    first_insta_sell_avg = get_earliest_ts_data(data_ts, "avgLowPrice", num_entries, num_steps)
-    
-    # Get most recent data
-    curr_insta_buy_time = get_current_ts_data(data_ts, "timestamp", num_entries, num_steps)
-    curr_insta_buy_avg = get_current_ts_data(data_ts, "avgHighPrice", num_entries, num_steps)
-    curr_insta_sell_avg = get_current_ts_data(data_ts, "avgLowPrice", num_entries, num_steps)
-
-    # If there is no first or last data then don't use tsd, but may 
-    # use other time frames (e.g. latest)
-    # TODO: Let user know there is no data for this.
-    if (curr_insta_buy_avg == None or curr_insta_sell_avg == None or\
-        first_insta_buy_avg == None or first_insta_sell_avg == None):
-        price_change = None
-        price_change_percent = None
+    # Get the number of time series entries. Series data is incomplete
+    # if not 365 entries, so simply no data to show
+    # - DO NOT apply filters, we want to return there is no data to user
+    # TODO: Wait .. I think we want to filter! 
+    num_entries = len(data_ts)
+    if (num_entries != 365):
         tsd.used = False
         return tsd
 
-    # Get insta buy change data
-    insta_buy_change = curr_insta_buy_avg - first_insta_buy_avg
-    insta_buy_change_percent = (insta_buy_change/first_insta_buy_avg)*100
+    # Compute earliest entry index
+    start = 364 - num_steps
 
-    # Get insta sell change data
-    insta_sell_change = curr_insta_sell_avg - first_insta_sell_avg
-    insta_sell_change_percent = (insta_sell_change/first_insta_sell_avg)*100
+    # Get most recent entry index 
+    end = 364
 
-    # Get average price change data
-    first_insta_price_avg = (first_insta_sell_avg + first_insta_buy_avg)/2     
-    curr_insta_price_avg = (curr_insta_sell_avg + curr_insta_buy_avg)/2
-    price_change = int(curr_insta_price_avg - first_insta_price_avg)
-    price_change_percent = (price_change / first_insta_price_avg)*100
-
-    # Check if price change passes filter
-    f = opt.price_change.filter(price_change)
-    if (f == False):
-        itd.used = False
-        return tsd
-
-    # Check if price change percent passes filter
-    f = opt.price_change_percent.filter(price_change_percent)
-    if (f == False):
-        itd.used = False
-        return tsd
-
-    # Loop entries from most recent to earliest
-    # TODO: Why do I loop this direction???? It plots correctly still .. 
-    for i in range(num_entries, num_entries-num_steps, -1):
+    # Loop entries from most recent to start of timeseries
+    # - Makes timestamp check more efficient because we can break out of loop
+    #   as soon as we leave desired time range
+    # - Note: Matplotlib still plots in the correct direction
+    for i in range(end, start, -1):
         entry = data_ts[i]
 
         # Check if timestamp entry is outside of our desired time range
-        # and wrap up if it is.
+        # and leave loop if it is
         if (entry['timestamp'] < time_range_start):
-            # No data in our time range
-            if (i == num_entries):
-                tsd.used = False
-                return tsd
             break
 
         # Get insta sell price data
@@ -1944,14 +1782,96 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
                 min_ibp_ts = entry['timestamp']
             # Get all local maxima into a list
             #get_maxima(max_list, data_ts, num_entries, num_steps, i)
- 
-    # Leave if there are no trades for either buy or sell data
-    # TODO: Leaving prematurely is an issue because some of the filters
-    # don't get a chance to filter out the item.
-    # I think we just need checks for any division stuff.
-    if (insta_sell_vol == 0 or insta_buy_vol == 0):
+
+    # Do not show the timeseries data if either buy or sell data is non-existent.
+    # - Must still apply item filters, so do not leave.
+    if (buy_count == 0 or sell_count == 0):
         tsd.used = False
-        return
+
+    # Initialize data derived from division, incase not computed due to denominator of 0
+    buy_over_sell_vol_ratio = None
+    sell_over_buy_vol_ratio = None
+    insta_sell_avg = None
+    insta_buy_avg = None
+    roi_avg = None
+    sell_vol_below_tunnel_percent = None
+    buy_vol_above_tunnel_percent = None
+    tunnel_roi = None
+    insta_buy_cov = None
+    insta_sell_cov = None
+    insta_buy_change = None
+    insta_buy_change_percent = None
+    insta_sell_change = None
+    insta_sell_change_percent = None
+    price_change = None
+    price_change_percent = None
+
+    # Check for insta buy data
+    if (insta_buy_prices != []):
+        first_insta_buy = insta_buy_prices[-1]
+        last_insta_buy = insta_buy_prices[0]
+
+        # Get insta buy change over timeseries
+        insta_buy_change = last_insta_buy - first_insta_buy
+        
+        # Get insta buy change percent over timeseries
+        insta_buy_change_percent = (insta_buy_change/first_insta_buy)*100
+
+    # Apply filters
+    f = opt.insta_buy_change.filter(insta_buy_change)
+    if (f == False):
+        itd.used = False
+        return tsd
+
+    f = opt.insta_buy_change_percent.filter(insta_buy_change_percent)
+    if (f == False):
+        itd.used = False
+        return tsd
+
+    # Check for insta sell data
+    if (insta_sell_prices != []):
+        first_insta_sell = insta_sell_prices[-1]
+        last_insta_sell = insta_sell_prices[0]
+
+        # Get insta sell change over timeseries
+        insta_sell_change = last_insta_sell - first_insta_sell
+        
+        # Get insta sell change percent over timeseries
+        insta_sell_change_percent = (insta_sell_change/first_insta_sell)*100
+
+    # Apply filters
+    f = opt.insta_sell_change.filter(insta_sell_change)
+    if (f == False):
+        itd.used = False
+        return tsd
+
+    f = opt.insta_sell_change_percent.filter(insta_sell_change_percent)
+    if (f == False):
+        itd.used = False
+        return tsd
+
+    # Get price change data if we have the data
+    if (insta_buy_prices != [] and insta_sell_prices != []):
+        # Price determined by average of buy and sell data
+        first_price = int((first_insta_buy + first_insta_sell)/2)
+        last_price = int((last_insta_buy + last_insta_sell)/2)
+
+        # Get price change
+        price_change = last_price - first_price
+
+        # Get price change percent
+        price_change_percent = price_change/first_price
+
+    # Apply filters
+    f = opt.price_change.filter(price_change)
+    if (f == False):
+        itd.used = False
+        return tsd
+
+    f = opt.price_change_percent.filter(price_change_percent)
+    if (f == False):
+        itd.used = False
+        return tsd
 
     # Get total trade volume
     total_vol = insta_sell_vol + insta_buy_vol
@@ -1961,52 +1881,50 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
         return tsd
 
     # Get buy over sell volume ratio
-    buy_over_sell_vol_ratio = insta_buy_vol / insta_sell_vol
+    if (insta_sell_vol != 0):
+        buy_over_sell_vol_ratio = insta_buy_vol / insta_sell_vol
+    f = opt.buy_over_sell_vol_ratio.filter(buy_over_sell_vol_ratio)
+    if (f == False):
+        itd.used = False
+        return tsd    
 
     # Get sell over buy volume ratio
-    sell_over_buy_vol_ratio = insta_sell_vol / insta_buy_vol
-
-    # Get average volume for each timestep
-    # TODO: Make the avg vol a filter item?
-    #avg_vol = int(total_vol/num_steps)
-    #avg_insta_sell_vol = int(insta_sell_vol/num_steps)
-    #avg_insta_buy_vol = int(insta_buy_vol/num_steps)
-
-    if (sell_count == 0):
+    if (insta_buy_vol != 0):
+        sell_over_buy_vol_ratio = insta_sell_vol / insta_buy_vol
+    f = opt.sell_over_buy_vol_ratio.filter(sell_over_buy_vol_ratio)
+    if (f == False):
         itd.used = False
         return tsd
 
-    # Check if insta sell avg passes filter
-    insta_sell_avg = int(total_insta_sell_price/sell_count)
+    # Get insta sell average price
+    if (sell_count != 0):
+        insta_sell_avg = int(total_insta_sell_price/sell_count)
     f = opt.insta_sell_avg.filter(insta_sell_avg)
     if (f == False):
         itd.used = False
         return tsd
 
-    # Check if insta sell vol passes filter
+    # Get insta sell volume
     f = opt.insta_sell_vol.filter(insta_sell_vol)
     if (f == False):
         itd.used = False
         return tsd
 
-    if (buy_count == 0):
-        itd.used = False
-        return tsd
-
-    # Check if insta buy avg passes filter
-    insta_buy_avg = int(total_insta_buy_price/buy_count)
+    # Get insta buy average price
+    if (buy_count != 0):
+        insta_buy_avg = int(total_insta_buy_price/buy_count)
     f = opt.insta_buy_avg.filter(insta_buy_avg)
     if (f == False):
         itd.used = False
         return tsd
 
-    # Check if insta buy vol passes filter
+    # Get insta sell volume
     f = opt.insta_sell_vol.filter(insta_buy_vol)
     if (f == False):
         itd.used = False
         return tsd
 
-    # Check if price avg passes filter
+    # Get average price
     # Note: We use item price from basic filter for our price filter
     price_avg = (insta_buy_avg + insta_sell_avg)/2
     f = ofs.bif.item_price.filter(price_avg)
@@ -2014,32 +1932,27 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
         itd.used = False
         return tsd
 
-    # Check if margin taxed avg passes filter
+    # Get margin taxed average
     margin_taxed_avg = int((insta_buy_avg*.99 - insta_sell_avg))
     f = opt.margin_taxed_avg.filter(margin_taxed_avg)
     if (f == False):
         itd.used = False
         return tsd
 
-    # Check if profit per limit avg passes filter
+    # Get average profit per limit
     profit_per_limit_avg = margin_taxed_avg * itd.ge_limit.value
     f = opt.profit_per_limit_avg.filter(profit_per_limit_avg)
     if (f == False):
         itd.used = False
         return tsd
 
-    # Check if roi avg passes filter
-    roi_avg = (margin_taxed_avg / insta_sell_avg)*100
+    # Get average return on investment
+    if (insta_sell_avg != 0):
+        roi_avg = (margin_taxed_avg / insta_sell_avg)*100
     f = opt.roi_avg.filter(roi_avg)
     if (f == False):
         itd.used = False
         return tsd
-
-    # Get our buying price based on the sell data
-    #low_i = get_ideal_low_margin(data_ts, num_entries, num_steps, min_list, .2)
-
-    # Get our selling price based on the buy data
-    #high_i = get_ideal_high_margin(data_ts, num_entries, num_steps, max_list, .2) 
 
     # Get insta buy tunnel price
     insta_buy_tunnel_price = int(np.percentile(insta_buy_prices, tsd.insta_buy_tunnel_percentile))
@@ -2070,15 +1983,17 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
         return tsd    
 
     # Get tunnel buy opportunity percent
-    tunnel_buy_opportunity = (sell_vol_below_tunnel / insta_sell_vol)*100
-    f = opt.tunnel_buy_opportunity.filter(tunnel_buy_opportunity)
+    if (insta_sell_vol != 0):
+        sell_vol_below_tunnel_percent = (sell_vol_below_tunnel / insta_sell_vol)*100
+    f = opt.sell_vol_below_tunnel_percent.filter(sell_vol_below_tunnel_percent)
     if (f == False):
         itd.used = False
         return tsd   
 
     # Get tunnel sell opportunity percent
-    tunnel_sell_opportunity = (buy_vol_above_tunnel / insta_buy_vol)*100
-    f = opt.tunnel_sell_opportunity.filter(tunnel_sell_opportunity)
+    if (insta_buy_vol != 0):
+        buy_vol_above_tunnel_percent = (buy_vol_above_tunnel / insta_buy_vol)*100
+    f = opt.buy_vol_above_tunnel_percent.filter(buy_vol_above_tunnel_percent)
     if (f == False):
         itd.used = False
         return tsd
@@ -2091,7 +2006,6 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
         return tsd
 
     # Get tunnel profit per limit
-    # TODO: Some values are insanely large .. what is up with that?
     tunnel_profit_per_limit = tunnel_margin_taxed * itd.ge_limit.value
     f = opt.tunnel_profit_per_limit.filter(tunnel_profit_per_limit)
     if (f == False):
@@ -2099,7 +2013,8 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
         return tsd
 
     # Get tunnel return on investment per item
-    tunnel_roi = (tunnel_margin_taxed / insta_sell_tunnel_price)*100
+    if (insta_sell_tunnel_price != 0):
+        tunnel_roi = (tunnel_margin_taxed / insta_sell_tunnel_price)*100
     f = opt.tunnel_roi.filter(tunnel_roi)
     if (f == False):
         itd.used = False
@@ -2110,22 +2025,24 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
     insta_sell_std = np.std(insta_sell_prices)
 
     # Get insta buy coefficient of variance
-    insta_buy_cov = (insta_buy_std/insta_buy_avg)*100
+    if (insta_buy_avg != 0):
+        insta_buy_cov = (insta_buy_std/insta_buy_avg)*100
     f = opt.insta_buy_cov.filter(insta_buy_cov)
     if (f == False):
         itd.used = False
         return tsd
 
     # Get insta sell coefficient of variance
-    insta_sell_cov = (insta_sell_std/insta_sell_avg)*100
+    if (insta_sell_avg != 0):
+        insta_sell_cov = (insta_sell_std/insta_sell_avg)*100
     f = opt.insta_sell_cov.filter(insta_sell_cov)
     if (f == False):
         itd.used = False
         return tsd
 
-    # Only plot if used has opted to 
+    # Only plot if used has opted to and if time series is used
     # TODO: Plot to show dots at each data point within the lines
-    if (opt.plot.show == True):
+    if (opt.plot.show == True and tsd.used == True):
         tsd.show_plot = True
         item = find_item_entry(item_id)
 
@@ -2146,17 +2063,16 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
         # Get insta sell tunnel line
         tsd.insta_sell_tunnel_price = insta_sell_tunnel_price
 
-
-    tsd.insta_buy_avg = Data(opt.insta_buy_avg.show, insta_buy_avg, "Insta Buy Price (Average): %d")
+    tsd.insta_buy_avg = Data(opt.insta_buy_avg.show, insta_buy_avg, "Insta Buy Average: %d")
     tsd.insta_buy_vol = Data(opt.insta_buy_vol.show, insta_buy_vol, "Insta Buy Volume: %d")
-    tsd.insta_sell_avg = Data(opt.insta_sell_avg.show, insta_sell_avg, "Insta Sell Price (Average): %d")
+    tsd.insta_sell_avg = Data(opt.insta_sell_avg.show, insta_sell_avg, "Insta Sell Average: %d")
     tsd.insta_sell_vol = Data(opt.insta_sell_vol.show, insta_sell_vol, "Insta Sell Volume: %d")
     tsd.total_vol = Data(opt.total_vol.show, total_vol, "Total Volume: %d")
-    tsd.price_avg = Data(opt.price_avg.show, price_avg, "Price (Average): %d")
-    tsd.margin_taxed_avg = Data(opt.margin_taxed_avg.show, margin_taxed_avg, "Margin (Average Taxed): %d")
-    tsd.profit_per_limit_avg = Data(opt.profit_per_limit_avg.show, profit_per_limit_avg, "Profit Per Limit (Average): %d")
+    tsd.price_avg = Data(opt.price_avg.show, price_avg, "Price Average: %d")
+    tsd.margin_taxed_avg = Data(opt.margin_taxed_avg.show, margin_taxed_avg, "Margin Taxed Average: %d")
+    tsd.profit_per_limit_avg = Data(opt.profit_per_limit_avg.show, profit_per_limit_avg, "Profit Per Limit Average: %d")
 
-    tsd.roi_avg = Data(opt.roi_avg.show, roi_avg, "ROI (Average): %.2f%%")
+    tsd.roi_avg = Data(opt.roi_avg.show, roi_avg, "ROI Average: %.2f%%")
     tsd.insta_buy_change = Data(opt.insta_buy_change.show, insta_buy_change, "Insta Buy Change: %d")
     tsd.insta_buy_change_percent = Data(opt.insta_buy_change_percent.show, insta_buy_change_percent, "Insta Buy Change Percent: %.2f%%")
     tsd.buy_over_sell_vol_ratio = Data(opt.buy_over_sell_vol_ratio.show, buy_over_sell_vol_ratio, "Buy/Sell Vol Ratio: %.2f")
@@ -2170,10 +2086,10 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps):
 
     tsd.insta_buy_tunnel_price = Data(opt.insta_buy_tunnel_price.show, insta_buy_tunnel_price, "Insta Buy Tunnel Price: %d")
     tsd.buy_vol_above_tunnel = Data(opt.buy_vol_above_tunnel.show, buy_vol_above_tunnel, "Buy Volume Above Tunnel: %d")
-    tsd.tunnel_buy_opportunity = Data(opt.tunnel_buy_opportunity.show, tunnel_buy_opportunity, "Tunnel Buy Opportunity: %.2f%%")
+    tsd.buy_vol_above_tunnel_percent = Data(opt.buy_vol_above_tunnel_percent.show, buy_vol_above_tunnel_percent, "Buy Volume Above Tunnel Percent: %.2f%%")
     tsd.insta_sell_tunnel_price = Data(opt.insta_sell_tunnel_price.show, insta_sell_tunnel_price, "Insta Sell Tunnel Price: %d")
     tsd.sell_vol_below_tunnel = Data(opt.sell_vol_below_tunnel.show, sell_vol_below_tunnel, "Sell Volume Below Tunnel: %d")
-    tsd.tunnel_sell_opportunity = Data(opt.tunnel_sell_opportunity.show, tunnel_sell_opportunity, "Tunnel Sell Opportunity: %.2f%%")
+    tsd.sell_vol_below_tunnel_percent = Data(opt.sell_vol_below_tunnel_percent.show, sell_vol_below_tunnel_percent, "Sell Volume Below Tunnel Percent: %.2f%%")
     tsd.tunnel_margin_taxed = Data(opt.tunnel_margin_taxed.show, tunnel_margin_taxed, "Tunnel Margin Taxed: %d")
     tsd.tunnel_profit_per_limit = Data(opt.tunnel_profit_per_limit.show, tunnel_profit_per_limit, "Tunnel Profit Per Limit: %d")
     tsd.tunnel_roi = Data(opt.tunnel_roi.show, tunnel_roi, "Tunnel ROI: %.2f%%")
@@ -2363,6 +2279,11 @@ def main():
                         help='Load item list from a file. Each item should be on its own line.',
                         metavar=('<file_name>.txt'),
                         dest='load_items')
+
+    parser.add_argument('-i', '--item',
+                        help='Searches for single item',
+                        metavar=('<Item Name>'),
+                        dest='search_item')                        
 
     parser.add_argument('-x', '--sort-options',
                         help='Show data options to sort items by',
