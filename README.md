@@ -1,7 +1,7 @@
 # OSRS Flipping Tool
 Allows users to find items based on an item filter.
 
-## Mac-OS Installation
+## Mac-OS Installation (UNTESTED)
 #### Update Homebrew and Upgrade Packages or Install Homebrew
 Check if you have Homebrew:
 `brew --version`
@@ -17,65 +17,174 @@ Install:
 Create link to call from terminal:
 `brew link --force git`
 
-#### Get the Tool
-`git clone https://github.com/AustinParkes/osrs_flipping_tool`
+#### Get the Flipping Tool
+Get with git:  
+`git clone https://github.com/AustinParkes/osrs_flipping_tool`  
+Go into directory:  
+`cd osrs_flipping_tool`  
+Make script executable:  
+`chmod +x flipping.py`
 
-#### Install/upgrade python3???
-
-#### Install pip
-ref: https://stackoverflow.com/questions/17271319/how-do-i-install-pip-on-macos-or-os-x
-Install pip for Python3:
-`python3 -m ensurepip --upgrade`
+#### Install python3 and pip
+`brew install python`  
 
 #### Install Python3 Packages
-`pip install jsonpickle`
+JSON Pickle (Filtering):  
+`pip install jsonpickle`  
+Matplotlib (Plotting):  
+`pip install matplotlib`  
 
 ## Using Tool
-#### Create and using filters
-1) Copy `blank_filter.pkl` to a new file name. Preferably choose a name that
-   helps you remember how it is filtering and add `.pkl` suffix so others
-   know it is a filter file.
+#### Running Tool
+Print Help Menu:  
+`./flipping.py --help`  
 
-2) In this file exists **Time Range Headers** or **headers** for short.
-   For example, a few headers:
-`bif`: Basic Item Filter (Not a time range, but still used for filtering items)
-`lf`: Latest Filter
-`a5mf`: Average 5 Minute Filter
-`s12hf`: Series 12 Hour Filter
+To execute:  
+`./flipping.py <arguments>`  
+Executing without any arguments will likely result in exceeding the 500 item  
+limit, so it is important you create and pass an item filter. 
 
- - All headers have a `py/object` header beneath them displaying the full acronym so
-   you can remember what time range they represent.
-   Example -> lf: `"py/object": "__main__.OutputFilters.LatestFilters",`
+Help Index:  
+[Create and Use Filters](#### Create and Use Filters)  
+[Sending Emails (gmail)](#### Sending Emails (gmail))  
+[Plotting Data](#### Plotting Data)  
+[Using Item Lists](#### Using Item Lists)  
+[Using Single Item](#### Using Single Item)  
+[Sorting Items](#### Sorting Items)  
+[Saving Data to File](#### Saving Data to File)  
 
-3) Using Filters:
-  - Each header has filter options to determine what items get shown.
- For example, an item's price, `item_price` under `bif`, has 3 filter options:
-    `show`: Set to `True` to show data and apply filters. Set to `False` to **NOT** 
-            show data and **NOT** apply filters.
-    `min`: Minimum value required, in this case for `item_price`.
-           Default is lowest possible OSRS value.
-    `max`: Maximum value allowed, in this case for `item_price`
-           Default is highest possible OSRS value.
+#### Create and Use Filters
+You can apply filters so the tool will only return items matching that filter.  
+Use existing filter file:  
+`./flipping.py -F filter.pkl`  
+or  
+`./flipping.py --load-filter filter.pkl` 
 
-  - Only items' whose `item_price` value falls between `min` and `max` will be shown,
-    discarding all others.
+Making a new filter:  
+  Copy `blank_filter.pkl` to a new file name. Preferably choose a name that  
+  helps you remember how it is filtering and add `.pkl` suffix so others  
+  know it is a filter file.
 
-4) Loading filters into tool with the `-F/--load-filter` command:
-`-F filter.pkl`
+  You can accomplish the same thing with:
+`./flipping.py -f filter.pkl`  
 or
-`--load-filter filter.pkl`
+`./flipping.py --save-filter filter.pkl`  
 
+Time Range Headers:  
+  Filter files contain **Time Range Headers**, or **headers** for short, which allow  
+  you to apply filters for particular time ranges.  
+  For example, a few headers:  
+`bif`: Basic Item Filter (Not a time range, but still used for filtering items)  
+`lf`: Latest Filter  
+`a5mf`: Average 5 Minute Filter  
+`s12hf`: Series 12 Hour Filter  
+
+  Each header's full acronym name is shown below it so you can remember it better.   
+  Example:  
+    lf: `"py/object": "__main__.OutputFilters.LatestFilters",`  
+
+Applying Filters:  
+  Each header has filter options for you to edit. 
+  For example, an item's price, `item_price` under `bif`, has 3 filter options:  
+    `show`: Set to `True` to show data and apply filters. Set to `False` to **NOT**   
+            show data and **NOT** apply filters.
+    `min`: Minimum value required, in this case for `item_price`.  
+           Default is lowest possible OSRS value.  
+    `max`: Maximum value allowed, in this case for `item_price`  
+           Default is highest possible OSRS value.  
+
+    Only items whose `item_price` value falls between `min` and `max` will be shown,  
+    discarding all others.  
+
+Filtering by item name:
+  To show items whose name contains a string, set `bif`'s `string` to the string you  
+  want included in the name.  
+ 
+  Example:   
+  Setting `"string": "chaps"` will show all items with "chaps" in the name.  
+  However, if other filters are set, this list may be smaller or non-existent  
+  if the items do not pass the other filters.  
 
 #### Sending Emails (gmail)
-You must create an app password to send gmails to yourself.
+You can send all your outputted item data as an email including plots!
 
-1) Create app password: [App Password](https://support.google.com/accounts/answer/185833?visit_id=638729061199434738-4233195689&p=InvalidSecondFactor&rd=1)
+You must have a gmail account and create an app password to permit the tool
+to access your gmail. This tool only uses it for authentication. 
+If you don't trust this tool, read the code, or do not use this option.
 
-2) Place app password in a file on the second line after your gmail name.
-`   user@gmail.com
-    app_password`
+1) Create app password: [App Password](https://support.google.com/accounts/answer/185833?   visit_id=638729061199434738-4233195689&p=InvalidSecondFactor&rd=1)  
 
-3) Pass this file to the -e/--send-email command:
-`-e file_name.txt`
-or
-`--send-email file_name.txt`
+2) Place app password in a file on the second line after your gmail name.  
+    `user@gmail.com`
+    `app_password`
+
+3) Pass this file to the -e/--send-email command:  
+`./flipping.py -e file_name.txt`  
+or  
+`./flipping.py --send-email file_name.txt`  
+
+#### Plotting Data
+You can plot your item data in two ways:  
+1) Via PDF  
+`./flipping.py -p plots.pdf`  
+or  
+`./flipping.py --save-plots plots.pdf`
+
+2) Via Email  
+(See [Sending Emails](#### Sending Emails (gmail)))  
+
+**NOTE:** Your filter file must show plots for atleast one time range for plots to work.  
+In other words, the tool must know which time range(s) to show plots for.    
+
+#### Using Item Lists
+You can use your own item list to show data for.
+
+1) Place your items in a textfile, each item on their own line.
+Example:
+    `saradomin chaps`
+    `zamorak chaps`
+    `red d'hide chaps (t)`
+
+2) Pass this file to the tool:
+`./flipping.py -I items.txt`  
+or  
+`./flipping.py --load-items items.txt`   
+
+**NOTE:** The item names DO NOT have to be case sensitive. (Capitalization does not matter)
+**NOTE:** If you apply filters, they will still apply to those items.
+
+#### Using Single Item
+You can also just pass a single item name to the tool.
+For example:
+`./flipping.py -i "saradomin chaps"`  
+or  
+`./flipping.py --item "saradomin chaps"`  
+
+**NOTE:** Items with spaces require double quotations.
+
+#### Sorting Items
+You can sort items (and their plots) based on any filter option with
+a `min`/`max` range.
+
+To view all sort options:
+`./flipping.py -x`  
+or  
+`./flipping.py --sort-options`  
+
+To apply a sort option: (Example)  
+`./flipping.py -s ld.profit_per_limit`  
+or  
+`./flipping.py --sort ld.profit_per_limit`  
+
+This will sort items from high to lowest `profit_per_limit` for `LatestData`
+
+**NOTE:** You can only apply one sort option at a time.
+
+#### Saving Data to File
+You can easily save your item data to a file:
+`./flipping.py -d item_data.txt`  
+or  
+`./flipping.py --save-data item_data.txt`  
+
+
+

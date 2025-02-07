@@ -139,13 +139,13 @@ class OutputFilters():
 
     class LatestFilters():
         def __init__(self):
-            self.insta_sell_price = Range(show=False)           # Normal
-            self.insta_sell_time_min = Range(show=False)        # Minutes
-            self.insta_buy_price = Range(show=False)            # Normal
-            self.insta_buy_time_min = Range(show=False)         # Minutes
+            self.insta_sell_price = Range(show=True)           # Normal
+            self.insta_sell_time_min = Range(show=True)        # Minutes
+            self.insta_buy_price = Range(show=True)            # Normal
+            self.insta_buy_time_min = Range(show=True)         # Minutes
             self.price_avg = NoFilter(show=False)               # We use item_price as our price filter
             self.margin_taxed = Range(show=False)               # Normal
-            self.profit_per_limit = Range(show=False)           # Normal
+            self.profit_per_limit = Range(show=True)           # Normal
             self.roi = Range(show=False)                        # Percent
 
     class Avg5mFilters():
@@ -241,7 +241,7 @@ class OutputFilters():
             self.sell_vol_below_tunnel = Range(show=True)      # Normal
             self.sell_vol_below_tunnel_percent = Range(show=True)     # Percent
             self.tunnel_margin_taxed = Range(show=False)        # Normal
-            self.tunnel_profit_per_limit =  Range(show=True, min=150000)   # Normal
+            self.tunnel_profit_per_limit =  Range(show=True, min=100000)   # Normal
             self.tunnel_roi =  Range(show=True)                # Percent
 
     class Series24hFilters():
@@ -1051,7 +1051,7 @@ def filter_items(args):
     id_list = apply_basic_filter(ofs, id_list)
     num_items = len(id_list)
     if (num_items > 500):
-        print("%d Items passed basic filter.\nNot exceeding 200 items during testing" % (num_items))
+        print("%d Items passed basic filter.\nNot exceeding 500 items." % (num_items))
         quit()
 
     # Return items that pass filter and return their data
@@ -1197,9 +1197,12 @@ def apply_basic_filter(ofs, user_id_list):
         item_entry = find_item_entry(int(item_id))
         if item_entry == None:
             continue
-        name = item_entry['name'] 
 
-        #print(item_id)
+        # Check if name passes filter
+        name = item_entry['name'] 
+        f = bif.item_name.filter(name)
+        if (f == False):
+            continue
 
         # Check if item limit exists
         if 'limit' in item_entry:
