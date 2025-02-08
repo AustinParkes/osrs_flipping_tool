@@ -142,7 +142,7 @@ or
 `./flipping.py --save-plots plots.pdf`
 
 2) Via Email  
-(See [Sending Emails](#### Sending Emails (gmail)))  
+(See [Sending Emails](#sending-emails-with-gmail))  
 
 **NOTE:** Your filter file must show plots for atleast one time range for plots to work.  
 In other words, the tool must know which time range(s) to show plots for.    
