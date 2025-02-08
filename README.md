@@ -46,7 +46,7 @@ limit, so it is important you create and pass an item filter.
 
 Help Index:  
 [Create and Use Filters](#create-and-use-filters)  
-[Sending Emails (gmail)](#sending-emails-(gmail))  
+[Sending Emails (gmail)](#sending-emails-with-gmail)  
 [Plotting Data](#plotting-data)  
 [Using Item Lists](#using-item-lists)  
 [Using Single Item](#using-single-item)  
@@ -105,7 +105,7 @@ Filtering by item name:
   However, if other filters are set, this list may be smaller or non-existent  
   if the items do not pass the other filters.  
 
-#### Sending Emails (gmail)
+#### Sending Emails With Gmail
 You can send all your outputted item data as an email including plots!  
 
 You must have a gmail account and create an app password to permit the tool  
