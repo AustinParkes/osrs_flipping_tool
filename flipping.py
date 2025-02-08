@@ -146,7 +146,7 @@ class OutputFilters():
             self.price_avg = NoFilter(show=False)               # We use item_price as our price filter
             self.margin_taxed = Range(show=False)               # Normal
             self.profit_per_limit = Range(show=True)           # Normal
-            self.roi = Range(show=False)                        # Percent
+            self.return_on_investment = Range(show=False)      # Percent
 
     class Avg5mFilters():
         def __init__(self):
@@ -158,7 +158,7 @@ class OutputFilters():
             self.avg_vol = Range(show=False)                    # Normal
             self.margin_taxed = Range(show=False)               # Normal
             self.profit_per_limit = Range(show=False)           # Normal
-            self.roi_avg = Range(show=False)                    # Percent
+            self.return_on_investment_avg = Range(show=False)                    # Percent
 
     class Avg1hFilters():
         def __init__(self):
@@ -170,7 +170,7 @@ class OutputFilters():
             self.avg_vol = Range(show=False)                    # Normal
             self.margin_taxed = Range(show=False)               # Normal
             self.profit_per_limit = Range(show=False)           # Normal
-            self.roi_avg = Range(show=False)                    # Percent
+            self.return_on_investment_avg = Range(show=False)                    # Percent
 
     class Series6hFilters():
         def __init__(self):
@@ -185,7 +185,7 @@ class OutputFilters():
             self.plot = DisplayPlot(show = False)               # Plot
             
             # Changes and Percentages
-            self.roi_avg = Range(show=False)                    # Percent
+            self.return_on_investment_avg = Range(show=False)                    # Percent
             self.insta_buy_change = Range(show=False)           # Normal
             self.insta_buy_change_percent = Range(show=False)   # Percent
             self.buy_over_sell_vol_ratio = Range(show=False)    # Ratio
@@ -206,7 +206,7 @@ class OutputFilters():
             self.sell_vol_below_tunnel_percent = Range(show=False)     # Percent
             self.tunnel_margin_taxed = Range(show=False)        # Normal
             self.tunnel_profit_per_limit =  Range(show=False)   # Normal
-            self.tunnel_roi =  Range(show=False)                # Percent
+            self.tunnel_return_on_investment =  Range(show=False)                # Percent
 
     class Series12hFilters():
         def __init__(self):
@@ -221,7 +221,7 @@ class OutputFilters():
             self.plot = DisplayPlot(show = True)               # Plot
             
             # Changes and Percentages
-            self.roi_avg = Range(show=False)                   # Percent
+            self.return_on_investment_avg = Range(show=False)                   # Percent
             self.insta_buy_change = Range(show=True)           # Normal
             self.insta_buy_change_percent = Range(show=True)   # Percent
             self.buy_over_sell_vol_ratio = Range(show=True)    # Ratio
@@ -242,7 +242,7 @@ class OutputFilters():
             self.sell_vol_below_tunnel_percent = Range(show=True)     # Percent
             self.tunnel_margin_taxed = Range(show=False)        # Normal
             self.tunnel_profit_per_limit =  Range(show=True, min=100000)   # Normal
-            self.tunnel_roi =  Range(show=True)                # Percent
+            self.tunnel_return_on_investment =  Range(show=True)                # Percent
 
     class Series24hFilters():
         def __init__(self):
@@ -257,7 +257,7 @@ class OutputFilters():
             self.plot = DisplayPlot(show = False)               # Plot
             
             # Changes and Percentages
-            self.roi_avg = Range(show=False)                    # Percent
+            self.return_on_investment_avg = Range(show=False)                    # Percent
             self.insta_buy_change = Range(show=False)           # Normal
             self.insta_buy_change_percent = Range(show=False)   # Percent
             self.buy_over_sell_vol_ratio = Range(show=False)    # Ratio
@@ -278,7 +278,7 @@ class OutputFilters():
             self.sell_vol_below_tunnel_percent = Range(show=False)     # Percent
             self.tunnel_margin_taxed = Range(show=False)        # Normal
             self.tunnel_profit_per_limit =  Range(show=False)   # Normal
-            self.tunnel_roi =  Range(show=False)                # Percent
+            self.tunnel_return_on_investment =  Range(show=False)                # Percent
 
     class Series1wFilters():
         def __init__(self):
@@ -293,7 +293,7 @@ class OutputFilters():
             self.plot = DisplayPlot(show = False)               # Plot
             
             # Changes and Percentages
-            self.roi_avg = Range(show=False)                    # Percent
+            self.return_on_investment_avg = Range(show=False)                    # Percent
             self.insta_buy_change = Range(show=False)           # Normal
             self.insta_buy_change_percent = Range(show=False)   # Percent
             self.buy_over_sell_vol_ratio = Range(show=False)    # Ratio
@@ -314,7 +314,7 @@ class OutputFilters():
             self.sell_vol_below_tunnel_percent = Range(show=False)     # Percent
             self.tunnel_margin_taxed = Range(show=False)        # Normal
             self.tunnel_profit_per_limit =  Range(show=False)   # Normal
-            self.tunnel_roi =  Range(show=False)                # Percent
+            self.tunnel_return_on_investment =  Range(show=False)                # Percent
 
     class Series1mFilters():
         def __init__(self):
@@ -329,7 +329,7 @@ class OutputFilters():
             self.plot = DisplayPlot(show = False)               # Plot
             
             # Changes and Percentages
-            self.roi_avg = Range(show=False)                    # Percent
+            self.return_on_investment_avg = Range(show=False)                    # Percent
             self.insta_buy_change = Range(show=False)           # Normal
             self.insta_buy_change_percent = Range(show=False)   # Percent
             self.buy_over_sell_vol_ratio = Range(show=False)    # Ratio
@@ -350,7 +350,7 @@ class OutputFilters():
             self.sell_vol_below_tunnel_percent = Range(show=False)     # Percent
             self.tunnel_margin_taxed = Range(show=False)        # Normal
             self.tunnel_profit_per_limit =  Range(show=False)   # Normal
-            self.tunnel_roi =  Range(show=False)                # Percent
+            self.tunnel_return_on_investment =  Range(show=False)                # Percent
 
     class Series1yFilters():
         def __init__(self):
@@ -365,7 +365,7 @@ class OutputFilters():
             self.plot = DisplayPlot(show = False)               # Plot
             
             # Changes and Percentages
-            self.roi_avg = Range(show=False)                    # Percent
+            self.return_on_investment_avg = Range(show=False)                    # Percent
             self.insta_buy_change = Range(show=False)           # Normal
             self.insta_buy_change_percent = Range(show=False)   # Percent
             self.buy_over_sell_vol_ratio = Range(show=False)    # Ratio
@@ -386,7 +386,7 @@ class OutputFilters():
             self.sell_vol_below_tunnel_percent = Range(show=False)     # Percent
             self.tunnel_margin_taxed = Range(show=False)        # Normal
             self.tunnel_profit_per_limit =  Range(show=False)   # Normal
-            self.tunnel_roi =  Range(show=False)                # Percent
+            self.tunnel_return_on_investment =  Range(show=False)                # Percent
 
 
 # Lowest level data
@@ -527,7 +527,7 @@ class LatestData():
         self.margin = Data()
         self.margin_taxed = Data()
         self.profit_per_limit = Data()
-        self.roi = Data()
+        self.return_on_investment = Data()
     
     def show(self, file, use_email):
         global email_msg
@@ -569,7 +569,7 @@ class AvgData():
         self.price_avg = Data()
         self.margin_taxed = Data()
         self.profit_per_limit = Data()  
-        self.roi_avg = Data()
+        self.return_on_investment_avg = Data()
 
     def show(self, file, use_email):
         global email_msg
@@ -630,7 +630,7 @@ class TimeSeriesData():
         self.profit_per_limit_avg = Data()  
 
         # Changes and percents
-        self.roi_avg = Data()
+        self.return_on_investment_avg = Data()
         self.insta_buy_change = Data()
         self.insta_buy_change_percent = Data()
         self.buy_over_sell_vol_ratio = Data()
@@ -651,7 +651,7 @@ class TimeSeriesData():
         self.sell_vol_below_tunnel_percent = Data()
         self.tunnel_margin_taxed = Data()
         self.tunnel_profit_per_limit = Data()
-        self.tunnel_roi = Data()
+        self.tunnel_return_on_investment = Data()
     
         # Plot data
         self.show_plot = False
@@ -1472,7 +1472,7 @@ def get_latest_data(itd, item_id, ofs):
     roi = (margin_taxed / insta_sell_price)*100
 
     # Check if roi passes filter
-    f = lf.roi.filter(roi)
+    f = lf.return_on_investment.filter(roi)
     if (f == False):
         itd.used = False
         return ld
@@ -1485,7 +1485,7 @@ def get_latest_data(itd, item_id, ofs):
     ld.price_avg = Data(lf.price_avg.show, price_avg, "Average Price: %d") 
     ld.margin_taxed = Data(lf.margin_taxed.show, margin_taxed, "Margin (Taxed): %d")
     ld.profit_per_limit = Data(lf.profit_per_limit.show, profit_per_limit, "Profit Per Limit: %d")
-    ld.roi = Data(lf.roi.show, roi, "ROI: %.2f%%")
+    ld.return_on_investment = Data(lf.return_on_investment.show, roi, "Return on Investment: %.2f%%")
 
     return ld
 
@@ -1601,20 +1601,20 @@ def get_average_data(itd, item_id, ofs, avg_type):
     roi_avg = (margin_taxed / insta_sell_avg)*100
 
     # Check if roi passes filter
-    f = opt.roi_avg.filter(roi_avg)
+    f = opt.return_on_investment_avg.filter(roi_avg)
     if (f == False):
         itd.used = False
         return ad
 
     ad.insta_buy_avg = Data(opt.insta_buy_avg.show, insta_buy_avg, "Average Insta Buy Price: %d")
-    ad.insta_buy_vol = Data(opt.insta_buy_vol.show, insta_buy_vol, "Average Insta Buy Vol: %d")
+    ad.insta_buy_vol = Data(opt.insta_buy_vol.show, insta_buy_vol, "Average Insta Buy Volume: %d")
     ad.insta_sell_avg = Data(opt.insta_sell_avg.show, insta_sell_avg, "Average Insta Sell Price: %d")
-    ad.insta_sell_vol = Data(opt.insta_sell_vol.show, insta_sell_vol, "Average Insta Sell Vol: %d")
+    ad.insta_sell_vol = Data(opt.insta_sell_vol.show, insta_sell_vol, "Average Insta Sell Volume: %d")
     ad.avg_vol = Data(opt.avg_vol.show, avg_vol, "Average Volume: %d")
     ad.price_avg = Data(opt.price_avg.show, price_avg, "Average Price: %d")
     ad.margin_taxed = Data(opt.margin_taxed.show, margin_taxed, "Average Margin (Taxed): %d")
     ad.profit_per_limit = Data(opt.profit_per_limit.show, profit_per_limit, "Average Profit Per Limit: %d")
-    ad.roi_avg = Data(opt.roi_avg.show, roi_avg, "Average ROI: %.2f%%")
+    ad.return_on_investment_avg = Data(opt.return_on_investment_avg.show, roi_avg, "Average Return on Investment: %.2f%%")
 
     return ad
     
@@ -1948,7 +1948,7 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps, data_ts):
     # Get average return on investment
     if (insta_sell_avg != 0):
         roi_avg = (margin_taxed_avg / insta_sell_avg)*100
-    f = opt.roi_avg.filter(roi_avg)
+    f = opt.return_on_investment_avg.filter(roi_avg)
     if (f == False):
         itd.used = False
         return tsd
@@ -2014,7 +2014,7 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps, data_ts):
     # Get tunnel return on investment per item
     if (insta_sell_tunnel_price != 0):
         tunnel_roi = (tunnel_margin_taxed / insta_sell_tunnel_price)*100
-    f = opt.tunnel_roi.filter(tunnel_roi)
+    f = opt.tunnel_return_on_investment.filter(tunnel_roi)
     if (f == False):
         itd.used = False
         return tsd    
@@ -2071,7 +2071,7 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps, data_ts):
     tsd.margin_taxed_avg = Data(opt.margin_taxed_avg.show, margin_taxed_avg, "Margin Taxed Average: %d")
     tsd.profit_per_limit_avg = Data(opt.profit_per_limit_avg.show, profit_per_limit_avg, "Profit Per Limit Average: %d")
 
-    tsd.roi_avg = Data(opt.roi_avg.show, roi_avg, "ROI Average: %.2f%%")
+    tsd.return_on_investment_avg = Data(opt.return_on_investment_avg.show, roi_avg, "Average Return on Investment: %.2f%%")
     tsd.insta_buy_change = Data(opt.insta_buy_change.show, insta_buy_change, "Insta Buy Change: %d")
     tsd.insta_buy_change_percent = Data(opt.insta_buy_change_percent.show, insta_buy_change_percent, "Insta Buy Change Percent: %.2f%%")
     tsd.buy_over_sell_vol_ratio = Data(opt.buy_over_sell_vol_ratio.show, buy_over_sell_vol_ratio, "Buy/Sell Vol Ratio: %.2f")
@@ -2091,7 +2091,7 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps, data_ts):
     tsd.sell_vol_below_tunnel_percent = Data(opt.sell_vol_below_tunnel_percent.show, sell_vol_below_tunnel_percent, "Sell Volume Below Tunnel Percent: %.2f%%")
     tsd.tunnel_margin_taxed = Data(opt.tunnel_margin_taxed.show, tunnel_margin_taxed, "Tunnel Margin Taxed: %d")
     tsd.tunnel_profit_per_limit = Data(opt.tunnel_profit_per_limit.show, tunnel_profit_per_limit, "Tunnel Profit Per Limit: %d")
-    tsd.tunnel_roi = Data(opt.tunnel_roi.show, tunnel_roi, "Tunnel ROI: %.2f%%")
+    tsd.tunnel_return_on_investment = Data(opt.tunnel_return_on_investment.show, tunnel_roi, "Tunnel Return on Investment: %.2f%%")
 
     return tsd
 
