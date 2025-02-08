@@ -45,13 +45,13 @@ Executing without any arguments will likely result in exceeding the 500 item
 limit, so it is important you create and pass an item filter. 
 
 Help Index:  
-[Create and Use Filters](#### Create and Use Filters)  
-[Sending Emails (gmail)](#### Sending Emails (gmail))  
-[Plotting Data](#### Plotting Data)  
-[Using Item Lists](#### Using Item Lists)  
-[Using Single Item](#### Using Single Item)  
-[Sorting Items](#### Sorting Items)  
-[Saving Data to File](#### Saving Data to File)  
+[Create and Use Filters](#create-and-use-filters)  
+[Sending Emails (gmail)](#sending-emails-(gmail))  
+[Plotting Data](#plotting-data)  
+[Using Item Lists](#using-item-lists)  
+[Using Single Item](#using-single-item)  
+[Sorting Items](#sorting-items)  
+[Saving Data to File](#saving-data-to-file)  
 
 #### Create and Use Filters
 You can apply filters so the tool will only return items matching that filter.  
