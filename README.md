@@ -5,22 +5,27 @@ Allows users to find items based on an item filter.
 #### Update Homebrew and Upgrade Packages or Install Homebrew
 Check if you have Homebrew:  
 `brew --version`  
+
 If you do, update and upgrade:  
 `brew update && brew upgrade`  
+
 If you don't then install it:  
 `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`  
 
 #### Install git  
 Install:  
 `brew install git`  
+
 Create link to call from terminal:  
 `brew link --force git`  
 
 #### Get the Flipping Tool
 Get with git:  
 `git clone https://github.com/AustinParkes/osrs_flipping_tool`  
+
 Go into directory:  
 `cd osrs_flipping_tool`  
+
 Make script executable:  
 `chmod +x flipping.py`
 
@@ -30,6 +35,7 @@ Make script executable:
 #### Install Python3 Packages
 JSON Pickle (Filtering):  
 `pip install jsonpickle`  
+
 Matplotlib (Plotting):  
 `pip install matplotlib`  
 
