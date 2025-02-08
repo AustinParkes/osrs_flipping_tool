@@ -59,7 +59,7 @@ Use existing filter file:
 or  
 `./flipping.py --load-filter filter.pkl` 
 
-Making a new filter:  
+**Making a new filter:**  
 Copy `blank_filter.pkl` to a new file name. Preferably choose a name that  
 helps you remember how it is filtering and add `.pkl` suffix so others  
 know it is a filter file.  
@@ -69,7 +69,7 @@ You can accomplish the same thing with:
 or  
 `./flipping.py --save-filter filter.pkl`  
 
-Time Range Headers:  
+**Time Range Headers:**  
 Filter files contain **Time Range Headers**, or **headers** for short, which allow  
 you to apply filters for particular time ranges.  
 For example, a few headers:  
@@ -82,7 +82,7 @@ Each header's full acronym name is shown below it so you can remember it better.
 Example:  
 lf: `"py/object": "__main__.OutputFilters.LatestFilters",`  
 
-Applying Filters:  
+**Applying Filters:**  
 Each header has filter options for you to edit.  
 For example, an item's price, `item_price` under `bif`, has 3 filter options:  
 `show`: Set to `True` to show data and apply filters. Set to `False` to **NOT**   
@@ -95,7 +95,7 @@ Default is highest possible OSRS value.
 Only items whose `item_price` value falls between `min` and `max` will be shown,  
 discarding all others.  
 
-Filtering by item name:  
+**Filtering by item name:**  
 To show items whose name contains a string, set `bif`'s `string` to the string you  
 want included in the name.  
  
