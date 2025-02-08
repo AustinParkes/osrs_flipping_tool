@@ -61,49 +61,49 @@ or
 `./flipping.py --load-filter filter.pkl` 
 
 Making a new filter:  
-  Copy `blank_filter.pkl` to a new file name. Preferably choose a name that  
-  helps you remember how it is filtering and add `.pkl` suffix so others  
-  know it is a filter file.  
+Copy `blank_filter.pkl` to a new file name. Preferably choose a name that  
+helps you remember how it is filtering and add `.pkl` suffix so others  
+know it is a filter file.  
 
-  You can accomplish the same thing with:  
+You can accomplish the same thing with:  
 `./flipping.py -f filter.pkl`  
 or  
 `./flipping.py --save-filter filter.pkl`  
 
 Time Range Headers:  
-  Filter files contain **Time Range Headers**, or **headers** for short, which allow  
-  you to apply filters for particular time ranges.  
-  For example, a few headers:  
+Filter files contain **Time Range Headers**, or **headers** for short, which allow  
+you to apply filters for particular time ranges.  
+For example, a few headers:  
 `bif`: Basic Item Filter (Not a time range, but still used for filtering items)  
 `lf`: Latest Filter  
 `a5mf`: Average 5 Minute Filter  
 `s12hf`: Series 12 Hour Filter  
 
-  Each header's full acronym name is shown below it so you can remember it better.   
-  Example:  
-    lf: `"py/object": "__main__.OutputFilters.LatestFilters",`  
+Each header's full acronym name is shown below it so you can remember it better.   
+Example:  
+lf: `"py/object": "__main__.OutputFilters.LatestFilters",`  
 
 Applying Filters:  
-  Each header has filter options for you to edit.  
-  For example, an item's price, `item_price` under `bif`, has 3 filter options:  
-    `show`: Set to `True` to show data and apply filters. Set to `False` to **NOT**   
-            show data and **NOT** apply filters.  
-    `min`: Minimum value required, in this case for `item_price`.  
-           Default is lowest possible OSRS value.  
-    `max`: Maximum value allowed, in this case for `item_price`  
-           Default is highest possible OSRS value.  
+Each header has filter options for you to edit.  
+For example, an item's price, `item_price` under `bif`, has 3 filter options:  
+`show`: Set to `True` to show data and apply filters. Set to `False` to **NOT**   
+show data and **NOT** apply filters.  
+`min`: Minimum value required, in this case for `item_price`.  
+Default is lowest possible OSRS value.  
+`max`: Maximum value allowed, in this case for `item_price`  
+Default is highest possible OSRS value.  
 
 Only items whose `item_price` value falls between `min` and `max` will be shown,  
 discarding all others.  
 
 Filtering by item name:  
-  To show items whose name contains a string, set `bif`'s `string` to the string you  
-  want included in the name.  
+To show items whose name contains a string, set `bif`'s `string` to the string you  
+want included in the name.  
  
-  Example:   
-  Setting `"string": "chaps"` will show all items with "chaps" in the name.  
-  However, if other filters are set, this list may be smaller or non-existent  
-  if the items do not pass the other filters.  
+Example:   
+Setting `"string": "chaps"` will show all items with "chaps" in the name.  
+However, if other filters are set, this list may be smaller or non-existent  
+if the items do not pass the other filters.  
 
 #### Sending Emails With Gmail
 You can send all your outputted item data as an email including plots!  
@@ -115,8 +115,8 @@ If you don't trust this tool, read the code, or do not use this option.
 1) Create app password: [App Password](https://support.google.com/accounts/answer/185833?   visit_id=638729061199434738-4233195689&p=InvalidSecondFactor&rd=1)  
 
 2) Place app password in a file on the second line after your gmail name.  
-    `user@gmail.com`  
-    `app_password`  
+`user@gmail.com`  
+`app_password`  
 
 3) Pass this file to the -e/--send-email command:  
 `./flipping.py -e file_name.txt`  
