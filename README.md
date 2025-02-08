@@ -11,7 +11,6 @@ If you don't then install it:
 `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`  
 
 #### Install git  
-ref: https://stackoverflow.com/questions/8957862/how-to-upgrade-git-to-latest-version-on-macos  
 Install:  
 `brew install git`  
 Create link to call from terminal:  
