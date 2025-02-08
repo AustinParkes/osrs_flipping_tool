@@ -3,7 +3,7 @@ Allows users to find items based on an item filter.
 
 ## Mac-OS Installation (UNTESTED)
 #### Update Homebrew and Upgrade Packages or Install Homebrew
-Check if you have Homebrew:
+Check if you have Homebrew:  
 `brew --version`
 If you do, update and upgrade:  
 `brew update && brew upgrade`  
