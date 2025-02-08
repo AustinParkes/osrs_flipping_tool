@@ -81,8 +81,9 @@ For example, a few headers:
 `s12hf`: Series 12 Hour Filter  
 
 Each header's full acronym name is shown below it so you can remember it better.   
+
 Example:  
-lf: `"py/object": "__main__.OutputFilters.LatestFilters",`  
+`lf`: `"py/object": "__main__.OutputFilters.LatestFilters",`  
 
 ###### Applying Filters:  
 Each header has filter options for you to edit.  
