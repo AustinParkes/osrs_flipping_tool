@@ -141,9 +141,9 @@ You can use your own item list to show data for.
 
 1) Place your items in a textfile, each item on their own line.  
 Example:  
-    `saradomin chaps`  
-    `zamorak chaps`  
-    `red d'hide chaps (t)`  
+`saradomin chaps`  
+`zamorak chaps`  
+`red d'hide chaps (t)`  
 
 2) Pass this file to the tool:  
 `./flipping.py -I items.txt`  
