@@ -40,6 +40,7 @@ Print Help Menu:
 
 To execute:  
 `./flipping.py <arguments>`  
+
 Executing without any arguments will likely result in exceeding the 500 item  
 limit, so it is important you create and pass an item filter. 
 
@@ -72,6 +73,7 @@ or
 ###### Time Range Headers:  
 Filter files contain **Time Range Headers**, or **headers** for short, which allow  
 you to apply filters for particular time ranges.  
+
 For example, a few headers:  
 `bif`: Basic Item Filter (Not a time range, but still used for filtering items)  
 `lf`: Latest Filter  
@@ -84,11 +86,14 @@ lf: `"py/object": "__main__.OutputFilters.LatestFilters",`
 
 ###### Applying Filters:  
 Each header has filter options for you to edit.  
+
 For example, an item's price, `item_price` under `bif`, has 3 filter options:  
 `show`: Set to `True` to show data and apply filters. Set to `False` to **NOT**   
 show data and **NOT** apply filters.  
+
 `min`: Minimum value required, in this case for `item_price`.  
 Default is lowest possible OSRS value.  
+
 `max`: Maximum value allowed, in this case for `item_price`  
 Default is highest possible OSRS value.  
 
@@ -111,7 +116,7 @@ You must have a gmail account and create an app password to permit the tool
 to access your gmail. This tool only uses it for authentication. 
 If you don't trust this tool, read the code, or do not use this option.
 
-1) Create app password: [App Password](https://support.google.com/accounts/answer/185833?   visit_id=638729061199434738-4233195689&p=InvalidSecondFactor&rd=1)  
+1) Create app password: [App Password](https://support.google.com/accounts/answer/185833?visit_id=638729061199434738-4233195689&p=InvalidSecondFactor&rd=1)  
 
 2) Place app password in a file on the second line after your gmail name.  
 `user@gmail.com`  
