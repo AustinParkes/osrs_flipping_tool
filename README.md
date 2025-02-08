@@ -93,8 +93,8 @@ Applying Filters:
     `max`: Maximum value allowed, in this case for `item_price`  
            Default is highest possible OSRS value.  
 
-    Only items whose `item_price` value falls between `min` and `max` will be shown,  
-    discarding all others.  
+Only items whose `item_price` value falls between `min` and `max` will be shown,  
+discarding all others.  
 
 Filtering by item name:  
   To show items whose name contains a string, set `bif`'s `string` to the string you  
