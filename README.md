@@ -50,7 +50,7 @@ To execute:
 Executing without any arguments will likely result in exceeding the 500 item  
 limit, so it is important you create and pass an item filter. 
 
-Help Index:  
+###### Help Index  
 [Create and Use Filters](#create-and-use-filters)  
 [Sending Emails (gmail)](#sending-emails-with-gmail)  
 [Plotting Data](#plotting-data)  
