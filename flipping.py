@@ -14,6 +14,7 @@ from operator import attrgetter
 import smtplib, ssl
 from email.message import EmailMessage
 import os
+import sys
 import numpy as np
 import jsonpickle
 
@@ -189,19 +190,19 @@ class OutputFilters():
             self.insta_buy_change = Range(show=False)           # Normal
             self.insta_buy_change_percent = Range(show=False)   # Percent
             self.buy_over_sell_vol_ratio = Range(show=False)    # Ratio
-            self.insta_buy_cov = Range(show=False)              # Percent
+            self.insta_buy_coefficient_of_variance = Range(show=False)              # Percent
             self.insta_sell_change = Range(show=False)          # Normal
             self.insta_sell_change_percent = Range(show=False)  # Percent
             self.sell_over_buy_vol_ratio = Range(show=False)    # Ratio
-            self.insta_sell_cov = Range(show=False)             # Percent
+            self.insta_sell_coefficient_of_variance = Range(show=False)             # Percent
             self.price_change = Range(show=False)               # Normal
             self.price_change_percent = Range(show=False)       # Percent
 
             # Tunnel Data
-            self.insta_buy_tunnel_price = Range(show=False)     # Normal
+            self.tunnel_insta_buy_price = Range(show=False)     # Normal
             self.buy_vol_above_tunnel = Range(show=False)       # Normal
             self.buy_vol_above_tunnel_percent = Range(show=False)    # Percent
-            self.insta_sell_tunnel_price = Range(show=False)    # Normal
+            self.tunnel_insta_sell_price = Range(show=False)    # Normal
             self.sell_vol_below_tunnel = Range(show=False)      # Normal
             self.sell_vol_below_tunnel_percent = Range(show=False)     # Percent
             self.tunnel_margin_taxed = Range(show=False)        # Normal
@@ -225,19 +226,19 @@ class OutputFilters():
             self.insta_buy_change = Range(show=True)           # Normal
             self.insta_buy_change_percent = Range(show=True)   # Percent
             self.buy_over_sell_vol_ratio = Range(show=True)    # Ratio
-            self.insta_buy_cov = Range(show=True)              # Percent
+            self.insta_buy_coefficient_of_variance = Range(show=True)              # Percent
             self.insta_sell_change = Range(show=True)          # Normal
             self.insta_sell_change_percent = Range(show=True)  # Percent
             self.sell_over_buy_vol_ratio = Range(show=True)    # Ratio
-            self.insta_sell_cov = Range(show=True)              # Percent
+            self.insta_sell_coefficient_of_variance = Range(show=True)              # Percent
             self.price_change = Range(show=False)               # Normal
             self.price_change_percent = Range(show=False)       # Percent
 
             # Tunnel Data
-            self.insta_buy_tunnel_price = Range(show=True)     # Normal
+            self.tunnel_insta_buy_price = Range(show=True)     # Normal
             self.buy_vol_above_tunnel = Range(show=True)       # Normal
             self.buy_vol_above_tunnel_percent = Range(show=True)    # Percent
-            self.insta_sell_tunnel_price = Range(show=True)    # Normal
+            self.tunnel_insta_sell_price = Range(show=True)    # Normal
             self.sell_vol_below_tunnel = Range(show=True)      # Normal
             self.sell_vol_below_tunnel_percent = Range(show=True)     # Percent
             self.tunnel_margin_taxed = Range(show=False)        # Normal
@@ -261,19 +262,19 @@ class OutputFilters():
             self.insta_buy_change = Range(show=False)           # Normal
             self.insta_buy_change_percent = Range(show=False)   # Percent
             self.buy_over_sell_vol_ratio = Range(show=False)    # Ratio
-            self.insta_buy_cov = Range(show=False)              # Percent
+            self.insta_buy_coefficient_of_variance = Range(show=False)              # Percent
             self.insta_sell_change = Range(show=False)          # Normal
             self.insta_sell_change_percent = Range(show=False)  # Percent
             self.sell_over_buy_vol_ratio = Range(show=False)    # Ratio
-            self.insta_sell_cov = Range(show=False)             # Percent
+            self.insta_sell_coefficient_of_variance = Range(show=False)             # Percent
             self.price_change = Range(show=False)               # Normal
             self.price_change_percent = Range(show=False)       # Percent
 
             # Tunnel Data
-            self.insta_buy_tunnel_price = Range(show=False)     # Normal
+            self.tunnel_insta_buy_price = Range(show=False)     # Normal
             self.buy_vol_above_tunnel = Range(show=False)       # Normal
             self.buy_vol_above_tunnel_percent = Range(show=False)    # Percent
-            self.insta_sell_tunnel_price = Range(show=False)    # Normal
+            self.tunnel_insta_sell_price = Range(show=False)    # Normal
             self.sell_vol_below_tunnel = Range(show=False)      # Normal
             self.sell_vol_below_tunnel_percent = Range(show=False)     # Percent
             self.tunnel_margin_taxed = Range(show=False)        # Normal
@@ -297,19 +298,19 @@ class OutputFilters():
             self.insta_buy_change = Range(show=False)           # Normal
             self.insta_buy_change_percent = Range(show=False)   # Percent
             self.buy_over_sell_vol_ratio = Range(show=False)    # Ratio
-            self.insta_buy_cov = Range(show=False)              # Percent
+            self.insta_buy_coefficient_of_variance = Range(show=False)              # Percent
             self.insta_sell_change = Range(show=False)          # Normal
             self.insta_sell_change_percent = Range(show=False)  # Percent
             self.sell_over_buy_vol_ratio = Range(show=False)    # Ratio
-            self.insta_sell_cov = Range(show=False)             # Percent
+            self.insta_sell_coefficient_of_variance = Range(show=False)             # Percent
             self.price_change = Range(show=False)               # Normal
             self.price_change_percent = Range(show=False)       # Percent
 
             # Tunnel Data
-            self.insta_buy_tunnel_price = Range(show=False)     # Normal
+            self.tunnel_insta_buy_price = Range(show=False)     # Normal
             self.buy_vol_above_tunnel = Range(show=False)       # Normal
             self.buy_vol_above_tunnel_percent = Range(show=False)    # Percent
-            self.insta_sell_tunnel_price = Range(show=False)    # Normal
+            self.tunnel_insta_sell_price = Range(show=False)    # Normal
             self.sell_vol_below_tunnel = Range(show=False)      # Normal
             self.sell_vol_below_tunnel_percent = Range(show=False)     # Percent
             self.tunnel_margin_taxed = Range(show=False)        # Normal
@@ -333,19 +334,19 @@ class OutputFilters():
             self.insta_buy_change = Range(show=False)           # Normal
             self.insta_buy_change_percent = Range(show=False)   # Percent
             self.buy_over_sell_vol_ratio = Range(show=False)    # Ratio
-            self.insta_buy_cov = Range(show=False)              # Percent
+            self.insta_buy_coefficient_of_variance = Range(show=False)              # Percent
             self.insta_sell_change = Range(show=False)          # Normal
             self.insta_sell_change_percent = Range(show=False)  # Percent
             self.sell_over_buy_vol_ratio = Range(show=False)    # Ratio
-            self.insta_sell_cov = Range(show=False)             # Percent
+            self.insta_sell_coefficient_of_variance = Range(show=False)             # Percent
             self.price_change = Range(show=False)               # Normal
             self.price_change_percent = Range(show=False)       # Percent
 
             # Tunnel Data
-            self.insta_buy_tunnel_price = Range(show=False)     # Normal
+            self.tunnel_insta_buy_price = Range(show=False)     # Normal
             self.buy_vol_above_tunnel = Range(show=False)       # Normal
             self.buy_vol_above_tunnel_percent = Range(show=False)    # Percent
-            self.insta_sell_tunnel_price = Range(show=False)    # Normal
+            self.tunnel_insta_sell_price = Range(show=False)    # Normal
             self.sell_vol_below_tunnel = Range(show=False)      # Normal
             self.sell_vol_below_tunnel_percent = Range(show=False)     # Percent
             self.tunnel_margin_taxed = Range(show=False)        # Normal
@@ -369,19 +370,19 @@ class OutputFilters():
             self.insta_buy_change = Range(show=False)           # Normal
             self.insta_buy_change_percent = Range(show=False)   # Percent
             self.buy_over_sell_vol_ratio = Range(show=False)    # Ratio
-            self.insta_buy_cov = Range(show=False)              # Percent
+            self.insta_buy_coefficient_of_variance = Range(show=False)              # Percent
             self.insta_sell_change = Range(show=False)          # Normal
             self.insta_sell_change_percent = Range(show=False)  # Percent
             self.sell_over_buy_vol_ratio = Range(show=False)    # Ratio
-            self.insta_sell_cov = Range(show=False)             # Percent
+            self.insta_sell_coefficient_of_variance = Range(show=False)             # Percent
             self.price_change = Range(show=False)               # Normal
             self.price_change_percent = Range(show=False)       # Percent
 
             # Tunnel Data
-            self.insta_buy_tunnel_price = Range(show=False)     # Normal
+            self.tunnel_insta_buy_price = Range(show=False)     # Normal
             self.buy_vol_above_tunnel = Range(show=False)       # Normal
             self.buy_vol_above_tunnel_percent = Range(show=False)    # Percent
-            self.insta_sell_tunnel_price = Range(show=False)    # Normal
+            self.tunnel_insta_sell_price = Range(show=False)    # Normal
             self.sell_vol_below_tunnel = Range(show=False)      # Normal
             self.sell_vol_below_tunnel_percent = Range(show=False)     # Percent
             self.tunnel_margin_taxed = Range(show=False)        # Normal
@@ -606,16 +607,8 @@ class TimeSeriesData():
         self.type = ""
         self.desc = desc
 
-        # TODO: Eventually want to automate finding the ideal percentiles here
-        # - Where their profit margin meets user's filter requirement
-        # - There are sufficient offers beyond the boundary to buy/sell
-        #     - Could base on buy/sell opportunity and just let user tune
-        #       because intelligently automating this is challenging since
-        #       items vary in their price fluctations a ton even if we can
-        #       measure cov, price changes, etc.
-        #       In other words .. what is sufficient? That is difficult to find
-        #       so unless a new idea comes along to solve that, let user decide.
-        #
+        # Temporary input
+        # TODO: Eventually remove this.
         self.insta_buy_tunnel_percentile = 60
         self.insta_sell_tunnel_percentile = 40
 
@@ -634,19 +627,19 @@ class TimeSeriesData():
         self.insta_buy_change = Data()
         self.insta_buy_change_percent = Data()
         self.buy_over_sell_vol_ratio = Data()
-        self.insta_buy_cov = Data()         # Cofficient of Variance
+        self.insta_buy_coefficient_of_variance = Data()         # Cofficient of Variance
         self.insta_sell_change = Data()
         self.insta_sell_change_percent = Data()
         self.sell_over_buy_vol_ratio = Data()
-        self.insta_sell_cov = Data()        # Coefficient of Variance
+        self.insta_sell_coefficient_of_variance = Data()        # Coefficient of Variance
         self.price_change = Data()
         self.price_change_percent = Data()
         
         # Tunnel Data
-        self.insta_buy_tunnel_price = Data()
+        self.tunnel_insta_buy_price = Data()
         self.buy_vol_above_tunnel = Data()
         self.buy_vol_above_tunnel_percent = Data()
-        self.insta_sell_tunnel_price = Data()
+        self.tunnel_insta_sell_price = Data()
         self.sell_vol_below_tunnel = Data()
         self.sell_vol_below_tunnel_percent = Data()
         self.tunnel_margin_taxed = Data()
@@ -674,13 +667,13 @@ class TimeSeriesData():
         axes.plot(self.insta_sell_times, self.insta_sell_prices, color = 'blue', label = 'Instant Sell Price')
 
         # Plot insta sell tunnel line
-        axes.axhline(y = self.insta_sell_tunnel_price.value, color = 'blue', linestyle = '-')
+        axes.axhline(y = self.tunnel_insta_sell_price.value, color = 'blue', linestyle = '-')
 
         # Plot insta buy data
         axes.plot(self.insta_buy_times, self.insta_buy_prices, color='red', label = 'Instant Buy Price')
 
         # Plot insta buy tunnel line
-        axes.axhline(y = self.insta_buy_tunnel_price.value, color = 'red', linestyle = '-')
+        axes.axhline(y = self.tunnel_insta_buy_price.value, color = 'red', linestyle = '-')
 
         # Label time
         # TODO: Eventually show time normally ..
@@ -793,6 +786,18 @@ def show_data(config, itd_list):
         item.s1yd.show(data_file, use_email)
         item.s1yd.plot()
 
+    # Print some final data
+    items_shown = "Items Shown: %d" % (len(itd_list))
+    cmd_used = "Command:", " ".join(sys.argv)
+    print(items_shown)
+    print(cmd_used)
+    if (data_file):
+        data_file.write(items_shown + "\n")
+        data_file.write(cmd_used + "\n")
+    if (use_email):
+        email_msg = email_msg + items_shown + "\n"
+        email_msg = email_msg + cmd_used + "\n"
+
     # Close file if used.
     if (config.data_filename):
         data_file.close()    
@@ -829,8 +834,6 @@ def show_data(config, itd_list):
             server.login(sender, passw)
             server.sendmail(sender, recip, msg.as_string())
 
-    # Print some final statistics
-    print("Items Shown: %d" % (len(itd_list)))
 
 def get_plot_pdf_data(config):
 
@@ -1482,8 +1485,8 @@ def get_latest_data(itd, item_id, ofs):
     ld.insta_sell_time_min = Data(lf.insta_sell_time_min.show, insta_sell_time_min, "Insta Sell Time: %d Min Ago")    
     ld.insta_buy_price = Data(lf.insta_buy_price.show, insta_buy_price, "Insta Buy Price: %d")
     ld.insta_buy_time_min = Data(lf.insta_buy_time_min.show, insta_buy_time_min, "Insta Buy Time: %d Min Ago")
-    ld.price_avg = Data(lf.price_avg.show, price_avg, "Average Price: %d") 
-    ld.margin_taxed = Data(lf.margin_taxed.show, margin_taxed, "Margin (Taxed): %d")
+    ld.price_avg = Data(lf.price_avg.show, price_avg, "Price Average: %d") 
+    ld.margin_taxed = Data(lf.margin_taxed.show, margin_taxed, "Margin Taxed: %d")
     ld.profit_per_limit = Data(lf.profit_per_limit.show, profit_per_limit, "Profit Per Limit: %d")
     ld.return_on_investment = Data(lf.return_on_investment.show, roi, "Return on Investment: %.2f%%")
 
@@ -1606,15 +1609,15 @@ def get_average_data(itd, item_id, ofs, avg_type):
         itd.used = False
         return ad
 
-    ad.insta_buy_avg = Data(opt.insta_buy_avg.show, insta_buy_avg, "Average Insta Buy Price: %d")
-    ad.insta_buy_vol = Data(opt.insta_buy_vol.show, insta_buy_vol, "Average Insta Buy Volume: %d")
-    ad.insta_sell_avg = Data(opt.insta_sell_avg.show, insta_sell_avg, "Average Insta Sell Price: %d")
-    ad.insta_sell_vol = Data(opt.insta_sell_vol.show, insta_sell_vol, "Average Insta Sell Volume: %d")
-    ad.avg_vol = Data(opt.avg_vol.show, avg_vol, "Average Volume: %d")
-    ad.price_avg = Data(opt.price_avg.show, price_avg, "Average Price: %d")
-    ad.margin_taxed = Data(opt.margin_taxed.show, margin_taxed, "Average Margin (Taxed): %d")
-    ad.profit_per_limit = Data(opt.profit_per_limit.show, profit_per_limit, "Average Profit Per Limit: %d")
-    ad.return_on_investment_avg = Data(opt.return_on_investment_avg.show, roi_avg, "Average Return on Investment: %.2f%%")
+    ad.insta_buy_avg = Data(opt.insta_buy_avg.show, insta_buy_avg, "Insta Buy Price Average: %d")
+    ad.insta_buy_vol = Data(opt.insta_buy_vol.show, insta_buy_vol, "Insta Buy Volume Average: %d")
+    ad.insta_sell_avg = Data(opt.insta_sell_avg.show, insta_sell_avg, "Insta Sell Price Average: %d")
+    ad.insta_sell_vol = Data(opt.insta_sell_vol.show, insta_sell_vol, "Insta Sell Volume Average: %d")
+    ad.avg_vol = Data(opt.avg_vol.show, avg_vol, "Volume Average: %d")
+    ad.price_avg = Data(opt.price_avg.show, price_avg, "Price Average: %d")
+    ad.margin_taxed = Data(opt.margin_taxed.show, margin_taxed, "Margin Taxed Average: %d")
+    ad.profit_per_limit = Data(opt.profit_per_limit.show, profit_per_limit, "Profit Per Limit Average: %d")
+    ad.return_on_investment_avg = Data(opt.return_on_investment_avg.show, roi_avg, "Return on Investment Average: %.2f%%")
 
     return ad
     
@@ -1954,28 +1957,28 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps, data_ts):
         return tsd
 
     # Get insta buy tunnel price
-    insta_buy_tunnel_price = int(np.percentile(insta_buy_prices, tsd.insta_buy_tunnel_percentile))
-    f = opt.insta_buy_tunnel_price.filter(insta_buy_tunnel_price)
+    tunnel_insta_buy_price = int(np.percentile(insta_buy_prices, tsd.insta_buy_tunnel_percentile))
+    f = opt.tunnel_insta_buy_price.filter(tunnel_insta_buy_price)
     if (f == False):
         itd.used = False
         return tsd
 
     # Get insta sell tunnel price
-    insta_sell_tunnel_price = int(np.percentile(insta_sell_prices, tsd.insta_sell_tunnel_percentile))
-    f = opt.insta_sell_tunnel_price.filter(insta_sell_tunnel_price)
+    tunnel_insta_sell_price = int(np.percentile(insta_sell_prices, tsd.insta_sell_tunnel_percentile))
+    f = opt.tunnel_insta_sell_price.filter(tunnel_insta_sell_price)
     if (f == False):
         itd.used = False
         return tsd
 
     # Get buy volume above buy tunnel
-    buy_vol_above_tunnel = get_buy_vol_above_tunnel(insta_buy_prices, insta_buy_vols, insta_buy_tunnel_price)
+    buy_vol_above_tunnel = get_buy_vol_above_tunnel(insta_buy_prices, insta_buy_vols, tunnel_insta_buy_price)
     f = opt.buy_vol_above_tunnel.filter(buy_vol_above_tunnel)
     if (f == False):
         itd.used = False
         return tsd
 
     # Get sell volume below tunnel
-    sell_vol_below_tunnel = get_sell_vol_below_tunnel(insta_sell_prices, insta_sell_vols, insta_sell_tunnel_price)
+    sell_vol_below_tunnel = get_sell_vol_below_tunnel(insta_sell_prices, insta_sell_vols, tunnel_insta_sell_price)
     f = opt.sell_vol_below_tunnel.filter(sell_vol_below_tunnel)
     if (f == False):
         itd.used = False
@@ -1998,7 +2001,7 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps, data_ts):
         return tsd
 
     # Get tunnel margin taxed
-    tunnel_margin_taxed = int((insta_buy_tunnel_price*.99) - insta_sell_tunnel_price)
+    tunnel_margin_taxed = int((tunnel_insta_buy_price*.99) - tunnel_insta_sell_price)
     f = opt.tunnel_margin_taxed.filter(tunnel_margin_taxed)
     if (f == False):
         itd.used = False
@@ -2012,8 +2015,8 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps, data_ts):
         return tsd
 
     # Get tunnel return on investment per item
-    if (insta_sell_tunnel_price != 0):
-        tunnel_roi = (tunnel_margin_taxed / insta_sell_tunnel_price)*100
+    if (tunnel_insta_sell_price != 0):
+        tunnel_roi = (tunnel_margin_taxed / tunnel_insta_sell_price)*100
     f = opt.tunnel_return_on_investment.filter(tunnel_roi)
     if (f == False):
         itd.used = False
@@ -2026,7 +2029,7 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps, data_ts):
     # Get insta buy coefficient of variance
     if (insta_buy_avg != 0):
         insta_buy_cov = (insta_buy_std/insta_buy_avg)*100
-    f = opt.insta_buy_cov.filter(insta_buy_cov)
+    f = opt.insta_buy_coefficient_of_variance.filter(insta_buy_cov)
     if (f == False):
         itd.used = False
         return tsd
@@ -2034,7 +2037,7 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps, data_ts):
     # Get insta sell coefficient of variance
     if (insta_sell_avg != 0):
         insta_sell_cov = (insta_sell_std/insta_sell_avg)*100
-    f = opt.insta_sell_cov.filter(insta_sell_cov)
+    f = opt.insta_sell_coefficient_of_variance.filter(insta_sell_cov)
     if (f == False):
         itd.used = False
         return tsd
@@ -2053,14 +2056,14 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps, data_ts):
         tsd.insta_buy_prices = insta_buy_prices
 
         # Get insta buy tunnel line
-        tsd.insta_buy_tunnel_price = insta_buy_tunnel_price
+        tsd.tunnel_insta_buy_price = tunnel_insta_buy_price
 
         # Get insta sell data
         tsd.insta_sell_times = insta_sell_times
         tsd.insta_sell_prices = insta_sell_prices
 
         # Get insta sell tunnel line
-        tsd.insta_sell_tunnel_price = insta_sell_tunnel_price
+        tsd.tunnel_insta_sell_price = tunnel_insta_sell_price
 
     tsd.insta_buy_avg = Data(opt.insta_buy_avg.show, insta_buy_avg, "Insta Buy Average: %d")
     tsd.insta_buy_vol = Data(opt.insta_buy_vol.show, insta_buy_vol, "Insta Buy Volume: %d")
@@ -2071,22 +2074,22 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps, data_ts):
     tsd.margin_taxed_avg = Data(opt.margin_taxed_avg.show, margin_taxed_avg, "Margin Taxed Average: %d")
     tsd.profit_per_limit_avg = Data(opt.profit_per_limit_avg.show, profit_per_limit_avg, "Profit Per Limit Average: %d")
 
-    tsd.return_on_investment_avg = Data(opt.return_on_investment_avg.show, roi_avg, "Average Return on Investment: %.2f%%")
+    tsd.return_on_investment_avg = Data(opt.return_on_investment_avg.show, roi_avg, "Return on Investment Average: %.2f%%")
     tsd.insta_buy_change = Data(opt.insta_buy_change.show, insta_buy_change, "Insta Buy Change: %d")
     tsd.insta_buy_change_percent = Data(opt.insta_buy_change_percent.show, insta_buy_change_percent, "Insta Buy Change Percent: %.2f%%")
-    tsd.buy_over_sell_vol_ratio = Data(opt.buy_over_sell_vol_ratio.show, buy_over_sell_vol_ratio, "Buy/Sell Vol Ratio: %.2f")
-    tsd.insta_buy_cov = Data(opt.insta_buy_cov.show, insta_buy_cov, "Insta Buy CoV: %.2f%%")
+    tsd.buy_over_sell_vol_ratio = Data(opt.buy_over_sell_vol_ratio.show, buy_over_sell_vol_ratio, "Buy/Sell Volume Ratio: %.2f")
+    tsd.insta_buy_coefficient_of_variance = Data(opt.insta_buy_coefficient_of_variance.show, insta_buy_cov, "Insta Buy Coefficient of Variance: %.2f%%")
     tsd.insta_sell_change = Data(opt.insta_sell_change.show, insta_sell_change, "Insta Sell Change: %d")
     tsd.insta_sell_change_percent = Data(opt.insta_sell_change_percent.show, insta_sell_change_percent, "Insta Sell Change Percent: %.2f%%")
-    tsd.sell_over_buy_vol_ratio = Data(opt.sell_over_buy_vol_ratio.show, sell_over_buy_vol_ratio, "Sell/Buy Vol Ratio: %.2f")
-    tsd.insta_sell_cov = Data(opt.insta_sell_cov.show, insta_sell_cov, "Insta Sell CoV: %.2f%%")
+    tsd.sell_over_buy_vol_ratio = Data(opt.sell_over_buy_vol_ratio.show, sell_over_buy_vol_ratio, "Sell/Buy Volume Ratio: %.2f")
+    tsd.insta_sell_coefficient_of_variance = Data(opt.insta_sell_coefficient_of_variance.show, insta_sell_cov, "Insta Sell Coefficient of Variance: %.2f%%")
     tsd.price_change = Data(opt.price_change.show, price_change, "Price Change: %d")
     tsd.price_change_percent = Data(opt.price_change_percent.show, price_change_percent, "Price Change Percent: %.2f%%")
 
-    tsd.insta_buy_tunnel_price = Data(opt.insta_buy_tunnel_price.show, insta_buy_tunnel_price, "Insta Buy Tunnel Price: %d")
+    tsd.tunnel_insta_buy_price = Data(opt.tunnel_insta_buy_price.show, tunnel_insta_buy_price, "Insta Buy Tunnel Price: %d")
     tsd.buy_vol_above_tunnel = Data(opt.buy_vol_above_tunnel.show, buy_vol_above_tunnel, "Buy Volume Above Tunnel: %d")
     tsd.buy_vol_above_tunnel_percent = Data(opt.buy_vol_above_tunnel_percent.show, buy_vol_above_tunnel_percent, "Buy Volume Above Tunnel Percent: %.2f%%")
-    tsd.insta_sell_tunnel_price = Data(opt.insta_sell_tunnel_price.show, insta_sell_tunnel_price, "Insta Sell Tunnel Price: %d")
+    tsd.tunnel_insta_sell_price = Data(opt.tunnel_insta_sell_price.show, tunnel_insta_sell_price, "Insta Sell Tunnel Price: %d")
     tsd.sell_vol_below_tunnel = Data(opt.sell_vol_below_tunnel.show, sell_vol_below_tunnel, "Sell Volume Below Tunnel: %d")
     tsd.sell_vol_below_tunnel_percent = Data(opt.sell_vol_below_tunnel_percent.show, sell_vol_below_tunnel_percent, "Sell Volume Below Tunnel Percent: %.2f%%")
     tsd.tunnel_margin_taxed = Data(opt.tunnel_margin_taxed.show, tunnel_margin_taxed, "Tunnel Margin Taxed: %d")
@@ -2095,7 +2098,7 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps, data_ts):
 
     return tsd
 
-def get_buy_vol_above_tunnel(insta_buy_prices, insta_buy_vols, insta_buy_tunnel_price):
+def get_buy_vol_above_tunnel(insta_buy_prices, insta_buy_vols, tunnel_insta_buy_price):
     
     # Ensure lists of same size
     num_trades = len(insta_buy_prices)
@@ -2109,14 +2112,14 @@ def get_buy_vol_above_tunnel(insta_buy_prices, insta_buy_vols, insta_buy_tunnel_
         avg_price = insta_buy_prices[i]
 
         # Count buy volume above tunnel
-        if (avg_price >= insta_buy_tunnel_price):
+        if (avg_price >= tunnel_insta_buy_price):
             buy_vol_above_tunnel = buy_vol_above_tunnel + insta_buy_vols[i]
 
 
     return buy_vol_above_tunnel
 
 
-def get_sell_vol_below_tunnel(insta_sell_prices, insta_sell_vols, insta_sell_tunnel_price):
+def get_sell_vol_below_tunnel(insta_sell_prices, insta_sell_vols, tunnel_insta_sell_price):
     
     # Ensure lists of same size
     num_trades = len(insta_sell_prices)
@@ -2130,7 +2133,7 @@ def get_sell_vol_below_tunnel(insta_sell_prices, insta_sell_vols, insta_sell_tun
         avg_price = insta_sell_prices[i]
 
         # Count buy volume above tunnel
-        if (avg_price <= insta_sell_tunnel_price):
+        if (avg_price <= tunnel_insta_sell_price):
             sell_vol_below_tunnel = sell_vol_below_tunnel + insta_sell_vols[i]
 
 
