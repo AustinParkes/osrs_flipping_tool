@@ -26,6 +26,8 @@ five_url = api_url + '/5m'
 hour_url = api_url + '/1h'
 ts_url = api_url + '/timeseries'
 
+# TODO: I should turn gathering my email message into a class object
+# and use a method and class variable to store this message ..
 email_msg = ""
 
 # Class to let user enter range filter
@@ -133,20 +135,20 @@ class OutputFilters():
 
     class BasicItemFilters():
         def __init__(self):
-            self.item_name = Contains(show=True, string = "")
-            self.item_id = Range(show=True)
-            self.item_price = Range(show=True, min=200000, max=2000000)
-            self.ge_limit = Range(show=True)
+            self.item_name = Contains(show=False, string = "")
+            self.item_id = Range(show=False)
+            self.item_price = Range(show=False)
+            self.ge_limit = Range(show=False)
 
     class LatestFilters():
         def __init__(self):
-            self.insta_sell_price = Range(show=True)           # Normal
-            self.insta_sell_time_min = Range(show=True)        # Minutes
-            self.insta_buy_price = Range(show=True)            # Normal
-            self.insta_buy_time_min = Range(show=True)         # Minutes
+            self.insta_sell_price = Range(show=False)           # Normal
+            self.insta_sell_time_min = Range(show=False)        # Minutes
+            self.insta_buy_price = Range(show=False)            # Normal
+            self.insta_buy_time_min = Range(show=False)         # Minutes
             self.price_avg = NoFilter(show=False)               # We use item_price as our price filter
             self.margin_taxed = Range(show=False)               # Normal
-            self.profit_per_limit = Range(show=True)           # Normal
+            self.profit_per_limit = Range(show=False)           # Normal
             self.return_on_investment = Range(show=False)      # Percent
 
     class Avg5mFilters():
@@ -183,7 +185,7 @@ class OutputFilters():
             self.total_vol = Range(show=False)                  # Normal
             self.margin_taxed_avg = Range(show=False)           # Normal
             self.profit_per_limit_avg = Range(show=False)       # Normal
-            self.plot = DisplayPlot(show = False)               # Plot
+            self.plot = DisplayPlot(show=False)               # Plot
             
             # Changes and Percentages
             self.return_on_investment_avg = Range(show=False)                    # Percent
@@ -212,38 +214,38 @@ class OutputFilters():
     class Series12hFilters():
         def __init__(self):
             self.insta_buy_avg = Range(show=False)              # Normal
-            self.insta_buy_vol = Range(show=True)              # Normal
+            self.insta_buy_vol = Range(show=False)              # Normal
             self.insta_sell_avg = Range(show=False)             # Normal
-            self.insta_sell_vol = Range(show=True)             # Normal
+            self.insta_sell_vol = Range(show=False)             # Normal
             self.price_avg = NoFilter(show=False)               # We use item_price as our price filter
-            self.total_vol = Range(show=True, min=200)                  # Normal
+            self.total_vol = Range(show=False)                  # Normal
             self.margin_taxed_avg = Range(show=False)           # Normal
             self.profit_per_limit_avg = Range(show=False)       # Normal
-            self.plot = DisplayPlot(show = True)               # Plot
+            self.plot = DisplayPlot(show=False)               # Plot
             
             # Changes and Percentages
-            self.return_on_investment_avg = Range(show=False)                   # Percent
-            self.insta_buy_change = Range(show=True)           # Normal
-            self.insta_buy_change_percent = Range(show=True)   # Percent
-            self.buy_over_sell_vol_ratio = Range(show=True)    # Ratio
-            self.insta_buy_coefficient_of_variance = Range(show=True)              # Percent
-            self.insta_sell_change = Range(show=True)          # Normal
-            self.insta_sell_change_percent = Range(show=True)  # Percent
-            self.sell_over_buy_vol_ratio = Range(show=True)    # Ratio
-            self.insta_sell_coefficient_of_variance = Range(show=True)              # Percent
+            self.return_on_investment_avg = Range(show=False)                    # Percent
+            self.insta_buy_change = Range(show=False)           # Normal
+            self.insta_buy_change_percent = Range(show=False)   # Percent
+            self.buy_over_sell_vol_ratio = Range(show=False)    # Ratio
+            self.insta_buy_coefficient_of_variance = Range(show=False)              # Percent
+            self.insta_sell_change = Range(show=False)          # Normal
+            self.insta_sell_change_percent = Range(show=False)  # Percent
+            self.sell_over_buy_vol_ratio = Range(show=False)    # Ratio
+            self.insta_sell_coefficient_of_variance = Range(show=False)             # Percent
             self.price_change = Range(show=False)               # Normal
             self.price_change_percent = Range(show=False)       # Percent
 
             # Tunnel Data
-            self.tunnel_insta_buy_price = Range(show=True)     # Normal
-            self.buy_vol_above_tunnel = Range(show=True)       # Normal
-            self.buy_vol_above_tunnel_percent = Range(show=True)    # Percent
-            self.tunnel_insta_sell_price = Range(show=True)    # Normal
-            self.sell_vol_below_tunnel = Range(show=True)      # Normal
-            self.sell_vol_below_tunnel_percent = Range(show=True)     # Percent
+            self.tunnel_insta_buy_price = Range(show=False)     # Normal
+            self.buy_vol_above_tunnel = Range(show=False)       # Normal
+            self.buy_vol_above_tunnel_percent = Range(show=False)    # Percent
+            self.tunnel_insta_sell_price = Range(show=False)    # Normal
+            self.sell_vol_below_tunnel = Range(show=False)      # Normal
+            self.sell_vol_below_tunnel_percent = Range(show=False)     # Percent
             self.tunnel_margin_taxed = Range(show=False)        # Normal
-            self.tunnel_profit_per_limit =  Range(show=True, min=100000)   # Normal
-            self.tunnel_return_on_investment =  Range(show=True)                # Percent
+            self.tunnel_profit_per_limit =  Range(show=False)   # Normal
+            self.tunnel_return_on_investment =  Range(show=False)                # Percent
 
     class Series24hFilters():
         def __init__(self):
@@ -255,7 +257,7 @@ class OutputFilters():
             self.total_vol = Range(show=False)                  # Normal
             self.margin_taxed_avg = Range(show=False)           # Normal
             self.profit_per_limit_avg = Range(show=False)       # Normal
-            self.plot = DisplayPlot(show = False)               # Plot
+            self.plot = DisplayPlot(show=False)               # Plot
             
             # Changes and Percentages
             self.return_on_investment_avg = Range(show=False)                    # Percent
@@ -291,7 +293,7 @@ class OutputFilters():
             self.total_vol = Range(show=False)                  # Normal
             self.margin_taxed_avg = Range(show=False)           # Normal
             self.profit_per_limit_avg = Range(show=False)       # Normal
-            self.plot = DisplayPlot(show = False)               # Plot
+            self.plot = DisplayPlot(show=False)               # Plot
             
             # Changes and Percentages
             self.return_on_investment_avg = Range(show=False)                    # Percent
@@ -327,7 +329,7 @@ class OutputFilters():
             self.total_vol = Range(show=False)                  # Normal
             self.margin_taxed_avg = Range(show=False)           # Normal
             self.profit_per_limit_avg = Range(show=False)       # Normal
-            self.plot = DisplayPlot(show = False)               # Plot
+            self.plot = DisplayPlot(show=False)               # Plot
             
             # Changes and Percentages
             self.return_on_investment_avg = Range(show=False)                    # Percent
@@ -363,7 +365,7 @@ class OutputFilters():
             self.total_vol = Range(show=False)                  # Normal
             self.margin_taxed_avg = Range(show=False)           # Normal
             self.profit_per_limit_avg = Range(show=False)       # Normal
-            self.plot = DisplayPlot(show = False)               # Plot
+            self.plot = DisplayPlot(show=False)               # Plot
             
             # Changes and Percentages
             self.return_on_investment_avg = Range(show=False)                    # Percent
@@ -788,7 +790,8 @@ def show_data(config, itd_list):
 
     # Print some final data
     items_shown = "Items Shown: %d" % (len(itd_list))
-    cmd_used = "Command:", " ".join(sys.argv)
+    cmd_used = "Command: "
+    cmd_used = cmd_used + " ".join(sys.argv)
     print(items_shown)
     print(cmd_used)
     if (data_file):
@@ -1519,8 +1522,6 @@ def get_average_data(itd, item_id, ofs, avg_type):
         print("Invalid time range for average data: %s" % (avg_type))
         quit(1)
 
-    # TODO: Provide a string at least letting user know that no data was found.
-    # Current behavior is to be blank
     # Format string if no data found for item
     if (str(item_id)) not in avg_all['data']:
         ad.used = False
@@ -1660,7 +1661,6 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps, data_ts):
     hour6 = hour*6
     day = hour*24
 
-    # TODO: 6 & 12 can be gotten from 24.
     # Get time range user options
     # 6 Hours
     if (timestep == "5m" and num_steps == 72):
@@ -1928,7 +1928,7 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps, data_ts):
 
     # Get average price
     # Note: We use item price from basic filter for our price filter
-    price_avg = (insta_buy_avg + insta_sell_avg)/2
+    price_avg = int((insta_buy_avg + insta_sell_avg)/2)
     f = ofs.bif.item_price.filter(price_avg)
     if (f == False):
         itd.used = False
