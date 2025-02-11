@@ -5,24 +5,24 @@
       "py/object": "__main__.OutputFilters.BasicItemFilters",
       "item_name": {
          "py/object": "__main__.Contains",
-         "show": false,
+         "show": true,
          "string": ""
       },
       "item_id": {
          "py/object": "__main__.Range",
-         "show": false,
+         "show": true,
          "min": -2147483647,
          "max": 2147483647
       },
       "item_price": {
          "py/object": "__main__.Range",
-         "show": false,
+         "show": true,
          "min": -2147483647,
          "max": 2147483647
       },
       "ge_limit": {
          "py/object": "__main__.Range",
-         "show": false,
+         "show": true,
          "min": -2147483647,
          "max": 2147483647
       }
