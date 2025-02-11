@@ -981,6 +981,15 @@ def filter_items(args):
     if (args.load_filter and args.save_filter):
         print("Attempting to save and load filter simultaneously. Quitting.")
 
+    # Check if user is saving program's filter
+    if (args.save_filter):
+        ofs = OutputFilters()
+        s = jsonpickle.encode(ofs, indent=3)
+        with open(args.save_filter, 'w') as f:
+            s = jsonpickle.encode(ofs, indent=3)
+            f.write(s)
+            return  
+
     # Check if user is loading existing filter as object
     if (args.load_filter):
         with open(args.load_filter, 'r') as f:
@@ -999,14 +1008,6 @@ def filter_items(args):
         can_sort = check_sort_options(ofs, config, args.sort)
         if (can_sort == False):
             quit(1)
-
-    # Check if user is saving program's filter
-    if (args.save_filter):
-        s = jsonpickle.encode(ofs, indent=3)
-        with open(args.save_filter, 'w') as f:
-            s = jsonpickle.encode(ofs, indent=3)
-            f.write(s)
-            return  
 
     # Ensure plot filters are used with --send-email or --save-plots
     # Otherwise, do not use at all.

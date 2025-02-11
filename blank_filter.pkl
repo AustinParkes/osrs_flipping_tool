@@ -1,29 +1,28 @@
 {
    "py/object": "__main__.OutputFilters",
-   "used": true,
-   "item_list": [],
+   "used": false,
    "bif": {
       "py/object": "__main__.OutputFilters.BasicItemFilters",
       "item_name": {
          "py/object": "__main__.Contains",
-         "show": true,
+         "show": false,
          "string": ""
       },
       "item_id": {
          "py/object": "__main__.Range",
-         "show": true,
+         "show": false,
          "min": -2147483647,
          "max": 2147483647
       },
       "item_price": {
          "py/object": "__main__.Range",
-         "show": true,
+         "show": false,
          "min": -2147483647,
          "max": 2147483647
       },
       "ge_limit": {
          "py/object": "__main__.Range",
-         "show": true,
+         "show": false,
          "min": -2147483647,
          "max": 2147483647
       }
@@ -70,7 +69,7 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "roi": {
+      "return_on_investment": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -125,7 +124,7 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "roi_avg": {
+      "return_on_investment_avg": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -180,7 +179,7 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "roi_avg": {
+      "return_on_investment_avg": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -239,7 +238,7 @@
          "py/object": "__main__.DisplayPlot",
          "show": false
       },
-      "roi_avg": {
+      "return_on_investment_avg": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -263,7 +262,7 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "insta_buy_cov": {
+      "insta_buy_coefficient_of_variance": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -287,7 +286,7 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "insta_sell_cov": {
+      "insta_sell_coefficient_of_variance": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -305,7 +304,7 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "insta_buy_tunnel_price": {
+      "tunnel_insta_buy_price": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -317,13 +316,13 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "tunnel_buy_opportunity": {
+      "buy_vol_above_tunnel_percent": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
          "max": 2147483647
       },
-      "insta_sell_tunnel_price": {
+      "tunnel_insta_sell_price": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -335,7 +334,7 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "tunnel_sell_opportunity": {
+      "sell_vol_below_tunnel_percent": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -353,7 +352,7 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "tunnel_roi": {
+      "tunnel_return_on_investment": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -412,7 +411,7 @@
          "py/object": "__main__.DisplayPlot",
          "show": false
       },
-      "roi_avg": {
+      "return_on_investment_avg": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -436,7 +435,7 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "insta_buy_cov": {
+      "insta_buy_coefficient_of_variance": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -460,7 +459,7 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "insta_sell_cov": {
+      "insta_sell_coefficient_of_variance": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -478,7 +477,7 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "insta_buy_tunnel_price": {
+      "tunnel_insta_buy_price": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -490,13 +489,13 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "tunnel_buy_opportunity": {
+      "buy_vol_above_tunnel_percent": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
          "max": 2147483647
       },
-      "insta_sell_tunnel_price": {
+      "tunnel_insta_sell_price": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -508,7 +507,7 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "tunnel_sell_opportunity": {
+      "sell_vol_below_tunnel_percent": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -523,10 +522,10 @@
       "tunnel_profit_per_limit": {
          "py/object": "__main__.Range",
          "show": false,
-         "min": 100000,
+         "min": -2147483647,
          "max": 2147483647
       },
-      "tunnel_roi": {
+      "tunnel_return_on_investment": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -585,7 +584,7 @@
          "py/object": "__main__.DisplayPlot",
          "show": false
       },
-      "roi_avg": {
+      "return_on_investment_avg": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -609,7 +608,7 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "insta_buy_cov": {
+      "insta_buy_coefficient_of_variance": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -633,7 +632,7 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "insta_sell_cov": {
+      "insta_sell_coefficient_of_variance": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -651,7 +650,7 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "insta_buy_tunnel_price": {
+      "tunnel_insta_buy_price": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -663,13 +662,13 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "tunnel_buy_opportunity": {
+      "buy_vol_above_tunnel_percent": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
          "max": 2147483647
       },
-      "insta_sell_tunnel_price": {
+      "tunnel_insta_sell_price": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -681,7 +680,7 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "tunnel_sell_opportunity": {
+      "sell_vol_below_tunnel_percent": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -699,7 +698,7 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "tunnel_roi": {
+      "tunnel_return_on_investment": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -758,7 +757,7 @@
          "py/object": "__main__.DisplayPlot",
          "show": false
       },
-      "roi_avg": {
+      "return_on_investment_avg": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -782,7 +781,7 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "insta_buy_cov": {
+      "insta_buy_coefficient_of_variance": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -806,7 +805,7 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "insta_sell_cov": {
+      "insta_sell_coefficient_of_variance": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -824,7 +823,7 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "insta_buy_tunnel_price": {
+      "tunnel_insta_buy_price": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -836,13 +835,13 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "tunnel_buy_opportunity": {
+      "buy_vol_above_tunnel_percent": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
          "max": 2147483647
       },
-      "insta_sell_tunnel_price": {
+      "tunnel_insta_sell_price": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -854,7 +853,7 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "tunnel_sell_opportunity": {
+      "sell_vol_below_tunnel_percent": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -872,7 +871,7 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "tunnel_roi": {
+      "tunnel_return_on_investment": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -931,7 +930,7 @@
          "py/object": "__main__.DisplayPlot",
          "show": false
       },
-      "roi_avg": {
+      "return_on_investment_avg": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -955,7 +954,7 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "insta_buy_cov": {
+      "insta_buy_coefficient_of_variance": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -979,7 +978,7 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "insta_sell_cov": {
+      "insta_sell_coefficient_of_variance": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -997,7 +996,7 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "insta_buy_tunnel_price": {
+      "tunnel_insta_buy_price": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -1009,13 +1008,13 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "tunnel_buy_opportunity": {
+      "buy_vol_above_tunnel_percent": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
          "max": 2147483647
       },
-      "insta_sell_tunnel_price": {
+      "tunnel_insta_sell_price": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -1027,7 +1026,7 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "tunnel_sell_opportunity": {
+      "sell_vol_below_tunnel_percent": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -1045,7 +1044,7 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "tunnel_roi": {
+      "tunnel_return_on_investment": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -1104,7 +1103,7 @@
          "py/object": "__main__.DisplayPlot",
          "show": false
       },
-      "roi_avg": {
+      "return_on_investment_avg": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -1128,7 +1127,7 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "insta_buy_cov": {
+      "insta_buy_coefficient_of_variance": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -1152,7 +1151,7 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "insta_sell_cov": {
+      "insta_sell_coefficient_of_variance": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -1170,7 +1169,7 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "insta_buy_tunnel_price": {
+      "tunnel_insta_buy_price": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -1182,13 +1181,13 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "tunnel_buy_opportunity": {
+      "buy_vol_above_tunnel_percent": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
          "max": 2147483647
       },
-      "insta_sell_tunnel_price": {
+      "tunnel_insta_sell_price": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -1200,7 +1199,7 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "tunnel_sell_opportunity": {
+      "sell_vol_below_tunnel_percent": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
@@ -1218,14 +1217,14 @@
          "min": -2147483647,
          "max": 2147483647
       },
-      "tunnel_roi": {
+      "tunnel_return_on_investment": {
          "py/object": "__main__.Range",
          "show": false,
          "min": -2147483647,
          "max": 2147483647
       }
    },
-   "show_bif": true,
+   "show_bif": false,
    "show_lf": false,
    "show_a5mf": false,
    "show_a1hf": false,
