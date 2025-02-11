@@ -2,7 +2,10 @@
 Python3 script which allows users to find items matching customized item filters.  
 
 This program is intended to be ran as a command-line tool. Since it is a Python3 script,  
-it may be ran on any OS that has Python3 and all the required Python3 packages.
+it may be ran on any OS that has Python3 and all the required Python3 packages.  
+
+Therefore, use of this tool requires basic knowledge of the command line on whatever OS
+you are using.  
 
 ## Mac-OS Installation (UNTESTED)
 #### Update Homebrew and Upgrade Packages or Install Homebrew
@@ -47,10 +50,47 @@ Matplotlib (Plotting):
 Print Help Menu:  
 `./flipping.py --help`  
 
-To execute:  
-`./flipping.py <arguments>`  
+Test the tool works:  
+`./flipping.py -F blank_filter.pkl -I test_list.txt`  
 
-Executing without any arguments will likely result in exceeding the 500 item  
+If the script runs without error, you should see output similar to:  
+`       
+        Name: Nature rune
+        -----------------
+        Id: 561
+        GE Buy Limit: 18,000
+        Price: 100
+
+        Name: Zamorak d'hide body
+        -------------------------
+        Id: 10370
+        GE Buy Limit: 8
+        Price: 282,134
+
+        Name: Twisted bow
+        -----------------
+        Id: 20997
+        GE Buy Limit: 8
+        Price: 1,589,490,000
+
+        Name: Raw chicken
+        -----------------
+        Id: 2138
+        GE Buy Limit: 13,000
+        Price: 43
+
+        Name: Logs
+        ----------
+        Id: 1511
+        GE Buy Limit: 15,000
+        Price: 87
+
+        Items Shown: 5
+        Command: ./flipping.py -F test_filter.pkl -I test_list.txt`  
+
+You are now ready to learn to use the tool!  
+
+**NOTE:**Executing without any arguments will likely result in exceeding the 500 item  
 limit, so it is important you create and pass an item filter. 
 
 ###### Help Index  
