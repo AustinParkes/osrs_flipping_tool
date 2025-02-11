@@ -1,5 +1,8 @@
 # OSRS Flipping Tool
-Allows users to find items based on an item filter.
+Python3 script which allows users to find items matching customized item filters.  
+
+This program is intended to be ran as a command-line tool. Since it is a Python3 script,  
+it may be ran on any OS that has Python3 and all the required Python3 packages.
 
 ## Mac-OS Installation (UNTESTED)
 #### Update Homebrew and Upgrade Packages or Install Homebrew
