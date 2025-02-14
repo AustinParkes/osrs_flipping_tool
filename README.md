@@ -54,9 +54,7 @@ Test the tool works:
 `./flipping.py -F blank_filter.pkl -I test_list.txt`  
 
 If the script runs without error, you should see output similar to:  
-`       
-
-        Name: Nature rune
+`       Name: Nature rune
         -----------------
         Id: 561
         GE Buy Limit: 18,000
