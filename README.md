@@ -86,7 +86,7 @@ If the script runs without error, you should see output similar to:
         Price: 87
 
         Items Shown: 5
-        Command: ./flipping.py -F test_filter.pkl -I test_list.txt` 
+        Command: ./flipping.py -F test_filter.pkl -I test_list.txt    
 
 You are now ready to learn to use the tool!  
 
