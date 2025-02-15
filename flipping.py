@@ -732,6 +732,8 @@ def show_obj_data(obj, file, use_email):
 
 def show_data(config, itd_list):
 
+    global email_msg
+
     # Open file if user is saving data to the file
     if (config.data_filename):
         data_file = open(config.data_filename, "a")
@@ -1236,126 +1238,6 @@ def apply_basic_filter(ofs, user_id_list):
         filtered_id_list.append(item_id)
 
     return filtered_id_list   
-       
-
-def get_minima(min_list, data_ts, num_entries, num_steps, i):
-
-    closest_left = 0
-    closest_right = 0    
-
-    # Find next non-null recent (left) insta sell indice
-    j = i+1
-    while (j <= num_entries): 
-        if (data_ts[j]['avgLowPrice'] != None):
-            closest_left = data_ts[j]['avgLowPrice']
-            break
-        if (j == num_entries):
-            closest_left = None
-        j = j+1
-            
-    # Find next non-null early (right) insta sell indice
-    j = i-1
-    while (j >= (num_entries-num_steps)):
-        if (data_ts[j]['avgLowPrice'] != None):
-            closest_right = data_ts[j]['avgLowPrice']
-            break
-        if (j == (num_entries-num_steps)):
-            closest_right = None
-        j = j-1
-
-    # Edge case where there is no adjacent data
-    if (closest_left == None and closest_right == None):
-        min_list.append(i)
-        return
-
-    # Case where we are on the first index
-    if (i == num_entries):
-        if (data_ts[num_entries]['avgLowPrice'] < closest_right):
-            min_list.append(num_entries)
-        return
-
-    # Case where we are on the last index
-    if (i == (num_entries-num_steps)):
-        if (data_ts[num_entries-num_steps]['avgLowPrice'] < closest_left):
-            min_list.append(num_entries-num_steps)
-        return
-
-    # Case where there is no left data
-    if (closest_left == None and closest_right != None):
-        if (data_ts[i]['avgLowPrice'] < closest_right):
-            min_list.append(i)
-        return
-
-    # Case where there is no right data
-    if (closest_left != None and closest_right == None):
-        if (data_ts[i]['avgLowPrice'] < closest_left):
-            min_list.append(i)
-        return
-
-    # Case where there is left and right data
-    if (closest_left > data_ts[i]['avgLowPrice'] < closest_right):
-        min_list.append(i)
-        return
-
-def get_maxima(max_list, data_ts, num_entries, num_steps, i):
-
-    closest_left = 0
-    closest_right = 0    
-
-    # Find next non-null recent (left) insta buy indice
-    j = i+1
-    while (j <= num_entries): 
-        if (data_ts[j]['avgHighPrice'] != None):
-            closest_left = data_ts[j]['avgHighPrice']
-            break
-        if (j == num_entries):
-            closest_left = None
-        j = j+1
-            
-    # Find next non-null early (right) insta buy indice
-    j = i-1
-    while (j >= (num_entries-num_steps)):
-        if (data_ts[j]['avgHighPrice'] != None):
-            closest_right = data_ts[j]['avgHighPrice']
-            break
-        if (j == (num_entries-num_steps)):
-            closest_right = None
-        j = j-1
-
-    # Edge case where there is no adjacent data
-    if (closest_left == None and closest_right == None):
-        max_list.append(i)
-        return
-
-    # Case where we are on first index 
-    if (i == num_entries and data_ts[num_entries]['avgHighPrice'] != None):
-        if (data_ts[num_entries]['avgHighPrice'] > closest_right):
-            max_list.append(num_entries)
-        return
-
-    # Case where we are on last index
-    if (i == (num_entries-num_steps) and data_ts[num_entries-num_steps]['avgHighPrice'] != None):
-        if (data_ts[num_entries-num_steps]['avgHighPrice'] > closest_left):
-            max_list.append(num_entries-num_steps)
-        return
-
-    # Edge Case where there is no left data
-    if (closest_left == None and closest_right != None):
-        if (data_ts[i]['avgHighPrice'] > closest_right):
-            max_list.append(i)
-        return
-
-    # Edge Case where there is no right data
-    if (closest_left != None and closest_right == None):
-        if (data_ts[i]['avgHighPrice'] > closest_left):
-            max_list.append(i)
-        return
-
-    # Case where there is left and right data
-    if (closest_left < data_ts[i]['avgHighPrice'] > closest_right):
-        max_list.append(i)
-        return
-
 
 def get_earliest_ts_data(data_ts, key, num_entries, num_steps):
   
@@ -1734,7 +1616,7 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps, data_ts):
     # Get most recent entry index 
     end = 364
 
-    # Loop entries from most recent to start of timeseries
+    # Loop entries from most recent to start of timeseries (backwards)
     # - Makes timestamp check more efficient because we can break out of loop
     #   as soon as we leave desired time range
     # - Note: Matplotlib still plots in the correct direction
@@ -2043,6 +1925,25 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps, data_ts):
         itd.used = False
         return tsd
 
+    # TODO: Return counts too, to use for more statistics
+    # TODO: Need conditions for when we don't even check,
+    #       like low sample count (<36?)
+    # Get maxima list, maxima indice list, and number of maxima as a tuple.
+    #max_tup = get_buy_maximas(insta_buy_prices, buy_count)
+
+    # Get minima list, minima indice list, and number of minima as a tuple.
+    #min_tup = get_sell_minimas(insta_sell_prices, sell_count)
+    
+    # TODO: Do buy and sell separately, then aggregate results?
+    #       Take worst result??? 
+    # TODO: Might wrap these functions in an "intelligent" function,
+    # that takes user's filters into consideration, aggregates results,
+    # etc. 
+
+    # Return consistency rating and return the price checked
+    #get_tunnel_consistency(max_tup, min_tup)
+
+
     # Only plot if used has opted to and if time series is used
     # TODO: Plot to show dots at each data point within the lines
     if (opt.plot.show == True and tsd.used == True):
@@ -2098,6 +1999,296 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps, data_ts):
     tsd.tunnel_return_on_investment = Data(opt.tunnel_return_on_investment.show, tunnel_roi, "Tunnel Return on Investment: %.2f%%")
 
     return tsd
+
+def get_tunnel_consistency(max_tup, min_tup):
+    """
+    Consistency Rating:
+
+    IDK .. trying to figure this out. 
+    Maybe scoring is the way to go? 
+
+    Excellent3:
+
+    Good2:
+    - All for qs have counts - 2
+    - q1, q2, and q3 have counts - 2
+    Ok1:
+    - If only q1 and q2 have counts - 2
+    - q1, q2, and q4 have counts - 2
+    - q1, q3, and q4 have counts - 2
+
+    Bad0: (Check the bad conditions first)
+    - If either tunnel boundary has only 0 or 1 quad count - 10
+    - If q1 has no count for either - 2
+    - If 
+    """
+
+
+# Count the number of maxima at or above the percentile line
+# for all 4 quadrants
+def get_buy_tunnel_quad_counts(max_tup, percentile):
+
+    # Get all maxima
+    max_list = max_tup[0]
+    max_count = max_tup[2]
+    q1c = 0
+    q2c = 0
+    q3c = 0
+    q4c = 0
+
+    if (max_count < 4):
+        print("Unhandled Error: Less than 4 maximas")
+        return
+
+    # Split max list into quadrants
+    quads = np.array_split(max_list, 4)
+    q1 = quads[0]
+    q2 = quads[1]
+    q3 = quads[2]
+    q4 = quads[3]
+
+    # Get the tunnel line to count maximas above it
+    tunnel_line = np.percentile(max_list, percentile)
+
+    # Get number maximas at or above tunnel line for q1
+    for price in q1:
+        if (price >= tunnel_line):
+            q1c = q1c + 1
+
+    # Get number maximas at or above tunnel line for q2
+    for price in q2:
+        if (price >= tunnel_line):
+            q2c = q2c + 1
+
+    # Get number maximas at or above tunnel line for q3
+    for price in q3:
+        if (price >= tunnel_line):
+            q3c = q3c + 1
+
+    # Get number maximas at or above tunnel line for q4
+    for price in q4:
+        if (price >= tunnel_line):
+            q4c = q4c + 1                        
+
+    quad_counts = (q1c, q2c, q3c, q4c)
+
+    return quad_counts
+    
+# Count the number of minima at or below the percentile line
+# for all 4 quadrants
+def get_sell_tunnel_quad_counts(min_tup, percentile):
+
+    # Get all minima
+    min_list = min_tup[0]
+    min_count = min_tup[2]
+    q1c = 0
+    q2c = 0
+    q3c = 0
+    q4c = 0
+
+    if (min_count < 4):
+        print("Unhandled Error: Less than 4 minimas")
+        return
+
+    # Split min list into quadrants
+    quads = np.array_split(min_list, 4)
+    q1 = quads[0]
+    q2 = quads[1]
+    q3 = quads[2]
+    q4 = quads[3]
+
+    # Get the tunnel line to count minimas below it
+    tunnel_line = np.percentile(min_list, percentile)
+
+    # Get number minimas at or below tunnel line for q1
+    for price in q1:
+        if (price <= tunnel_line):
+            q1c = q1c + 1
+
+    # Get number minimas at or below tunnel line for q2
+    for price in q2:
+        if (price <= tunnel_line):
+            q2c = q2c + 1
+
+    # Get number minimas at or below tunnel line for q3
+    for price in q3:
+        if (price <= tunnel_line):
+            q3c = q3c + 1
+
+    # Get number minimas at or below tunnel line for q4
+    for price in q4:
+        if (price <= tunnel_line):
+            q4c = q4c + 1                        
+
+    quad_counts = (q1c, q2c, q3c, q4c)
+
+    return quad_counts
+
+# Get all local maxima from timeseries data
+def get_buy_maximas(ibp, n):
+    mxi = []    # Maxima indice list
+    mx = []     # Maxima list
+    maxc = 0    # NMaxima count
+    pl = []     # Plateau list
+    in_pl = 0   # In plateau
+    last_max = None
+
+    # Check if first index is local maxima
+    if (ibp[0] > ibp[1]):
+        mx.append(ibp[0])
+        mxi.append(0)
+        maxc = maxc + 1
+    elif (ibp[0] == ibp[1]):
+        pl.append(0)
+        in_pl = 1
+        last_max = 0
+
+    # Loop buy data looking for local maxima
+    for i in range(1, n-1):
+
+        # Typical condition for local maxima
+        if (ibp[i-1] < ibp[i] > ibp[i+1]):
+            mx.append(ibp[i])
+            mxi.append(i)
+            maxc = maxc + 1
+            last_max = i
+            in_pl = 0
+            pl = []
+            continue
+
+        # On potential plateau, add plateau values to list
+        if (ibp[i] == ibp[i-1] and last_max == (i-1)):
+            pl.append(i)
+            last_max = i
+            in_pl = 1
+
+        # Starting potential plateau, add plateau values to list
+        elif (ibp[i] > ibp[i-1] and in_pl == 0):
+            pl.append(i)
+            last_max = i
+            in_pl= 1
+
+        # End of plateau, add plateau values to maxima list
+        elif (ibp[i] < ibp[i-1] and in_pl):
+            for p in pl:
+                mx.append(ibp[p])
+                mxi.append(p)
+                maxc = maxc + 1
+            in_pl = 0
+            pl = []
+
+        # Was not a plateau if value after is greater
+        elif (ibp[i] > ibp[i-1] and in_pl):
+            pl = []
+            in_pl = 0
+
+
+    # Check if last index is traditional local maxima
+    if (ibp[-1] > ibp[-2]):
+        mx.append(ibp[n-1])
+        mxi.append(n-1)
+        maxc = maxc + 1
+
+    # Handle plateau, if loop ended in a potential plateau 
+
+    # End of pleateau, add pleateau values to maxima list
+    if (ibp[-1] < ibp[-2] and in_pl):
+        for p in pl:
+            mx.append(ibp[p])
+            mxi.append(p)   
+            maxc = maxc + 1     
+    elif (ibp[-1] == ibp[-2] and in_pl):
+        pl.append(n-1)
+        for p in pl:
+            mx.append(ibp[p])
+            mxi.append(p)
+            maxc = maxc + 1
+
+    max_tup = (mx, mxi, maxc)
+
+    return max_tup
+
+# Get all minimas for a timeseries
+def get_sell_minimas(isp, n):
+    mn = []
+    mni = []
+    mnc = 0
+    bs = []
+    in_bs = 0   # In basin
+    last_min = None
+
+    # Check if first index is local minima
+    if (isp[0] < isp[1]):
+        mn.append(isp[0])
+        mni.append(0)
+        mnc = mnc + 1
+    elif (isp[0] == isp[1]):
+        bs.append(0)
+        in_bs = 1
+        last_min = 0
+
+    # Loop sell data looking for local minima
+    for i in range(1, n-1):
+
+        # Typical condition for local minima
+        if (isp[i-1] > isp[i] < isp[i+1]):
+            mn.append(isp[i])
+            mni.append(i)
+            mnc = mnc + 1
+            last_min = i
+            bs = []
+            in_bs = 0
+            continue
+
+        # In potential basin, add basin values to list
+        if (isp[i] == isp[i-1] and last_min == (i-1)):
+            bs.append(i)
+            last_min = i
+            in_bs = 1
+
+        # Starting potential basin, add bs values to list
+        elif (isp[i] < isp[i-1] and in_bs == 0):
+            bs.append(i)
+            last_min = i
+            in_bs = 1
+
+        # End of basin, add basin values to minima list
+        elif (isp[i] > isp[i-1] and in_bs):
+            for b in bs:
+                mn.append(isp[b])
+                mni.append(b)
+                mnc = mnc + 1
+            in_bs = 0
+            bs = []
+
+        # Was not a basin if value after is less
+        elif (isp[i] < isp[i-1] and in_bs):
+            bs = []
+            in_bs = 0
+
+
+    # Check if last index is traditional local minima
+    if (isp[-1] < isp[-2]):
+        mn.append(isp[n-1])
+        mni.append(n-1)
+        mnc = mnc + 1
+
+    # Handle basin, if loop ended in a potential basin
+
+    # End of basin, add basin values to minima list
+    if (isp[-1] > isp[-2] and in_bs):
+        for b in bs:
+            mni.append(b)        
+    elif (isp[-1] == isp[-2] and in_bs):
+        bs.append(n-1)
+        for b in bs:
+            mn.append(isp[b])
+            mni.append(b)
+            mnc = mnc + 1
+
+    min_tup = (mn, mni, mnc)
+
+    return min_tup
 
 def get_buy_vol_above_tunnel(insta_buy_prices, insta_buy_vols, tunnel_insta_buy_price):
     
