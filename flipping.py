@@ -1940,6 +1940,7 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps, data_ts):
     # that takes user's filters into consideration, aggregates results,
     # etc. 
 
+
     # Return consistency rating and return the price checked
     #get_tunnel_consistency(max_tup, min_tup)
 
@@ -2026,7 +2027,7 @@ def get_tunnel_consistency(max_tup, min_tup):
 
 # Count the number of maxima at or above the percentile line
 # for all 4 quadrants
-def get_buy_tunnel_quad_counts(max_tup, percentile):
+def get_buy_tunnel_quad_counts(max_tup, buy_count, percentile):
 
     # Get all maxima
     max_list = max_tup[0]
@@ -2039,6 +2040,9 @@ def get_buy_tunnel_quad_counts(max_tup, percentile):
     if (max_count < 4):
         print("Unhandled Error: Less than 4 maximas")
         return
+
+
+    qi = get_quad_indices(buy_count)
 
     # Split max list into quadrants
     quads = np.array_split(max_list, 4)
@@ -2123,6 +2127,7 @@ def get_sell_tunnel_quad_counts(min_tup, percentile):
     quad_counts = (q1c, q2c, q3c, q4c)
 
     return quad_counts
+
 
 # Get all local maxima from timeseries data
 def get_buy_maximas(ibp, n):
