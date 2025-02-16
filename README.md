@@ -53,7 +53,7 @@ Print Help Menu:
 Test the tool works:  
 `./flipping.py -F blank_filter.pkl -I test_list.txt`  
 
-If the script runs without error, you should see output similar to:  
+If the script runs without error, you should see test output similar to:  
 
         Name: Nature rune
         -----------------
