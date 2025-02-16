@@ -1646,7 +1646,6 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps, data_ts):
                 min_insta_sell_price = insta_sell_price
                 min_isp_ts = entry['timestamp']
             # Get all local minima into a list
-            #get_minima(min_list, data_ts, num_entries, num_steps, i)
 
         # Get insta buy price data
         if (entry['avgHighPrice'] != None):
@@ -1666,7 +1665,6 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps, data_ts):
                 min_insta_buy_price = insta_buy_price
                 min_ibp_ts = entry['timestamp']
             # Get all local maxima into a list
-            #get_maxima(max_list, data_ts, num_entries, num_steps, i)
 
     # Do not show the timeseries data if either buy or sell data is non-existent.
     # - Must still apply item filters, so do not leave.
@@ -1925,24 +1923,23 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps, data_ts):
         itd.used = False
         return tsd
 
-    # TODO: Return counts too, to use for more statistics
+    # Get timeseries octet to divide it into 8 time zones 
+    # (That is 9 separators, hence why 9 is used.)
+    octet_zones = np.linspace(curr_time, time_range_start, 9)
+    
     # TODO: Need conditions for when we don't even check,
     #       like low sample count (<36?)
     # Get maxima list, maxima indice list, and number of maxima as a tuple.
-    #max_tup = get_buy_maximas(insta_buy_prices, buy_count)
+    max_tup = get_buy_maximas(insta_buy_prices, buy_count)
 
     # Get minima list, minima indice list, and number of minima as a tuple.
-    #min_tup = get_sell_minimas(insta_sell_prices, sell_count)
+    min_tup = get_sell_minimas(insta_sell_prices, sell_count)
     
-    # TODO: Do buy and sell separately, then aggregate results?
-    #       Take worst result??? 
-    # TODO: Might wrap these functions in an "intelligent" function,
-    # that takes user's filters into consideration, aggregates results,
-    # etc. 
+    # TODO: What we are currently working on
+    # - Counting maximas for each octet.
 
-
-    # Return consistency rating and return the price checked
-    #get_tunnel_consistency(max_tup, min_tup)
+    # Return consistency rating for buy and sell tunnel boundaries (tuple)
+    get_tunnel_consistency(max_tup, min_tup, insta_buy_times, insta_sell_times, octet_zones)
 
 
     # Only plot if used has opted to and if time series is used
@@ -2001,7 +1998,7 @@ def get_timeseries_data(itd, item_id, ofs, timestep, num_steps, data_ts):
 
     return tsd
 
-def get_tunnel_consistency(max_tup, min_tup):
+def get_tunnel_consistency(max_tup, min_tup, ibt, ist, octet_zones):
     """
     Consistency Rating:
 
@@ -2024,60 +2021,119 @@ def get_tunnel_consistency(max_tup, min_tup):
     - If 
     """
 
+    max_oc = get_maxima_octet_counts(max_tup, ibt, octet_zones, 90)
+
+    return
 
 # Count the number of maxima at or above the percentile line
-# for all 4 quadrants
-def get_buy_tunnel_quad_counts(max_tup, buy_count, percentile):
+# for all 8 octets
+def get_maxima_octet_counts(max_tup, ibt, octet_zones, percentile):
 
-    # Get all maxima
+    # Get all maxima data
     max_list = max_tup[0]
+    max_indices = max_tup[1]
     max_count = max_tup[2]
-    q1c = 0
-    q2c = 0
-    q3c = 0
-    q4c = 0
 
-    if (max_count < 4):
-        print("Unhandled Error: Less than 4 maximas")
-        return
+    # Counts for maxima above tunnel line for each octet zone
+    o1c = 0
+    o2c = 0
+    o3c = 0
+    o4c = 0
+    o5c = 0
+    o6c = 0
+    o7c = 0
+    o8c = 0
 
+    # Init
+    octet_counts = [0, 0, 0, 0, 0, 0, 0, 0]
 
-    qi = get_quad_indices(buy_count)
-
-    # Split max list into quadrants
-    quads = np.array_split(max_list, 4)
-    q1 = quads[0]
-    q2 = quads[1]
-    q3 = quads[2]
-    q4 = quads[3]
+    # Get start of octet zones. 
+    # Anything greater than o2 is o1
+    o2 = octet_zones[1]
+    o3 = octet_zones[2]
+    o4 = octet_zones[3]
+    o5 = octet_zones[4]
+    o6 = octet_zones[5]
+    o7 = octet_zones[6]
+    o8 = octet_zones[7]
 
     # Get the tunnel line to count maximas above it
     tunnel_line = np.percentile(max_list, percentile)
 
-    # Get number maximas at or above tunnel line for q1
-    for price in q1:
-        if (price >= tunnel_line):
-            q1c = q1c + 1
+    # Note: Time decends the higher the octet zone.
+    # So o1 > o2 > o3 .. > o8
+    i = 0
+    for price in max_list:
+        # Get timestamp for current maxima
+        mi = max_indices[i]
+        ts = ibt[mi]
 
-    # Get number maximas at or above tunnel line for q2
-    for price in q2:
-        if (price >= tunnel_line):
-            q2c = q2c + 1
+        # Octet 1
+        if (ts > o2):
+            if (price >= tunnel_line):
+                o1c = o1c + 1
 
-    # Get number maximas at or above tunnel line for q3
-    for price in q3:
-        if (price >= tunnel_line):
-            q3c = q3c + 1
+        # Octet 2
+        elif (o2 >= ts > o3):
+            if (price >= tunnel_line):
+                o2c = o2c + 1
 
-    # Get number maximas at or above tunnel line for q4
-    for price in q4:
-        if (price >= tunnel_line):
-            q4c = q4c + 1                        
+        # Octet 3
+        elif (o3 >= ts > o4):
+            if (check_bad_quad(o1c, o2c)):
+                return octet_counts
+            if (price >= tunnel_line):
+                o3c = o3c + 1
 
-    quad_counts = (q1c, q2c, q3c, q4c)
+        # Octet 4
+        elif (o4 >= ts > o5):
+            if (check_bad_quad(o1c, o2c)):
+                return octet_counts            
+            if (price >= tunnel_line):
+                o4c = o4c + 1
 
-    return quad_counts
+        # Octet 5
+        elif (o5 >= ts > o6):
+            if (check_bad_quad(o1c, o2c)):
+                return octet_counts
+            if (price >= tunnel_line):
+                o5c = o5c + 1
+
+        # Octet 6
+        elif (o6 >= ts > o7):
+            if (check_bad_quad(o1c, o2c)):
+                return octet_counts
+            if (price >= tunnel_line):
+                o6c = o6c + 1
+
+        # Octet 7
+        elif (o7 >= ts > o8):
+            if (check_bad_quad(o1c, o2c)):
+                return octet_counts
+            if (price >= tunnel_line):
+                o7c = o7c + 1
+
+        # Octet 8
+        elif (ts <= o8):
+            if (check_bad_quad(o1c, o2c)):
+                return octet_counts
+            if (price >= tunnel_line):
+                o8c = o8c + 1
+
+        # To get next maxima timestamp
+        i = i + 1
+
+    return octet_counts
     
+# Purpose is to stop counting maxima/minima above/below
+# lines and leave early if first quadrant has nothing
+# as this is always bad.
+def check_bad_quad(oc1, oc2):
+    if (oc1 == 0 and oc2 == 0):
+        return 1
+    else:
+        return 0
+
 # Count the number of minima at or below the percentile line
 # for all 4 quadrants
 def get_sell_tunnel_quad_counts(min_tup, percentile):
